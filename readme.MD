@@ -8,17 +8,15 @@ The AtGames Arcade Legends Ultimate cabinet allows the addition of user-owned ga
 
 This tool allows batch creation of rom files to add to the system with the minimum user input. For now, this means if you want to - for example - add 10 MAME roms to your cabinet you will need:
 - A USB stick formatted to eXfat or Fat32
+- An installation of [Skyscraper](https://github.com/muldjord/skyscraper) (just follow the instructions on that page)
 - The 10 roms
-- A compatible emulator core
+- The MAME libreto core
 
-All the fiddly bits to do with scraping artwork and metadata, creating an xml file and launch script etc are handled for you. 
+All the fiddly bits to do with scraping artwork and metadata, creating an xml file and launch script etc are handled. In due course I'd like to make this a bit more user-friendly.
 
-In due course I'd like to make this a bit more user-friendly.
+For now this only works on Linux and is designed with Debian derivatives in mind. It currently uses copies of two files from the saUCE factory repo (link below) but ideally I'll submodule this or similar to keep track of any improvements there.
 
-For now this only works on Linux and is designed with Debian derivatives in mind.
-
-# Other things to look at
+# Sources and Inspiration
 
 - The [ultimate_addon repo](https://github.com/FalkensMaze1983/ultimate_addon) which has the Windows tool for creating addon roms and a Linux script for doing the same.
 - The [saUCE factory repo](https://github.com/wn2000/sauce_factory) which has an updated version of addon script for Linux and does the heavy lifting for this tool (this tool basically batch-runs the script and puts a few ease-of-use features around it).
-- [Skyscraper](https://github.com/muldjord/skyscraper) which identifies your roms and sorts out the artwork.
