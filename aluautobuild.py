@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import errno
+from genericpath import isfile
 import os
 # import sys
 from pprint import pp, pprint
@@ -50,10 +51,24 @@ def setup(paths):
     write_file(paths['config_file'], CONFIG)
     write_file(paths['art_xml_path'], ARTWORK)
 
+def get_rom_paths(paths):
+    # rom_paths = []
+
+    rom_paths = [rom_path for rom_path in os.listdir(paths['input_dir']) if os.path.isfile(rom_path)]
+
+    # for root, dirs, files in os.walk(paths['input_dir'], topdown=False):
+    #     for file in files:
+    #         rom_paths.append((os.path.join(root, file)))
+    return rom_paths
+
+def make_source_dirs(paths):
+    pass
+
 def run(platform, input_dir, flags, scrape_source, user_creds, output_dir):
     paths = set_paths(input_dir, output_dir)
     pprint(paths)
     setup(paths)
+    pprint(get_rom_paths(paths))
     # run_skyscraper(platform, input_dir, flags, paths['config_file'], scrape_source=scrape_source, user_creds=user_creds)
     # run_skyscraper(platform, input_dir, flags, paths['config_file'], art_xml_path=paths['art_xml_path'])
 
