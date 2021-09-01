@@ -37,16 +37,6 @@ def run_skyscraper(platform, flags, paths, opts):
     print(cmd)
     os.system(cmd)
 
-# def run_skyscraper_old(platform, input_dir, flags, config_path, art_xml_path=None, scrape_source=None, user_creds=None):
-#     cmd = 'Skyscraper -p {0} -i "{1}" --flags {2} -c "{3}"'.format(platform, input_dir, flags, config_path)
-#     if scrape_source:
-#         cmd = cmd + ' -s {0}'.format(scrape_source)
-#         cmd = cmd + ' -u {0}'.format(user_creds) if user_creds else cmd
-#     elif art_xml_path:
-#         cmd = cmd + ' -a "{0}"'.format(art_xml_path)
-#     os.system(cmd)
-    # print(cmd)
-
 def get_app_paths():
     this_dir = os.path.split(os.path.realpath(__file__))[0]
     return { 'root': this_dir, 'common_files': os.path.join(this_dir, 'common'), 'vendor_scripts': os.path.join(this_dir, 'vendor')}
@@ -85,22 +75,27 @@ def run(platform, input_dir, flags, scrape_source, user_creds, output_dir):
     scrape(platform, flags, paths, scrape_source, user_creds)
     create_gamelist(platform, flags, paths)
 
-    # run_skyscraper(platform, input_dir, flags, paths['config_file'], scrape_source=scrape_source, user_creds=user_creds)
-    # run_skyscraper(platform, input_dir, flags, paths['config_file'], art_xml_path=paths['art_xml_path'])
-
-
-if __name__ == "__main__":
-
+def get_opts_parser():
     parser = OptionParser()
     parser.add_option('-p', '--platform', dest='platform', help="Emulated platform. Run 'Skyscraper --help' to see available platforms.")
     parser.add_option('-i', '--inputdir', dest='input_dir', help="Location of input roms.")
     parser.add_option('-s', '--scraper', dest='scraper', help="Scraping source. Run 'Skyscraper --help' to see available scraping modules.")
     parser.add_option('-o', '--output', dest='output_dir', help="Output directory.")
     parser.add_option('-u', '--usercreds', dest='user_creds', help="User credentials for scraping module.")
+    return parser
+
+def validate_opts(parser):
     (options, args) = parser.parse_args()
     if options.platform is None:
         print(parser.usage)
         exit(0)
+    return options, args
+
+if __name__ == "__main__":
+    
+    parser = get_opts_parser()
+    (options, args) = validate_opts(parser)
+    
     
     flags=FLAGS
     input_dir = options.input_dir if options.input_dir else os.getcwd()
