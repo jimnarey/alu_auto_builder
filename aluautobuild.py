@@ -23,27 +23,43 @@ def safe_make_dir(path):
             raise
     pass
 
-def run_skyscraper(platform, input_dir, flags, config_path, art_xml_path=None, scrape_source=None, user_creds=None):
-    cmd = 'Skyscraper -p {0} -i "{1}" --flags {2} -c "{3}"'.format(platform, input_dir, flags, config_path)
-    if scrape_source:
-        cmd = cmd + ' -s {0}'.format(scrape_source)
-        cmd = cmd + ' -u {0}'.format(user_creds) if user_creds else cmd
-    elif art_xml_path:
-        cmd = cmd + ' -a "{0}"'.format(art_xml_path)
+def scrape(platform, flags, paths, scrape_source, user_creds=None):
+    opts = '-s {0}'.format(scrape_source)
+    opts = opts + ' -u {0}'.format(user_creds) if user_creds else opts
+    run_skyscraper(platform, flags, paths, opts)
+
+def create_gamelist(platform, flags, paths):
+    opts = '-a "{0}"'.format(paths['art_xml_path'])
+    run_skyscraper(platform, flags, paths, opts)
+
+def run_skyscraper(platform, flags, paths, opts):
+    cmd = 'Skyscraper -p {0} -i "{1}" --flags {2} -c "{3}" {4}'.format(platform, input_dir, flags, paths['config_file'], opts)
+    print(cmd)
     os.system(cmd)
+
+# def run_skyscraper_old(platform, input_dir, flags, config_path, art_xml_path=None, scrape_source=None, user_creds=None):
+#     cmd = 'Skyscraper -p {0} -i "{1}" --flags {2} -c "{3}"'.format(platform, input_dir, flags, config_path)
+#     if scrape_source:
+#         cmd = cmd + ' -s {0}'.format(scrape_source)
+#         cmd = cmd + ' -u {0}'.format(user_creds) if user_creds else cmd
+#     elif art_xml_path:
+#         cmd = cmd + ' -a "{0}"'.format(art_xml_path)
+#     os.system(cmd)
     # print(cmd)
 
-def set_paths(input_dir, output_dir):
+def get_app_paths():
     this_dir = os.path.split(os.path.realpath(__file__))[0]
-    paths = {}
-    paths['input_dir'] = input_dir
-    paths['output_dir'] = output_dir if output_dir else os.path.join(input_dir, 'output')
-    paths['temp_dir'] = os.path.join(input_dir, 'temp')
-    paths['config_file'] = os.path.join(paths['temp_dir'], 'config.ini')
-    paths['art_xml_path'] = os.path.join(paths['temp_dir'], 'artwork.xml')
-    paths['common_files'] = os.path.join(this_dir, 'common')
-    paths['vendor_scripts'] = os.path.join(this_dir, 'vendor')
-    return paths
+    return { 'root': this_dir, 'common_files': os.path.join(this_dir, 'common'), 'vendor_scripts': os.path.join(this_dir, 'vendor')}
+
+def set_paths(input_dir, output_dir):
+    temp_dir = os.path.join(input_dir, 'temp')
+    return {
+        'input_dir': input_dir,
+        'output_dir': output_dir if output_dir else os.path.join(input_dir, 'output'),
+        'temp_dir': temp_dir,
+        'config_file': os.path.join(temp_dir, 'config.ini'),
+        'art_xml_path': os.path.join(temp_dir, 'artwork.xml')
+    }
 
 def setup(paths):
     safe_make_dir(paths['temp_dir'])
@@ -52,23 +68,23 @@ def setup(paths):
     write_file(paths['art_xml_path'], ARTWORK)
 
 def get_rom_paths(paths):
-    # rom_paths = []
-
     rom_paths = [rom_path for rom_path in os.listdir(paths['input_dir']) if os.path.isfile(rom_path)]
-
-    # for root, dirs, files in os.walk(paths['input_dir'], topdown=False):
-    #     for file in files:
-    #         rom_paths.append((os.path.join(root, file)))
     return rom_paths
 
-def make_source_dirs(paths):
-    pass
+def make_source_dirs(paths, rom_paths):
+    for rom_path in rom_paths:
+        pass
 
 def run(platform, input_dir, flags, scrape_source, user_creds, output_dir):
     paths = set_paths(input_dir, output_dir)
+    app_paths = get_app_paths()
     pprint(paths)
+    pprint(app_paths)
     setup(paths)
     pprint(get_rom_paths(paths))
+    scrape(platform, flags, paths, scrape_source, user_creds)
+    create_gamelist(platform, flags, paths)
+
     # run_skyscraper(platform, input_dir, flags, paths['config_file'], scrape_source=scrape_source, user_creds=user_creds)
     # run_skyscraper(platform, input_dir, flags, paths['config_file'], art_xml_path=paths['art_xml_path'])
 
