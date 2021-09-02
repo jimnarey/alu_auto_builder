@@ -8,12 +8,17 @@ import xml.etree.ElementTree as ET
 from genericpath import isfile
 from pprint import pp, pprint
 from optparse import OptionParser
-from configs import CONFIG, ARTWORK, FLAGS
+import configs
 
+# TODO - Add marquees
 # TODO - Add something to ignore existing Skyscraper config
 # TODO - Ensure temp files are created in input dir, not in whatever dir the script is run in
 # TODO - Allow user to specify gamelist.xml
 # TODO - Allow creation of gamelist without scraping (not very useful)
+# TODO - Error handling:
+# - Skyscraper fail
+# - Can't create dirs
+# - Can't read xml
 
 def write_file(file_path, lines):
     with open(file_path, 'w') as target_file:
@@ -58,19 +63,8 @@ def set_paths(input_dir, output_dir):
 def setup(paths):
     safe_make_dir(paths['temp_dir'])
     safe_make_dir(paths['output_dir'])
-    write_file(paths['config_file'], CONFIG)
-    write_file(paths['art_xml_path'], ARTWORK)
-
-# def get_rom_paths(paths):
-#     rom_paths = [rom_path for rom_path in os.listdir(paths['input_dir']) if os.path.isfile(rom_path)]
-#     return rom_paths
-
-
-
-# def setup_uce_dirs(paths, rom_paths):
-#     for rom_path in rom_paths:
-#         game_dir = os.path.join(paths['temp_dir'], os.path.splitext(os.path.basename(rom_path))[0])
-#         safe_make_dir(game_dir)
+    write_file(paths['config_file'], configs.CONFIG)
+    write_file(paths['art_xml_path'], configs.ARTWORK)
 
 def read_gamelist(gamelist_path):
     tree = ET.parse(gamelist_path)
@@ -89,6 +83,11 @@ def make_uce_sub_dirs(game_dir):
     for dir in ('emu', 'roms', 'boxart', 'save'):
         safe_make_dir(os.path.join(game_dir, dir))
 
+def write_cart_xml(game_dir, game_title, game_desc):
+    # cart_xml = ''.join(configs.CARTRIDGE_XML).replace()
+    pass
+
+
 def setup_uce_sources(paths):
     game_list = read_gamelist(os.path.join(paths['temp_dir'], 'gamelist.xml'))
     for game_entry in game_list:
@@ -97,14 +96,6 @@ def setup_uce_sources(paths):
         safe_make_dir(game_dir)
         make_uce_sub_dirs(game_dir)
         
-
-
-
-
-
-
-
-
 
 def run(platform, input_dir, flags, scrape_source, user_creds, output_dir):
     paths = set_paths(input_dir, output_dir)
@@ -139,7 +130,7 @@ if __name__ == "__main__":
     (options, args) = validate_opts(parser)
     
     
-    flags=FLAGS
+    flags=configs.FLAGS
     input_dir = options.input_dir if options.input_dir else os.getcwd()
     scrape_source = options.scraper if options.scraper else 'screenscraper'
     user_creds = options.user_creds if options.user_creds else None

@@ -15,3 +15,18 @@ ARTWORK = [
 ]
 
 FLAGS = 'onlymissing,nosubdirs,noscreenshots,nomarquees'
+
+CARTRIDGE_XML = [
+    '<?xml version="1.0" encoding="UTF-8"?>\n',
+    '<byog_cartridge version="1.0">\n',
+    '\t<title>GAME_TITLE</title>\n',
+    '\t<desc>GAME_DESCRIPTION</desc>\n',
+    '\t<boxart file="boxart\BOXART_FILE_NAME" ext="png">\n',
+    '</byog_cartridge>\n',
+]
+
+EXEC_SH = [
+    '#!/bin/sh\n',
+    'set -x\n',
+    '/emulator/retroplayer ./emu/genesis_plus_gx_libretro.so "./roms/GAME_FILE_NAME"\n'
+]
