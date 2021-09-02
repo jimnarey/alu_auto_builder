@@ -2,3 +2,7 @@
 sample.xml
 xmltest.py
 .idea/
+hextest.py
+hexbi*
+*.uce
+buildtemp/

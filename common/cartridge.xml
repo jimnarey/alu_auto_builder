@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<byog_cartridge version="1.0">
-  <title>GAME_TITLE</title>
-  <desc>GAME_DESCRIPTION</desc>
-  <boxart file="boxart\BOXART_FILE_NAME" ext="png">
-</byog_cartridge>
-

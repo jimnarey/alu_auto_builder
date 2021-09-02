@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
-
 import os
-# import sys
 import errno
 import shutil
 import xml.etree.ElementTree as ET
-from genericpath import isfile
-from pprint import pp, pprint
+from pprint import pprint
 from optparse import OptionParser
 import configs
+
+import build_uce_img
 
 
 # TODO - ESSENTIAL
@@ -22,17 +21,18 @@ import configs
 # TODO - Add marquees
 # TODO - Add something to ignore existing Skyscraper config
 # TODO - Allow user to specify gamelist.xml
-# TODO - Allow creation of gamelist without scraping (not very useful)
+# TODO - Allow creation of gamelist without scraping (not very useful, implement without Skyscraper)
 # TODO - Add option to discontinue based on scrape results
 # TODO - Add option to allow user to specify default png
 # TODO - Handle (MAME) roms which need individual config file/metadata subfolder
+# TODO - Check images are png (check whether this is a requirement first)
+# TODO - Incorporate defaults into optparse call
+# TODO - Look in input dir for core
 # TODO - Error handling:
 # - Skyscraper fail
 # - Can't create dirs/write files
 # - Can't read gamelist.xml
 
-# TODO - CHECK MET
-# TODO - Ensure temp files are created in input dir, not in whatever dir the script is run in
 
 def write_file(file_path, file_content):
     with open(file_path, 'w') as target_file:
@@ -62,22 +62,16 @@ def create_gamelist(platform, flags, data_paths):
 def run_skyscraper(platform, flags, data_paths, opts):
     cmd = 'Skyscraper -p {0} -i "{1}" --flags {2} -c "{3}" {4}'.format(platform, input_dir, flags,
                                                                        data_paths['config_file'], opts)
-    # print(cmd)
-    x = os.popen(cmd).read()
-    print(x)
+    cmd_out = os.popen(cmd).read()
+    print(cmd_out)
 
 
-def get_app_paths():
-    this_dir = os.path.split(os.path.realpath(__file__))[0]
-    return {'root': this_dir, 'common_files': os.path.join(this_dir, 'common'),
-            'vendor_scripts': os.path.join(this_dir, 'vendor')}
-
-
-def set_paths(input_dir, output_dir, core_path):
+def set_paths(input_dir, output_dir, core_path, other_dir):
     temp_dir = os.path.join(input_dir, 'temp')
     return {
         'input_dir': input_dir,
         'core_path': core_path,
+        'other_dir': other_dir,
         'output_dir': output_dir if output_dir else os.path.join(input_dir, 'output'),
         'temp_dir': temp_dir,
         'config_file': os.path.join(temp_dir, 'config.ini'),
@@ -112,11 +106,10 @@ def make_uce_sub_dirs(game_dir):
         safe_make_dir(os.path.join(game_dir, sub_dir))
 
 
-def write_cart_xml(game_dir, game_title, game_desc, boxart_file_name):
+def write_cart_xml(game_dir, game_title, game_desc):
     cart_xml = ''.join(configs.CARTRIDGE_XML)\
         .replace('GAME_TITLE', game_title)\
-        .replace('GAME_DESCRIPTION', game_desc)\
-        .replace('BOXART_FILE_NAME', boxart_file_name)
+        .replace('GAME_DESCRIPTION', game_desc)
     write_file(os.path.join(game_dir, 'cartridge.xml'), cart_xml)
 
 
@@ -127,47 +120,54 @@ def write_exec_sh(game_dir, core_file_name, game_file_name):
     write_file(os.path.join(game_dir, 'exec.sh'), exec_sh)
 
 
+def copy_dir_contents(source_dir, dest_dir):
+    source_files = os.listdir(source_dir)
+    pprint(source_files)
+    for file_name in source_files:
+        source_file_path = os.path.join(source_dir, file_name)
+        dest_file_path = os.path.join(dest_dir, file_name)
+        if os.path.isfile(source_file_path):
+            shutil.copy(source_file_path, dest_file_path)
+
+
 def copy_source_files(data_paths, game_data, game_dir):
-    box_art_target_path = os.path.join(game_dir, 'boxart', os.path.basename(game_data['boxart_path']))
+    box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
     shutil.copyfile(data_paths['core_path'], os.path.join(game_dir, 'emu', os.path.basename(data_paths['core_path'])))
     shutil.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
     shutil.copyfile(game_data['boxart_path'], box_art_target_path)
+    if data_paths['other_dir']:
+        copy_dir_contents(data_paths['other_dir'], os.path.join(game_dir, 'roms'))
     os.symlink(box_art_target_path, os.path.join(game_dir, 'title.png'))
 
 
 def setup_uce_source(data_paths, game_data, game_dir):
     safe_make_dir(game_dir)
     make_uce_sub_dirs(game_dir)
-    write_cart_xml(game_dir, game_data['name'], game_data['description'], os.path.basename(game_data['boxart_path']))
+    write_cart_xml(game_dir, game_data['name'], game_data['description'])
     write_exec_sh(game_dir, os.path.basename(data_paths['core_path']), os.path.basename(game_data['rom_path']))
     copy_source_files(data_paths, game_data, game_dir)
 
 
-def build_uce(app_paths, data_paths, game_dir):
+def py_build_uce(data_paths, game_dir):
     target_path = os.path.join(data_paths['output_dir'], '{0}{1}'.format(os.path.basename(game_dir), '.UCE'))
-    build_exec = os.path.join(app_paths['vendor_scripts'], 'build_uce.sh')
-    cmd = '{0} "{1}" "{2}"'.format(build_exec, game_dir, target_path)
-    x = os.popen(cmd).read()
-    print(x)
+    build_uce_img.run(game_dir, target_path, os.path.join(game_dir, 'buildtemp'))
 
 
-def build_uces(app_paths, data_paths):
+def build_uces(data_paths):
     game_list = read_gamelist(os.path.join(data_paths['temp_dir'], 'gamelist.xml'))
     for game_entry in game_list:
         game_data = parse_game_entry(game_entry)
         game_dir = os.path.join(data_paths['temp_dir'], os.path.splitext(os.path.basename(game_data['rom_path']))[0])
         setup_uce_source(data_paths, game_data, game_dir)
-        build_uce(app_paths, data_paths, game_dir)
+        py_build_uce(data_paths, game_dir)
 
 
-def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_path):
-    data_paths = set_paths(input_dir, output_dir, core_path)
-    app_paths = get_app_paths()
-
+def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_path, other_dir):
+    data_paths = set_paths(input_dir, output_dir, core_path, other_dir)
     setup(data_paths)
     scrape(platform, flags, data_paths, scrape_source, user_creds)
     create_gamelist(platform, flags, data_paths)
-    build_uces(app_paths, data_paths)
+    build_uces(data_paths)
 
 
 def get_opts_parser():
@@ -180,6 +180,8 @@ def get_opts_parser():
     parser.add_option('-o', '--output', dest='output_dir', help="Output directory.")
     parser.add_option('-u', '--usercreds', dest='user_creds', help="User credentials for scraping module.")
     parser.add_option('-c', '--core', dest='core', help="Libretro core compatible with input roms")
+    parser.add_option('-b', '--other', dest='other_dir', help="Path to directory containing common files "
+                                                              "(e.g. bios files) to be included with EVERY game")
     return parser
 
 
@@ -200,4 +202,5 @@ if __name__ == "__main__":
     scrape_source = options.scraper if options.scraper else 'screenscraper'
     user_creds = options.user_creds if options.user_creds else None
     output_dir = options.output_dir if options.output_dir else None
-    run(options.platform, input_dir, flags, scrape_source, user_creds, output_dir, options.core)
+    other_dir = options.other_dir if options.other_dir else None
+    run(options.platform, input_dir, flags, scrape_source, user_creds, output_dir, options.core, other_dir)
