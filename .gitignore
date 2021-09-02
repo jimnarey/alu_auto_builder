@@ -1,3 +1,4 @@
 *.pyc
 sample.xml
 xmltest.py
+.idea/

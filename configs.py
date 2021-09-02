@@ -28,5 +28,5 @@ CARTRIDGE_XML = [
 EXEC_SH = [
     '#!/bin/sh\n',
     'set -x\n',
-    '/emulator/retroplayer ./emu/genesis_plus_gx_libretro.so "./roms/GAME_FILE_NAME"\n'
+    '/emulator/retroplayer ./emu/CORE_FILE_NAME "./roms/GAME_FILE_NAME"\n'
 ]

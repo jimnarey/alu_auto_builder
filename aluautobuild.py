@@ -10,19 +10,23 @@ from pprint import pp, pprint
 from optparse import OptionParser
 import configs
 
+
 # TODO - Add marquees
 # TODO - Add something to ignore existing Skyscraper config
 # TODO - Ensure temp files are created in input dir, not in whatever dir the script is run in
 # TODO - Allow user to specify gamelist.xml
 # TODO - Allow creation of gamelist without scraping (not very useful)
+# TODO - Add option to discontinue based on scrape results
+# TODO - Add option to allow user to specify default png
 # TODO - Error handling:
 # - Skyscraper fail
 # - Can't create dirs
 # - Can't read xml
 
-def write_file(file_path, lines):
+def write_file(file_path, file_content):
     with open(file_path, 'w') as target_file:
-        target_file.writelines(lines)
+        target_file.write(file_content)
+
 
 def safe_make_dir(path):
     try:
@@ -32,43 +36,55 @@ def safe_make_dir(path):
             raise
     pass
 
-def scrape(platform, flags, paths, scrape_source, user_creds=None):
+
+def scrape(platform, flags, data_paths, scrape_source, user_creds=None):
     opts = '-s {0}'.format(scrape_source)
     opts = opts + ' -u {0}'.format(user_creds) if user_creds else opts
-    run_skyscraper(platform, flags, paths, opts)
+    run_skyscraper(platform, flags, data_paths, opts)
 
-def create_gamelist(platform, flags, paths):
-    opts = '-a "{0}" -g "{1}"'.format(paths['art_xml_path'], paths['temp_dir'])
-    run_skyscraper(platform, flags, paths, opts)
 
-def run_skyscraper(platform, flags, paths, opts):
-    cmd = 'Skyscraper -p {0} -i "{1}" --flags {2} -c "{3}" {4}'.format(platform, input_dir, flags, paths['config_file'], opts)
+def create_gamelist(platform, flags, data_paths):
+    opts = '-a "{0}" -g "{1}"'.format(data_paths['art_xml_path'], data_paths['temp_dir'])
+    run_skyscraper(platform, flags, data_paths, opts)
+
+
+def run_skyscraper(platform, flags, data_paths, opts):
+    cmd = 'Skyscraper -p {0} -i "{1}" --flags {2} -c "{3}" {4}'.format(platform, input_dir, flags,
+                                                                       data_paths['config_file'], opts)
     # print(cmd)
     x = os.popen(cmd).read()
+    print(x)
+
 
 def get_app_paths():
     this_dir = os.path.split(os.path.realpath(__file__))[0]
-    return { 'root': this_dir, 'common_files': os.path.join(this_dir, 'common'), 'vendor_scripts': os.path.join(this_dir, 'vendor')}
+    return {'root': this_dir, 'common_files': os.path.join(this_dir, 'common'),
+            'vendor_scripts': os.path.join(this_dir, 'vendor')}
 
-def set_paths(input_dir, output_dir):
+
+def set_paths(input_dir, output_dir, core_path):
     temp_dir = os.path.join(input_dir, 'temp')
     return {
         'input_dir': input_dir,
+        'core_path': core_path,
         'output_dir': output_dir if output_dir else os.path.join(input_dir, 'output'),
         'temp_dir': temp_dir,
         'config_file': os.path.join(temp_dir, 'config.ini'),
         'art_xml_path': os.path.join(temp_dir, 'artwork.xml')
     }
 
-def setup(paths):
-    safe_make_dir(paths['temp_dir'])
-    safe_make_dir(paths['output_dir'])
-    write_file(paths['config_file'], configs.CONFIG)
-    write_file(paths['art_xml_path'], configs.ARTWORK)
+
+def setup(data_paths):
+    safe_make_dir(data_paths['temp_dir'])
+    safe_make_dir(data_paths['output_dir'])
+    write_file(data_paths['config_file'], ''.join(configs.CONFIG))
+    write_file(data_paths['art_xml_path'], ''.join(configs.ARTWORK))
+
 
 def read_gamelist(gamelist_path):
     tree = ET.parse(gamelist_path)
     return tree.getroot()
+
 
 def parse_game_entry(game_entry):
     return {
@@ -79,61 +95,77 @@ def parse_game_entry(game_entry):
         'description': game_entry.find('desc').text
     }
 
+
 def make_uce_sub_dirs(game_dir):
-    for dir in ('emu', 'roms', 'boxart', 'save'):
-        safe_make_dir(os.path.join(game_dir, dir))
-
-def write_cart_xml(game_dir, game_title, game_desc):
-    # cart_xml = ''.join(configs.CARTRIDGE_XML).replace()
-    pass
+    for sub_dir in ('emu', 'roms', 'boxart', 'save'):
+        safe_make_dir(os.path.join(game_dir, sub_dir))
 
 
-def setup_uce_sources(paths):
-    game_list = read_gamelist(os.path.join(paths['temp_dir'], 'gamelist.xml'))
+def write_cart_xml(game_dir, game_title, game_desc, boxart_file_name):
+    cart_xml = ''.join(configs.CARTRIDGE_XML)\
+        .replace('GAME_TITLE', game_title)\
+        .replace('GAME_DESCRIPTION', game_desc)\
+        .replace('BOXART_FILE_NAME', boxart_file_name)
+    write_file(os.path.join(game_dir, 'cartridge.xml'), cart_xml)
+
+
+def write_exec_sh(game_dir, core_file_name, game_file_name):
+    exec_sh = ''.join(configs.EXEC_SH)\
+        .replace('CORE_FILE_NAME', core_file_name)\
+        .replace('GAME_FILE_NAME', game_file_name)
+    write_file(os.path.join(game_dir, 'exec.sh'), exec_sh)
+
+
+def setup_uce_sources(data_paths):
+    game_list = read_gamelist(os.path.join(data_paths['temp_dir'], 'gamelist.xml'))
     for game_entry in game_list:
         game_data = parse_game_entry(game_entry)
-        game_dir = os.path.join(paths['temp_dir'], os.path.splitext( os.path.basename(game_data['path']) )[0])
+        game_dir = os.path.join(data_paths['temp_dir'], os.path.splitext(os.path.basename(game_data['path']))[0])
         safe_make_dir(game_dir)
         make_uce_sub_dirs(game_dir)
-        
+        write_cart_xml(game_dir, game_data['name'], game_data['description'], os.path.basename(game_data['boxart']))
+        write_exec_sh(game_dir, os.path.basename(data_paths['core_path']), os.path.basename(game_data['path']))
 
-def run(platform, input_dir, flags, scrape_source, user_creds, output_dir):
-    paths = set_paths(input_dir, output_dir)
+
+def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_path):
+    data_paths = set_paths(input_dir, output_dir, core_path)
     app_paths = get_app_paths()
-    
-    setup(paths)
-    scrape(platform, flags, paths, scrape_source, user_creds)
-    create_gamelist(platform, flags, paths)
-    setup_uce_sources(paths)
-    
+
+    setup(data_paths)
+    scrape(platform, flags, data_paths, scrape_source, user_creds)
+    create_gamelist(platform, flags, data_paths)
+    setup_uce_sources(data_paths)
+
 
 def get_opts_parser():
     parser = OptionParser()
-    parser.add_option('-p', '--platform', dest='platform', help="Emulated platform. Run 'Skyscraper --help' to see available platforms.")
+    parser.add_option('-p', '--platform', dest='platform',
+                      help="Emulated platform. Run 'Skyscraper --help' to see available platforms.")
     parser.add_option('-i', '--inputdir', dest='input_dir', help="Location of input roms.")
-    parser.add_option('-s', '--scraper', dest='scraper', help="Scraping source. Run 'Skyscraper --help' to see available scraping modules.")
+    parser.add_option('-s', '--scraper', dest='scraper',
+                      help="Scraping source. Run 'Skyscraper --help' to see available scraping modules.")
     parser.add_option('-o', '--output', dest='output_dir', help="Output directory.")
     parser.add_option('-u', '--usercreds', dest='user_creds', help="User credentials for scraping module.")
     parser.add_option('-c', '--core', dest='core', help="Libretro core compatible with input roms")
     return parser
 
+
 def validate_opts(parser):
     (options, args) = parser.parse_args()
-    if options.platform is None:
-        print(parser.usage)
+    if None in (options.platform, options.core):
+        # print(parser.usage)
+        parser.print_help()
         exit(0)
     return options, args
 
+
 if __name__ == "__main__":
-    
     parser = get_opts_parser()
     (options, args) = validate_opts(parser)
-    
-    
-    flags=configs.FLAGS
+
+    flags = configs.FLAGS
     input_dir = options.input_dir if options.input_dir else os.getcwd()
     scrape_source = options.scraper if options.scraper else 'screenscraper'
     user_creds = options.user_creds if options.user_creds else None
     output_dir = options.output_dir if options.output_dir else None
-    run(options.platform, input_dir, flags, scrape_source, user_creds, output_dir)
-
+    run(options.platform, input_dir, flags, scrape_source, user_creds, output_dir, options.core)
