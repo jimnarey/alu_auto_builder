@@ -11,7 +11,7 @@ fi
 inputdir="$1"
 cart_file=$2
 
-mkdir -p out
+#mkdir -p out
 
 workdir=$(mktemp -d)
 trap "rm -R $workdir" 0 2 3 15
@@ -31,8 +31,8 @@ mkdir -p "$workdir/data"
 cp -R "$inputdir"/* "$workdir/data/"
 mkdir -p "$workdir/data/save"
 
-find "$workdir/data" -name "*.lnk" -type f -print0 | xargs -0 -n1 ./resolve.sh
-find "$workdir/data" -name "*.lnk" -type f -delete
+#find "$workdir/data" -name "*.lnk" -type f -print0 | xargs -0 -n1 ./resolve.sh
+#find "$workdir/data" -name "*.lnk" -type f -delete
 
 chmod 755 "$workdir/data/exec.sh"
 

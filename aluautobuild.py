@@ -4,6 +4,7 @@
 import os
 # import sys
 import errno
+import shutil
 import xml.etree.ElementTree as ET
 from genericpath import isfile
 from pprint import pp, pprint
@@ -11,17 +12,27 @@ from optparse import OptionParser
 import configs
 
 
+# TODO - ESSENTIAL
+# TODO - Ensure gamelist is created for games with no data
+# TODO - Ensure something is done for games with no metadata/image
+# TODO - Print some output
+# TODO - Cleanup
+
+# TODO - FEATURE
 # TODO - Add marquees
 # TODO - Add something to ignore existing Skyscraper config
-# TODO - Ensure temp files are created in input dir, not in whatever dir the script is run in
 # TODO - Allow user to specify gamelist.xml
 # TODO - Allow creation of gamelist without scraping (not very useful)
 # TODO - Add option to discontinue based on scrape results
 # TODO - Add option to allow user to specify default png
+# TODO - Handle (MAME) roms which need individual config file/metadata subfolder
 # TODO - Error handling:
 # - Skyscraper fail
-# - Can't create dirs
-# - Can't read xml
+# - Can't create dirs/write files
+# - Can't read gamelist.xml
+
+# TODO - CHECK MET
+# TODO - Ensure temp files are created in input dir, not in whatever dir the script is run in
 
 def write_file(file_path, file_content):
     with open(file_path, 'w') as target_file:
@@ -89,8 +100,8 @@ def read_gamelist(gamelist_path):
 def parse_game_entry(game_entry):
     return {
         'name': game_entry.find('name').text,
-        'path': game_entry.find('path').text,
-        'boxart': game_entry.find('thumbnail').text,
+        'rom_path': game_entry.find('path').text,
+        'boxart_path': game_entry.find('thumbnail').text,
         'marquee': game_entry.find('marquee').text,
         'description': game_entry.find('desc').text
     }
@@ -116,15 +127,37 @@ def write_exec_sh(game_dir, core_file_name, game_file_name):
     write_file(os.path.join(game_dir, 'exec.sh'), exec_sh)
 
 
-def setup_uce_sources(data_paths):
+def copy_source_files(data_paths, game_data, game_dir):
+    box_art_target_path = os.path.join(game_dir, 'boxart', os.path.basename(game_data['boxart_path']))
+    shutil.copyfile(data_paths['core_path'], os.path.join(game_dir, 'emu', os.path.basename(data_paths['core_path'])))
+    shutil.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
+    shutil.copyfile(game_data['boxart_path'], box_art_target_path)
+    os.symlink(box_art_target_path, os.path.join(game_dir, 'title.png'))
+
+
+def setup_uce_source(data_paths, game_data, game_dir):
+    safe_make_dir(game_dir)
+    make_uce_sub_dirs(game_dir)
+    write_cart_xml(game_dir, game_data['name'], game_data['description'], os.path.basename(game_data['boxart_path']))
+    write_exec_sh(game_dir, os.path.basename(data_paths['core_path']), os.path.basename(game_data['rom_path']))
+    copy_source_files(data_paths, game_data, game_dir)
+
+
+def build_uce(app_paths, data_paths, game_dir):
+    target_path = os.path.join(data_paths['output_dir'], '{0}{1}'.format(os.path.basename(game_dir), '.UCE'))
+    build_exec = os.path.join(app_paths['vendor_scripts'], 'build_uce.sh')
+    cmd = '{0} "{1}" "{2}"'.format(build_exec, game_dir, target_path)
+    x = os.popen(cmd).read()
+    print(x)
+
+
+def build_uces(app_paths, data_paths):
     game_list = read_gamelist(os.path.join(data_paths['temp_dir'], 'gamelist.xml'))
     for game_entry in game_list:
         game_data = parse_game_entry(game_entry)
-        game_dir = os.path.join(data_paths['temp_dir'], os.path.splitext(os.path.basename(game_data['path']))[0])
-        safe_make_dir(game_dir)
-        make_uce_sub_dirs(game_dir)
-        write_cart_xml(game_dir, game_data['name'], game_data['description'], os.path.basename(game_data['boxart']))
-        write_exec_sh(game_dir, os.path.basename(data_paths['core_path']), os.path.basename(game_data['path']))
+        game_dir = os.path.join(data_paths['temp_dir'], os.path.splitext(os.path.basename(game_data['rom_path']))[0])
+        setup_uce_source(data_paths, game_data, game_dir)
+        build_uce(app_paths, data_paths, game_dir)
 
 
 def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_path):
@@ -134,7 +167,7 @@ def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_
     setup(data_paths)
     scrape(platform, flags, data_paths, scrape_source, user_creds)
     create_gamelist(platform, flags, data_paths)
-    setup_uce_sources(data_paths)
+    build_uces(app_paths, data_paths)
 
 
 def get_opts_parser():
@@ -153,7 +186,6 @@ def get_opts_parser():
 def validate_opts(parser):
     (options, args) = parser.parse_args()
     if None in (options.platform, options.core):
-        # print(parser.usage)
         parser.print_help()
         exit(0)
     return options, args
