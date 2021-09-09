@@ -8,9 +8,8 @@ from pprint import pprint
 from optparse import OptionParser
 import configs
 
-# import build_uce_img
+import build_uce_tool
 
-import build_uce_new as build_uce_img
 
 # TODO - ESSENTIAL
 # TODO - Ensure gamelist is created for games with no data
@@ -157,27 +156,16 @@ def setup_uce_source(data_paths, game_data, game_dir):
 
 def py_build_uce(data_paths, game_dir):
     target_path = os.path.join(data_paths['output_dir'], '{0}{1}'.format(os.path.basename(game_dir), '.UCE'))
-    # build_uce_img.run(game_dir, target_path, os.path.join(game_dir, 'buildtemp'))
-    build_uce_img.run(game_dir, target_path)
+    build_uce_tool.run(game_dir, target_path)
 
 
-def build_uce(app_paths, data_paths, game_dir):
-    target_path = os.path.join(data_paths['output_dir'], '{0}{1}'.format(os.path.basename(game_dir), '.UCE'))
-    # build_exec = os.path.join(app_paths['vendor_scripts'], 'build_uce.sh')
-    build_exec = os.path.join(app_paths['vendor_scripts'], 'build_uce_base.sh')
-    cmd = '{0} "{1}" "{2}"'.format(build_exec, game_dir, target_path)
-    cmd_out = os.popen(cmd).read()
-    print(cmd_out)
-
-
-def build_uces(app_paths, data_paths):
+def build_uces(data_paths):
     game_list = read_gamelist(os.path.join(data_paths['temp_dir'], 'gamelist.xml'))
     for game_entry in game_list:
         game_data = parse_game_entry(game_entry)
         game_dir = os.path.join(data_paths['temp_dir'], os.path.splitext(os.path.basename(game_data['rom_path']))[0])
         setup_uce_source(data_paths, game_data, game_dir)
         py_build_uce(data_paths, game_dir)
-        # build_uce(app_paths, data_paths, game_dir)
 
 
 def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_path, other_dir):
@@ -186,7 +174,7 @@ def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_
     setup(data_paths)
     scrape(platform, flags, data_paths, scrape_source, user_creds)
     create_gamelist(platform, flags, data_paths)
-    build_uces(app_paths, data_paths)
+    build_uces(data_paths)
 
 
 def get_opts_parser():

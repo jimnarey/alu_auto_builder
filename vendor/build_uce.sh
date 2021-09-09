@@ -31,8 +31,8 @@ mkdir -p "$workdir/data"
 cp -R "$inputdir"/* "$workdir/data/"
 mkdir -p "$workdir/data/save"
 
-#find "$workdir/data" -name "*.lnk" -type f -print0 | xargs -0 -n1 ./resolve.sh
-#find "$workdir/data" -name "*.lnk" -type f -delete
+find "$workdir/data" -name "*.lnk" -type f -print0 | xargs -0 -n1 ./resolve.sh
+find "$workdir/data" -name "*.lnk" -type f -delete
 
 chmod 755 "$workdir/data/exec.sh"
 
@@ -106,12 +106,12 @@ echo "*** Size of $cart_tmp_file: $filesize Bytes (after Ext4 MD5)"
 filesize=$(stat -c%s "$cart_save_file")
 echo "*** Size of $cart_save_file: $filesize Bytes (save partition)"
 
-#bind files together
-#if [ -f "$workdir/save.zip" ]
-#then
-#  unzip "$workdir/save.zip" -d "$workdir"
-#  /bin/mv "$workdir/save.bin" $cart_save_file
-#fi
+bind files together
+if [ -f "$workdir/save.zip" ]
+then
+  unzip "$workdir/save.zip" -d "$workdir"
+  /bin/mv "$workdir/save.bin" $cart_save_file
+fi
 
 cat $cart_tmp_file $cart_save_file > "$cart_file"
 
