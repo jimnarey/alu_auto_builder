@@ -7,8 +7,9 @@ import tempfile
 import xml.etree.ElementTree as ET
 from pprint import pprint
 from optparse import OptionParser
-import configs
 
+import cmd_help
+import configs
 import build_uce_tool
 
 
@@ -172,26 +173,21 @@ def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_
     else:
         scrape(platform, flags, data_paths, scrape_source, user_creds)
         create_gamelist(platform, flags, data_paths)
-    # pprint(data_paths)
-    # breakpoint()
     build_uces(data_paths)
 
 
 def get_opts_parser():
     parser = OptionParser()
-    parser.add_option('-p', '--platform', dest='platform',
-                      help="Emulated platform. Run 'Skyscraper --help' to see available platforms.")
-    parser.add_option('-i', '--inputdir', dest='input_dir', help="Location of input roms.")
-    parser.add_option('-s', '--scraper', dest='scraper',
-                      help="Scraping source. Run 'Skyscraper --help' to see available scraping modules.")
-    parser.add_option('-o', '--output', dest='output_dir', help="Output directory.")
-    parser.add_option('-u', '--usercreds', dest='user_creds', help="User credentials for scraping module.")
-    parser.add_option('-c', '--core', dest='core', help="Libretro core compatible with input roms")
-    parser.add_option('-b', '--other', dest='other_dir', help="Path to directory containing common files "
-                                                              "(e.g. bios files) to be included with EVERY game")
-    parser.add_option('-g', '--gamelist', dest='game_list',
-                      help="Specify existing gamelist.xml in EmulationStation format.\n "
-                           "This means Skyscraper will not be run and the following options are ignored: -p, -s, -u")
+    parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM)
+    parser.add_option('-s', '--scraper', dest='scraper', help=cmd_help.SCRAPE_MODULE)
+    parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS)
+    parser.add_option('-k', '--keepbrackets', dest='keep_brackets', help=cmd_help.KEEP_BRACKETS)
+    parser.add_option('-a', '--allroms', dest='all_roms', help=cmd_help.ALL_ROMS)
+    parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR)
+    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR)
+    parser.add_option('-c', '--core', dest='core', help=cmd_help.CORE)
+    parser.add_option('-b', '--other', dest='other_dir', help=cmd_help.OTHER_DIR)
+    parser.add_option('-g', '--gamelist', dest='game_list', help=cmd_help.GAME_LIST)
     return parser
 
 
