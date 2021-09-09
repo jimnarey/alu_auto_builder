@@ -50,15 +50,15 @@ def safe_make_dir(path):
     pass
 
 
-def scrape(platform, flags, data_paths, scrape_source, user_creds=None):
+def scrape(platform, scrape_flags, data_paths, scrape_source, user_creds=None):
     opts = '-s {0}'.format(scrape_source)
     opts = opts + ' -u {0}'.format(user_creds) if user_creds else opts
-    run_skyscraper(platform, flags, data_paths, opts)
+    run_skyscraper(platform, scrape_flags, data_paths, opts)
 
 
-def create_gamelist(platform, flags, data_paths):
+def create_gamelist(platform, game_list_flags, data_paths):
     opts = '-a "{0}" -g "{1}"'.format(data_paths['art_xml_path'], data_paths['temp_dir'])
-    run_skyscraper(platform, flags, data_paths, opts)
+    run_skyscraper(platform, game_list_flags, data_paths, opts)
 
 
 def run_skyscraper(platform, flags, data_paths, opts):
@@ -165,14 +165,15 @@ def build_uces(data_paths):
         build_uce(data_paths, game_dir)
 
 
-def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_path, other_dir, game_list):
+def run(platform, input_dir, output_dir, core_path, other_dir, game_list, scrape_source, user_creds, scrape_flags,
+        game_list_flags):
     data_paths = set_paths(input_dir, output_dir, core_path, other_dir)
     setup(data_paths)
     if game_list:
         shutil.copy(game_list, os.path.join(data_paths['temp_dir'], 'gamelist.xml'))
     else:
-        scrape(platform, flags, data_paths, scrape_source, user_creds)
-        create_gamelist(platform, flags, data_paths)
+        scrape(platform, scrape_flags, data_paths, scrape_source, user_creds)
+        create_gamelist(platform, game_list_flags, data_paths)
     build_uces(data_paths)
 
 
@@ -208,11 +209,13 @@ if __name__ == "__main__":
     parser = get_opts_parser()
     (options, args) = validate_opts(parser)
 
-    flags = configs.FLAGS
+    scrape_flags = ','.join(configs.SCRAPE_FLAGS)
+    game_list_flags = ','.join(configs.GAME_LIST_FLAGS)
     input_dir = options.input_dir if options.input_dir else os.getcwd()
     scrape_source = options.scraper if options.scraper else 'screenscraper'
     user_creds = options.user_creds if options.user_creds else None
     output_dir = options.output_dir if options.output_dir else None
     other_dir = options.other_dir if options.other_dir else None
     game_list = options.game_list if options.game_list else None
-    run(options.platform, input_dir, flags, scrape_source, user_creds, output_dir, options.core, other_dir, game_list)
+    run(options.platform, input_dir, output_dir, options.core, other_dir, game_list,
+        scrape_source, user_creds, scrape_flags, game_list_flags)

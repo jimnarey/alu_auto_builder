@@ -14,8 +14,6 @@ ARTWORK = [
     '</artwork>\n'
 ]
 
-FLAGS = 'onlymissing,nosubdirs,noscreenshots,nomarquees'
-
 CARTRIDGE_XML = [
     '<?xml version="1.0" encoding="UTF-8"?>\n',
     '<byog_cartridge version="1.0">\n',
@@ -30,3 +28,7 @@ EXEC_SH = [
     'set -x\n',
     '/emulator/retroplayer ./emu/CORE_FILE_NAME "./roms/GAME_FILE_NAME"\n'
 ]
+
+SCRAPE_FLAGS = ['onlymissing', 'nosubdirs', 'noscreenshots', 'nomarquees']
+
+GAME_LIST_FLAGS = ['nobrackets', 'skipped']
