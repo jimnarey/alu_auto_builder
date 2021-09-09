@@ -3,6 +3,7 @@
 import os
 import errno
 import shutil
+import tempfile
 import xml.etree.ElementTree as ET
 from pprint import pprint
 from optparse import OptionParser
@@ -73,7 +74,7 @@ def get_app_paths():
 
 
 def set_paths(input_dir, output_dir, core_path, other_dir):
-    temp_dir = os.path.join(input_dir, 'temp')
+    temp_dir = tempfile.TemporaryDirectory().name
     return {
         'input_dir': input_dir,
         'core_path': core_path,
