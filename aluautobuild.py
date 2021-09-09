@@ -17,6 +17,7 @@ import build_uce_tool
 # TODO - Ensure something is done for games with no metadata/image
 # TODO - Print some output
 # TODO - Cleanup
+# TODO - Something if user-provided gamelist points nowhere
 
 # TODO - FEATURE
 # TODO - Add marquees
@@ -67,12 +68,6 @@ def run_skyscraper(platform, flags, data_paths, opts):
     print(cmd_out)
 
 
-def get_app_paths():
-    this_dir = os.path.split(os.path.realpath(__file__))[0]
-    return {'root': this_dir, 'common_files': os.path.join(this_dir, 'common'),
-            'vendor_scripts': os.path.join(this_dir, 'vendor')}
-
-
 def set_paths(input_dir, output_dir, core_path, other_dir):
     temp_dir = tempfile.TemporaryDirectory().name
     return {
@@ -114,27 +109,24 @@ def make_uce_sub_dirs(game_dir):
 
 
 def write_cart_xml(game_dir, game_title, game_desc):
-    cart_xml = ''.join(configs.CARTRIDGE_XML)\
-        .replace('GAME_TITLE', game_title)\
+    cart_xml = ''.join(configs.CARTRIDGE_XML) \
+        .replace('GAME_TITLE', game_title) \
         .replace('GAME_DESCRIPTION', game_desc)
     write_file(os.path.join(game_dir, 'cartridge.xml'), cart_xml)
 
 
 def write_exec_sh(game_dir, core_file_name, game_file_name):
-    exec_sh = ''.join(configs.EXEC_SH)\
-        .replace('CORE_FILE_NAME', core_file_name)\
+    exec_sh = ''.join(configs.EXEC_SH) \
+        .replace('CORE_FILE_NAME', core_file_name) \
         .replace('GAME_FILE_NAME', game_file_name)
     write_file(os.path.join(game_dir, 'exec.sh'), exec_sh)
 
 
 def copy_dir_contents(source_dir, dest_dir):
-    source_files = os.listdir(source_dir)
-    pprint(source_files)
-    for file_name in source_files:
+    for file_name in os.listdir(source_dir):
         source_file_path = os.path.join(source_dir, file_name)
-        dest_file_path = os.path.join(dest_dir, file_name)
         if os.path.isfile(source_file_path):
-            shutil.copy(source_file_path, dest_file_path)
+            shutil.copy(source_file_path, os.path.join(dest_dir, file_name))
 
 
 def copy_source_files(data_paths, game_data, game_dir):
@@ -155,7 +147,7 @@ def setup_uce_source(data_paths, game_data, game_dir):
     copy_source_files(data_paths, game_data, game_dir)
 
 
-def py_build_uce(data_paths, game_dir):
+def build_uce(data_paths, game_dir):
     target_path = os.path.join(data_paths['output_dir'], '{0}{1}'.format(os.path.basename(game_dir), '.UCE'))
     build_uce_tool.run(game_dir, target_path)
 
@@ -166,15 +158,19 @@ def build_uces(data_paths):
         game_data = parse_game_entry(game_entry)
         game_dir = os.path.join(data_paths['temp_dir'], os.path.splitext(os.path.basename(game_data['rom_path']))[0])
         setup_uce_source(data_paths, game_data, game_dir)
-        py_build_uce(data_paths, game_dir)
+        build_uce(data_paths, game_dir)
 
 
-def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_path, other_dir):
-    app_paths = get_app_paths()
+def run(platform, input_dir, flags, scrape_source, user_creds, output_dir, core_path, other_dir, game_list):
     data_paths = set_paths(input_dir, output_dir, core_path, other_dir)
     setup(data_paths)
-    scrape(platform, flags, data_paths, scrape_source, user_creds)
-    create_gamelist(platform, flags, data_paths)
+    if game_list:
+        shutil.copy(game_list, os.path.join(data_paths['temp_dir'], 'gamelist.xml'))
+    else:
+        scrape(platform, flags, data_paths, scrape_source, user_creds)
+        create_gamelist(platform, flags, data_paths)
+    # pprint(data_paths)
+    # breakpoint()
     build_uces(data_paths)
 
 
@@ -190,12 +186,20 @@ def get_opts_parser():
     parser.add_option('-c', '--core', dest='core', help="Libretro core compatible with input roms")
     parser.add_option('-b', '--other', dest='other_dir', help="Path to directory containing common files "
                                                               "(e.g. bios files) to be included with EVERY game")
+    parser.add_option('-g', '--gamelist', dest='game_list',
+                      help="Specify existing gamelist.xml in EmulationStation format.\n "
+                           "This means Skyscraper will not be run and the following options are ignored: -p, -s, -u")
     return parser
 
 
 def validate_opts(parser):
     (options, args) = parser.parse_args()
-    if None in (options.platform, options.core):
+    valid = True
+    if options.core is None:
+        valid = False
+    if options.platform is None and options.game_list is None:
+        valid = False
+    if valid is False:
         parser.print_help()
         exit(0)
     return options, args
@@ -211,4 +215,5 @@ if __name__ == "__main__":
     user_creds = options.user_creds if options.user_creds else None
     output_dir = options.output_dir if options.output_dir else None
     other_dir = options.other_dir if options.other_dir else None
-    run(options.platform, input_dir, flags, scrape_source, user_creds, output_dir, options.core, other_dir)
+    game_list = options.game_list if options.game_list else None
+    run(options.platform, input_dir, flags, scrape_source, user_creds, output_dir, options.core, other_dir, game_list)
