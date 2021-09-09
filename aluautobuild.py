@@ -22,7 +22,6 @@ import build_uce_tool
 # TODO - FEATURE
 # TODO - Add marquees
 # TODO - Add something to ignore existing Skyscraper config
-# TODO - Allow user to specify gamelist.xml
 # TODO - Allow creation of gamelist without scraping (not very useful, implement without Skyscraper)
 # TODO - Add option to discontinue based on scrape results
 # TODO - Add option to allow user to specify default png
@@ -76,6 +75,7 @@ def set_paths(input_dir, output_dir, core_path, other_dir):
         'other_dir': other_dir,
         'output_dir': output_dir if output_dir else os.path.join(input_dir, 'output'),
         'temp_dir': temp_dir,
+        'app_root_dir': os.path.split(os.path.realpath(__file__))[0],
         'config_file': os.path.join(temp_dir, 'config.ini'),
         'art_xml_path': os.path.join(temp_dir, 'artwork.xml')
     }
@@ -133,7 +133,10 @@ def copy_source_files(data_paths, game_data, game_dir):
     box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
     shutil.copyfile(data_paths['core_path'], os.path.join(game_dir, 'emu', os.path.basename(data_paths['core_path'])))
     shutil.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
-    shutil.copyfile(game_data['boxart_path'], box_art_target_path)
+    try:
+        shutil.copyfile(game_data['boxart_path'], box_art_target_path)
+    except (TypeError, FileNotFoundError):
+        shutil.copyfile(os.path.join(data_paths['app_root_dir'], 'common', 'title.png'), box_art_target_path)
     if data_paths['other_dir']:
         copy_dir_contents(data_paths['other_dir'], os.path.join(game_dir, 'roms'))
     os.symlink(box_art_target_path, os.path.join(game_dir, 'title.png'))
