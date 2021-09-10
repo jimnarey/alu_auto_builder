@@ -3,25 +3,11 @@
 import os
 import shutil
 import tempfile
-import errno
 import xml.etree.ElementTree as ET
 
+import common_utils
 import configs
 import build_uce_tool
-
-
-def write_file(file_path, file_content):
-    with open(file_path, 'w') as target_file:
-        target_file.write(file_content)
-
-
-def safe_make_dir(path):
-    try:
-        os.mkdir(path)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise
-    pass
 
 
 def read_gamelist(gamelist_path):
@@ -41,21 +27,21 @@ def parse_game_entry(game_entry):
 
 def make_uce_sub_dirs(game_dir):
     for sub_dir in ('emu', 'roms', 'boxart', 'save'):
-        safe_make_dir(os.path.join(game_dir, sub_dir))
+        common_utils.safe_make_dir(os.path.join(game_dir, sub_dir))
 
 
 def write_cart_xml(game_dir, game_name, game_desc):
     cart_xml = ''.join(configs.CARTRIDGE_XML)\
         .replace('GAME_TITLE', game_name)\
         .replace('GAME_DESCRIPTION', game_desc if game_desc else '')
-    write_file(os.path.join(game_dir, 'cartridge.xml'), cart_xml)
+    common_utils.write_file(os.path.join(game_dir, 'cartridge.xml'), cart_xml)
 
 
 def write_exec_sh(game_dir, core_file_name, game_file_name):
     exec_sh = ''.join(configs.EXEC_SH) \
         .replace('CORE_FILE_NAME', core_file_name) \
         .replace('GAME_FILE_NAME', game_file_name)
-    write_file(os.path.join(game_dir, 'exec.sh'), exec_sh)
+    common_utils.write_file(os.path.join(game_dir, 'exec.sh'), exec_sh)
 
 
 def copy_dir_contents(source_dir, dest_dir):
@@ -80,7 +66,7 @@ def copy_source_files(core_path, bios_dir, game_data, game_dir):
 
 
 def setup_uce_source(core_path, bios_dir, game_data, game_dir):
-    safe_make_dir(game_dir)
+    common_utils.safe_make_dir(game_dir)
     make_uce_sub_dirs(game_dir)
     write_cart_xml(game_dir, game_data['name'], game_data['description'])
     write_exec_sh(game_dir, os.path.basename(core_path), os.path.basename(game_data['rom_path']))
@@ -99,7 +85,7 @@ def build_uces(output_dir, core_path, bios_dir, temp_dir=None, game_list_source_
     game_list_path = os.path.join(game_list_source_dir, 'gamelist.xml') if game_list_source_dir else \
         os.path.join(temp_dir, 'gamelist.xml')
     game_list = read_gamelist(game_list_path)
-    safe_make_dir(output_dir)
+    common_utils.safe_make_dir(output_dir)
     for game_entry in game_list:
         game_data = parse_game_entry(game_entry)
         game_dir = os.path.join(temp_dir, os.path.splitext(os.path.basename(game_data['rom_path']))[0])

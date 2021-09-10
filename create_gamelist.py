@@ -5,12 +5,8 @@ import configs
 import tempfile
 from optparse import OptionParser
 
+import common_utils
 import cmd_help
-
-
-def write_file(file_path, file_content):
-    with open(file_path, 'w') as target_file:
-        target_file.write(file_content)
 
 
 def scrape(platform, input_dir, scrape_flags, config_path, scrape_source=None, user_creds=None):
@@ -42,8 +38,8 @@ def run(platform, input_dir, scrape_source=None, user_creds=None, scrape_flags=N
     art_xml_path = os.path.join(temp_dir, 'artwork.xml')
     scrape_flags = scrape_flags if scrape_flags else configs.SCRAPE_FLAGS
     game_list_flags = game_list_flags if game_list_flags else configs.GAME_LIST_FLAGS
-    write_file(config_path, ''.join(configs.CONFIG))
-    write_file(art_xml_path, ''.join(configs.ARTWORK))
+    common_utils.write_file(config_path, ''.join(configs.CONFIG))
+    common_utils.write_file(art_xml_path, ''.join(configs.ARTWORK))
     scrape(platform, input_dir, scrape_flags, config_path, scrape_source, user_creds)
     create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, game_list_target_dir)
 

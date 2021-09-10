@@ -5,7 +5,8 @@ import shutil
 import stat
 import hashlib
 import tempfile
-import errno
+
+import common_utils
 
 
 def execute(cmd):
@@ -13,15 +14,6 @@ def execute(cmd):
     cmd_out = os.popen(cmd).read()
     print(cmd_out)
     return cmd_out
-
-
-def safe_make_dir(path):
-    try:
-        os.mkdir(path)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise
-    pass
 
 
 def set_755(file_path):
@@ -83,7 +75,7 @@ def run(input_dir, output_file):
     save_dir = os.path.join(work_dir.name, 'data', 'save')
     # TODO Can we avoid the need for re-linking boxart here?
     shutil.copytree(input_dir, data_dir, symlinks=True)
-    safe_make_dir(save_dir)
+    common_utils.safe_make_dir(save_dir)
     set_755(os.path.join(data_dir, 'exec.sh'))
     relink_boxart(data_dir)
     call_mksquashfs(data_dir, cart_tmp_file)
