@@ -4,6 +4,8 @@
 
 INPUT_DIR = "Location of input roms."
 
+GAME_LIST_TARGET_DIR = "Directory to save the generated gamelist.xml"
+
 # Scraping only
 
 PLATFORM = "Emulated platform. Passed to Skyscaper. Run 'Skyscraper --help' to see available platforms."

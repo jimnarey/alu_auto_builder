@@ -8,7 +8,6 @@ import tempfile
 from optparse import OptionParser
 
 import cmd_help
-import configs
 import create_gamelist
 import build_uces
 
@@ -50,24 +49,6 @@ def safe_make_dir(path):
         if exc.errno != errno.EEXIST:
             raise
     pass
-
-
-# def run(platform, input_dir, output_dir, core_path, other_dir, game_list, scrape_source, user_creds, scrape_flags,
-#         game_list_flags, game_list_dir):
-#     temp_dir = tempfile.TemporaryDirectory().name
-#     game_list_dir = game_list_dir if game_list_dir else temp_dir
-#     build_paths = paths.set_build_paths(core_path, other_dir, output_dir, temp_dir, game_list_dir)
-#     game_list_paths = paths.set_game_list_paths(input_dir, temp_dir, game_list_dir)
-#     safe_make_dir(build_paths['output_dir'])
-#
-#     # setup(data_paths)
-#
-#     if game_list:
-#         shutil.copy(game_list, os.path.join(temp_dir, 'gamelist.xml'))
-#     else:
-#         create_gamelist.scrape(platform, scrape_flags, data_paths, scrape_source, user_creds)
-#         create_gamelist.create_gamelist(platform, game_list_flags, data_paths)
-#     build_uces.build_uces(data_paths)
 
 
 def run(opts):

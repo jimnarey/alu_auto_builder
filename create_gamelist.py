@@ -51,9 +51,11 @@ def run(platform, input_dir, scrape_source=None, user_creds=None, scrape_flags=N
 def get_opts_parser():
     parser = OptionParser()
     parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM)
-    parser.add_option('-s', '--scraper', dest='scraper', help=cmd_help.SCRAPE_MODULE)
-    parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS)
-    parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR)
+    parser.add_option('-s', '--scraper', dest='scrape_source', help=cmd_help.SCRAPE_MODULE, default=None)
+    parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS, default=None)
+    parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
+    parser.add_option('-t', '--target', dest='game_list_target_dir', help=cmd_help.GAME_LIST_TARGET_DIR,
+                      default=os.getcwd())
     return parser
 
 
@@ -69,9 +71,5 @@ if __name__ == "__main__":
     parser = get_opts_parser()
     (options, args) = validate_opts(parser)
 
-
-    input_dir = options.input_dir if options.input_dir else os.getcwd()
-    scrape_source = options.scraper if options.scraper else None
-    user_creds = options.user_creds if options.user_creds else None
-
-    run(options.platform, input_dir, scrape_source, user_creds)
+    run(options.platform, options.input_dir, options.scrape_source, options.user_creds,
+        game_list_target_dir=options.game_list_target_dir)
