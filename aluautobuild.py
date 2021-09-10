@@ -144,6 +144,8 @@ def copy_source_files(data_paths, game_data, game_dir):
     os.symlink(box_art_target_path, os.path.join(game_dir, 'title.png'))
 
 
+# TODO - Deal with missing xml entries
+# TODO - Sanitise all build input here - missing description etc
 def setup_uce_source(data_paths, game_data, game_dir):
     safe_make_dir(game_dir)
     make_uce_sub_dirs(game_dir)
@@ -159,6 +161,8 @@ def build_uce(data_paths, game_dir):
 
 def build_uces(data_paths):
     game_list = read_gamelist(os.path.join(data_paths['temp_dir'], 'gamelist.xml'))
+    print(data_paths['temp_dir'])
+    breakpoint()
     for game_entry in game_list:
         game_data = parse_game_entry(game_entry)
         game_dir = os.path.join(data_paths['temp_dir'], os.path.splitext(os.path.basename(game_data['rom_path']))[0])
@@ -178,6 +182,7 @@ def run(platform, input_dir, output_dir, core_path, other_dir, game_list, scrape
     build_uces(data_paths)
 
 
+# TODO - Allow keeping of rom attributes, region, rom-code, none, etc
 def get_opts_parser():
     parser = OptionParser()
     parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM)
