@@ -15,15 +15,13 @@ import build_uces
 # TODO - Something if user-provided gamelist points nowhere
 
 # TODO - FEATURE
-# TODO - Separate generation of source files (scrape, make gamelist) from building UCEs
+# TODO - Command line interface for build_uces
 # TODO - Add marquees
-# TODO - Add something to ignore existing Skyscraper config
 # TODO - Allow creation of gamelist without scraping (not very useful, implement without Skyscraper)
 # TODO - Add option to discontinue based on scrape results
 # TODO - Add option to allow user to specify default png
 # TODO - Handle (MAME) roms which need individual config file/metadata subfolder
 # TODO - Check images are png (check whether this is a requirement first)
-# TODO - Incorporate defaults into optparse call
 # TODO - Look in input dir for core
 # TODO - Error handling:
 # - Skyscraper fail
