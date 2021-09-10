@@ -5,7 +5,6 @@ import errno
 import shutil
 import tempfile
 import xml.etree.ElementTree as ET
-from pprint import pprint
 from optparse import OptionParser
 
 import cmd_help
