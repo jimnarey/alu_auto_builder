@@ -14,13 +14,11 @@ import build_uce_tool
 
 
 # TODO - ESSENTIAL
-# TODO - Ensure gamelist is created for games with no data
-# TODO - Ensure something is done for games with no metadata/image
 # TODO - Print some output
-# TODO - Cleanup
 # TODO - Something if user-provided gamelist points nowhere
 
 # TODO - FEATURE
+# TODO - Separate generation of source files (scrape, make gamelist) from building UCEs
 # TODO - Add marquees
 # TODO - Add something to ignore existing Skyscraper config
 # TODO - Allow creation of gamelist without scraping (not very useful, implement without Skyscraper)
@@ -34,6 +32,10 @@ import build_uce_tool
 # - Skyscraper fail
 # - Can't create dirs/write files
 # - Can't read gamelist.xml
+# TODO - Custom save concept:
+# User points to an overall 'save' dir
+# Contains custom saves with same names as games
+# Failing that uses a generic, custom save.zip
 
 
 def write_file(file_path, file_content):
@@ -110,10 +112,10 @@ def make_uce_sub_dirs(game_dir):
         safe_make_dir(os.path.join(game_dir, sub_dir))
 
 
-def write_cart_xml(game_dir, game_title, game_desc):
-    cart_xml = ''.join(configs.CARTRIDGE_XML) \
-        .replace('GAME_TITLE', game_title) \
-        .replace('GAME_DESCRIPTION', game_desc)
+def write_cart_xml(game_dir, game_name, game_desc):
+    cart_xml = ''.join(configs.CARTRIDGE_XML)\
+        .replace('GAME_TITLE', game_name)\
+        .replace('GAME_DESCRIPTION', game_desc if game_desc else '')
     write_file(os.path.join(game_dir, 'cartridge.xml'), cart_xml)
 
 
@@ -144,8 +146,6 @@ def copy_source_files(data_paths, game_data, game_dir):
     os.symlink(box_art_target_path, os.path.join(game_dir, 'title.png'))
 
 
-# TODO - Deal with missing xml entries
-# TODO - Sanitise all build input here - missing description etc
 def setup_uce_source(data_paths, game_data, game_dir):
     safe_make_dir(game_dir)
     make_uce_sub_dirs(game_dir)
@@ -161,8 +161,6 @@ def build_uce(data_paths, game_dir):
 
 def build_uces(data_paths):
     game_list = read_gamelist(os.path.join(data_paths['temp_dir'], 'gamelist.xml'))
-    print(data_paths['temp_dir'])
-    breakpoint()
     for game_entry in game_list:
         game_data = parse_game_entry(game_entry)
         game_dir = os.path.join(data_paths['temp_dir'], os.path.splitext(os.path.basename(game_data['rom_path']))[0])
@@ -188,8 +186,8 @@ def get_opts_parser():
     parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM)
     parser.add_option('-s', '--scraper', dest='scraper', help=cmd_help.SCRAPE_MODULE)
     parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS)
-    parser.add_option('-k', '--keepbrackets', dest='keep_brackets', help=cmd_help.KEEP_BRACKETS)
-    parser.add_option('-a', '--allroms', dest='all_roms', help=cmd_help.ALL_ROMS)
+    # parser.add_option('-k', '--keepbrackets', dest='keep_brackets', help=cmd_help.KEEP_BRACKETS)
+    # parser.add_option('-a', '--allroms', dest='all_roms', help=cmd_help.ALL_ROMS)
     parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR)
     parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR)
     parser.add_option('-c', '--core', dest='core', help=cmd_help.CORE)
