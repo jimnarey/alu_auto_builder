@@ -62,8 +62,9 @@ def create_gamelist(platform, game_list_flags, data_paths):
 
 
 def run_skyscraper(platform, flags, data_paths, opts):
-    cmd = 'Skyscraper -p {0} -i "{1}" --flags {2} -c "{3}" {4}'.format(platform, input_dir, flags,
-                                                                       data_paths['config_file'], opts)
+    cmd = 'Skyscraper -p {0} -i "{1}" -c "{2}" {3}'.format(platform, input_dir, data_paths['config_file'], opts)
+    cmd = cmd + ' --flags {0}'.format(','.join(flags)) if flags else cmd
+    print(cmd)
     cmd_out = os.popen(cmd).read()
     print(cmd_out)
 
@@ -209,8 +210,8 @@ if __name__ == "__main__":
     parser = get_opts_parser()
     (options, args) = validate_opts(parser)
 
-    scrape_flags = ','.join(configs.SCRAPE_FLAGS)
-    game_list_flags = ','.join(configs.GAME_LIST_FLAGS)
+    scrape_flags = configs.SCRAPE_FLAGS
+    game_list_flags = configs.GAME_LIST_FLAGS
     input_dir = options.input_dir if options.input_dir else os.getcwd()
     scrape_source = options.scraper if options.scraper else 'screenscraper'
     user_creds = options.user_creds if options.user_creds else None
