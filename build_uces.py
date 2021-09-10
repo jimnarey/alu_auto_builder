@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import tempfile
 import errno
 import xml.etree.ElementTree as ET
 
@@ -64,36 +65,46 @@ def copy_dir_contents(source_dir, dest_dir):
             shutil.copy(source_file_path, os.path.join(dest_dir, file_name))
 
 
-def copy_source_files(data_paths, game_data, game_dir):
+def copy_source_files(core_path, bios_dir, game_data, game_dir):
+    app_root_dir = os.path.split(os.path.realpath(__file__))[0]
     box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
-    shutil.copyfile(data_paths['core_path'], os.path.join(game_dir, 'emu', os.path.basename(data_paths['core_path'])))
+    shutil.copyfile(core_path, os.path.join(game_dir, 'emu', os.path.basename(core_path)))
     shutil.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
     try:
         shutil.copyfile(game_data['boxart_path'], box_art_target_path)
     except (TypeError, FileNotFoundError):
-        shutil.copyfile(os.path.join(data_paths['app_root_dir'], 'common', 'title.png'), box_art_target_path)
-    if data_paths['other_dir']:
-        copy_dir_contents(data_paths['other_dir'], os.path.join(game_dir, 'roms'))
+        shutil.copyfile(os.path.join(app_root_dir, 'common', 'title.png'), box_art_target_path)
+    if bios_dir:
+        copy_dir_contents(bios_dir, os.path.join(game_dir, 'roms'))
     os.symlink(box_art_target_path, os.path.join(game_dir, 'title.png'))
 
 
-def setup_uce_source(data_paths, game_data, game_dir):
+def setup_uce_source(core_path, bios_dir, game_data, game_dir):
     safe_make_dir(game_dir)
     make_uce_sub_dirs(game_dir)
     write_cart_xml(game_dir, game_data['name'], game_data['description'])
-    write_exec_sh(game_dir, os.path.basename(data_paths['core_path']), os.path.basename(game_data['rom_path']))
-    copy_source_files(data_paths, game_data, game_dir)
+    write_exec_sh(game_dir, os.path.basename(core_path), os.path.basename(game_data['rom_path']))
+    copy_source_files(core_path, bios_dir, game_data, game_dir)
 
 
-def build_uce(data_paths, game_dir):
-    target_path = os.path.join(data_paths['output_dir'], '{0}{1}'.format(os.path.basename(game_dir), '.UCE'))
+def build_uce(output_dir, game_dir):
+    target_path = os.path.join(output_dir, '{0}{1}'.format(os.path.basename(game_dir), '.UCE'))
     build_uce_tool.run(game_dir, target_path)
 
 
-def build_uces(data_paths):
-    game_list = read_gamelist(os.path.join(data_paths['temp_dir'], 'gamelist.xml'))
+def build_uces(output_dir, core_path, bios_dir, temp_dir=None, game_list_source_dir=None):
+    if not temp_dir:
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        temp_dir = temp_dir_obj.name
+    game_list_path = os.path.join(game_list_source_dir, 'gamelist.xml') if game_list_source_dir else \
+        os.path.join(temp_dir, 'gamelist.xml')
+    game_list = read_gamelist(game_list_path)
+    safe_make_dir(output_dir)
     for game_entry in game_list:
         game_data = parse_game_entry(game_entry)
-        game_dir = os.path.join(data_paths['temp_dir'], os.path.splitext(os.path.basename(game_data['rom_path']))[0])
-        setup_uce_source(data_paths, game_data, game_dir)
-        build_uce(data_paths, game_dir)
+        game_dir = os.path.join(temp_dir, os.path.splitext(os.path.basename(game_data['rom_path']))[0])
+        setup_uce_source(core_path, bios_dir, game_data, game_dir)
+        build_uce(output_dir, game_dir)
+
+
+
