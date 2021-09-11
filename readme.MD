@@ -68,3 +68,7 @@ In short, loads. See the top of the aluautobuilder.py file for a current, non-ex
   addon roms and a Linux script for doing the same.
 - The [saUCE factory repo](https://github.com/wn2000/sauce_factory) which has an updated version of addon script for
   Linux and builds the UCE files.
+
+### Licence
+
+Because this tool uses the GP3 licensed PyQT library it is also released under GPL3.
