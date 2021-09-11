@@ -4,9 +4,19 @@ import os
 import shutil
 import stat
 import hashlib
+import sys
 import tempfile
 
 import common_utils
+
+PLATFORM = common_utils.get_platform()
+
+
+def pre_flight():
+    if PLATFORM not in ('linux', 'win32'):
+        print('This tool requires either Linux or Windows')
+        return False
+    return True
 
 
 def execute(cmd):
@@ -20,14 +30,21 @@ def set_755(file_path):
     os.chmod(file_path, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
 
+# This doesn't appear to be needed?
+# When not called as part of Windows development all worked anyway
 def relink_boxart(data_dir):
     title_png = os.path.join(data_dir, 'title.png')
     os.remove(title_png)
     os.symlink('boxart/boxart.png', title_png)
 
 
-def call_mksquashfs(input_dir, target_file):
-    cmd = 'mksquashfs "{0}" "{1}" -b 262144 -root-owned -nopad'.format(input_dir, target_file)
+def call_mksquashfs(input_dir, target_file, this_dir):
+    if PLATFORM == 'win32':
+        exe_dir = os.path.join(this_dir, 'windows')
+        exe = os.path.join(exe_dir, 'mksquashfs.exe')
+        cmd = '"{0}" "{1}" "{2}" -b 262144 -root-owned -nopad'.format(exe, input_dir, target_file)
+    else:
+        cmd = 'mksquashfs "{0}" "{1}" -b 262144 -root-owned -nopad'.format(input_dir, target_file)
     cmd_out = os.popen(cmd).read()
     print(cmd_out)
 
@@ -63,10 +80,21 @@ def append_to_file(start_file, append_data):
         s_file.write(append_data)
 
 
-def run(input_dir, output_file):
+def make_ext4_part(cart_save_file, this_dir):
+    if PLATFORM == 'win32':
+        exe_dir = os.path.join(this_dir, 'windows')
+        script = os.path.join(exe_dir, 'make_ext4_part.bat')
+    else:
+        bash_script_dir = os.path.join(this_dir, 'bash_scripts')
+        script = os.path.join(bash_script_dir, 'make_ext4_part.sh')
+    cmd = '"{0}" "{1}"'.format(script, cart_save_file)
+    execute(cmd)
 
+
+def run(input_dir, output_file):
+    if not pre_flight():
+        sys.exit(0)
     this_dir = os.path.split(os.path.realpath(__file__))[0]
-    bash_script_dir = os.path.join(this_dir, 'bash_scripts')
     work_dir = tempfile.TemporaryDirectory()
     cart_tmp_file = os.path.join(work_dir.name, 'cart_tmp_file.img')
     cart_save_file = os.path.join(work_dir.name, 'cart_save_file.img')
@@ -78,7 +106,7 @@ def run(input_dir, output_file):
     common_utils.safe_make_dir(save_dir)
     set_755(os.path.join(data_dir, 'exec.sh'))
     relink_boxart(data_dir)
-    call_mksquashfs(data_dir, cart_tmp_file)
+    call_mksquashfs(data_dir, cart_tmp_file, this_dir)
     sq_img_file_size = os.path.getsize(cart_tmp_file)
     real_bytes_used = get_sq_image_real_bytes_used(sq_img_file_size)
     count = int(real_bytes_used) - int(sq_img_file_size)
@@ -89,10 +117,7 @@ def run(input_dir, output_file):
     append_to_file(cart_tmp_file, bytearray(32))
     # TODO - Is this next line needed?
     os.remove(md5_file)
-    # TODO - Reduce this
-    script = os.path.join(bash_script_dir, 'make_ext4_part.sh')
-    cmd = '{0} {1}'.format(script, cart_save_file)
-    execute(cmd)
+    make_ext4_part(cart_save_file, this_dir)
     md5_string = get_md5(cart_save_file)
     create_hex_file(md5_string, md5_file)
     append_file_to_file(cart_tmp_file, md5_file)
