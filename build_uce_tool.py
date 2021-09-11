@@ -40,7 +40,7 @@ def relink_boxart(data_dir):
 
 def call_mksquashfs(input_dir, target_file, this_dir):
     if PLATFORM == 'win32':
-        exe_dir = os.path.join(this_dir, 'windows', 'cygwin_old')
+        exe_dir = os.path.join(this_dir, 'windows')
         exe = os.path.join(exe_dir, 'mksquashfs.exe')
         cmd = '"{0}" "{1}" "{2}" -b 262144 -root-owned -nopad'.format(exe, input_dir, target_file)
     else:
@@ -82,7 +82,7 @@ def append_to_file(start_file, append_data):
 
 def make_ext4_part(cart_save_file, this_dir):
     if PLATFORM == 'win32':
-        exe_dir = os.path.join(this_dir, 'windows', 'cygwin_new')
+        exe_dir = os.path.join(this_dir, 'windows')
         script = os.path.join(exe_dir, 'make_ext4_part.bat')
     else:
         bash_script_dir = os.path.join(this_dir, 'bash_scripts')
