@@ -30,8 +30,9 @@ def set_755(file_path):
     os.chmod(file_path, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
 
-# This doesn't appear to be needed?
+# This doesn't appear to be needed.
 # When not called as part of Windows development all worked anyway
+# Subsequently tested on Linux, same result.
 def relink_boxart(data_dir):
     title_png = os.path.join(data_dir, 'title.png')
     os.remove(title_png)
