@@ -80,7 +80,7 @@ def make_ext4_part(cart_save_file, this_dir):
         script = os.path.join(bash_script_dir, 'make_ext4_part.sh')
         cmd = '{0} {1}'.format(script, cart_save_file)
     elif common_utils.get_platform() == 'win32':
-        exe_dir = os.path.join(this_dir, 'windows', 'cygwin_old')
+        exe_dir = os.path.join(this_dir, 'windows', 'cygwin_new')
         script = os.path.join(exe_dir, 'make_ext4_part.bat')
         cmd = '"{0}" "{1}"'.format(script, cart_save_file)
     execute(cmd)
@@ -116,7 +116,7 @@ def run(input_dir, output_file):
     # script = os.path.join(bash_script_dir, 'make_ext4_part.sh')
     # cmd = '{0} {1}'.format(script, cart_save_file)
     # execute(cmd)
-
+    make_ext4_part(cart_save_file, this_dir)
 
     md5_string = get_md5(cart_save_file)
     create_hex_file(md5_string, md5_file)

@@ -76,7 +76,6 @@ if __name__ == "__main__":
     parser = get_opts_parser()
     (options, args) = validate_opts(parser)
     run(options)
-    x = input('Hello')
 
 # parser.add_option('-k', '--keepbrackets', dest='keep_brackets', help=cmd_help.KEEP_BRACKETS)
 # parser.add_option('-a', '--allroms', dest='all_roms', help=cmd_help.ALL_ROMS)
