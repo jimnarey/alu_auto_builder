@@ -8,6 +8,7 @@ import sys
 import tempfile
 
 import common_utils
+import configs
 
 PLATFORM = common_utils.get_platform()
 
@@ -39,9 +40,9 @@ def relink_boxart(data_dir):
     os.symlink('boxart/boxart.png', title_png)
 
 
-def call_mksquashfs(input_dir, target_file, this_dir):
+def call_mksquashfs(input_dir, target_file, app_root):
     if PLATFORM == 'win32':
-        exe_dir = os.path.join(this_dir, 'windows')
+        exe_dir = os.path.join(app_root, 'windows')
         exe = os.path.join(exe_dir, 'mksquashfs.exe')
         cmd = '"{0}" "{1}" "{2}" -b 262144 -root-owned -nopad'.format(exe, input_dir, target_file)
     else:
@@ -81,12 +82,12 @@ def append_to_file(start_file, append_data):
         s_file.write(append_data)
 
 
-def make_ext4_part(cart_save_file, this_dir):
+def make_ext4_part(cart_save_file, app_root):
     if PLATFORM == 'win32':
-        exe_dir = os.path.join(this_dir, 'windows')
+        exe_dir = os.path.join(app_root, 'windows')
         script = os.path.join(exe_dir, 'make_ext4_part.bat')
     else:
-        bash_script_dir = os.path.join(this_dir, 'bash_scripts')
+        bash_script_dir = os.path.join(app_root, 'bash_scripts')
         script = os.path.join(bash_script_dir, 'make_ext4_part.sh')
     cmd = '"{0}" "{1}"'.format(script, cart_save_file)
     execute(cmd)
@@ -95,7 +96,8 @@ def make_ext4_part(cart_save_file, this_dir):
 def run(input_dir, output_file):
     if not pre_flight():
         sys.exit(0)
-    this_dir = os.path.split(os.path.realpath(__file__))[0]
+    # app_root = os.path.split(os.path.realpath(__file__))[0]
+    app_root = configs.APP_ROOT
     work_dir = tempfile.TemporaryDirectory()
     cart_tmp_file = os.path.join(work_dir.name, 'cart_tmp_file.img')
     cart_save_file = os.path.join(work_dir.name, 'cart_save_file.img')
@@ -107,7 +109,7 @@ def run(input_dir, output_file):
     common_utils.safe_make_dir(save_dir)
     set_755(os.path.join(data_dir, 'exec.sh'))
     relink_boxart(data_dir)
-    call_mksquashfs(data_dir, cart_tmp_file, this_dir)
+    call_mksquashfs(data_dir, cart_tmp_file, app_root)
     sq_img_file_size = os.path.getsize(cart_tmp_file)
     real_bytes_used = get_sq_image_real_bytes_used(sq_img_file_size)
     count = int(real_bytes_used) - int(sq_img_file_size)
@@ -118,7 +120,7 @@ def run(input_dir, output_file):
     append_to_file(cart_tmp_file, bytearray(32))
     # TODO - Is this next line needed?
     os.remove(md5_file)
-    make_ext4_part(cart_save_file, this_dir)
+    make_ext4_part(cart_save_file, app_root)
     md5_string = get_md5(cart_save_file)
     create_hex_file(md5_string, md5_file)
     append_file_to_file(cart_tmp_file, md5_file)

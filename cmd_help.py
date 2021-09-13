@@ -26,7 +26,7 @@ OUTPUT_DIR = "Output directory."
 
 CORE = "Libretro core compatible with input roms"
 
-OTHER_DIR = "Path to directory containing common files (e.g. bios files) to be included with EVERY game"
+BIOS_DIR = "Path to directory containing common files (e.g. bios files) to be included with EVERY game"
 
 # Combined only
 

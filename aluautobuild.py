@@ -36,12 +36,12 @@ import build_uces
 def run(opts):
     temp_dir_obj = tempfile.TemporaryDirectory()
     temp_dir = temp_dir_obj.name
-    if opts.game_list:
+    if opts.gamelist:
         shutil.copy(opts.game_list, os.path.join(temp_dir, 'gamelist.xml'))
     else:
         create_gamelist.run(opts.platform, opts.input_dir, scrape_source=opts.scrape_source,
                             user_creds=opts.user_creds, temp_dir=temp_dir)
-    build_uces.build_uces(opts.output_dir, opts.core_path, opts.other_dir, temp_dir=temp_dir)
+    build_uces.build_uces(opts.output_dir, opts.core_path, opts.bios_dir, temp_dir)
 
 
 # TODO - Allow keeping of rom attributes, region, rom-code, none, etc
@@ -54,8 +54,8 @@ def get_opts_parser():
     parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR,
                       default=os.path.join(os.getcwd(), 'output'))
     parser.add_option('-c', '--core', dest='core_path', help=cmd_help.CORE, default=None)
-    parser.add_option('-b', '--other', dest='other_dir', help=cmd_help.OTHER_DIR, default=None)
-    parser.add_option('-g', '--gamelist', dest='game_list', help=cmd_help.GAME_LIST, default=None)
+    parser.add_option('-b', '--other', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
+    parser.add_option('-g', '--gamelist', dest='gamelist', help=cmd_help.GAME_LIST, default=None)
     return parser
 
 

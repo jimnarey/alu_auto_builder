@@ -69,3 +69,6 @@ if __name__ == "__main__":
 
     run(options.platform, options.input_dir, options.scrape_source, options.user_creds,
         game_list_target_dir=options.game_list_target_dir)
+
+# TODO - Allow user manipulation of scraping/gamelist flags
+# TODO - Sense checking run interface; currently designed for scrape only but this isn't implemented so it's fragile

@@ -52,14 +52,15 @@ def copy_dir_contents(source_dir, dest_dir):
 
 
 def copy_source_files(core_path, bios_dir, game_data, game_dir):
-    app_root_dir = os.path.split(os.path.realpath(__file__))[0]
+    # app_root = os.path.split(os.path.realpath(__file__))[0]
+    app_root = configs.APP_ROOT
     box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
     shutil.copyfile(core_path, os.path.join(game_dir, 'emu', os.path.basename(core_path)))
     shutil.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
     try:
         shutil.copyfile(game_data['boxart_path'], box_art_target_path)
     except (TypeError, FileNotFoundError):
-        shutil.copyfile(os.path.join(app_root_dir, 'common', 'title.png'), box_art_target_path)
+        shutil.copyfile(os.path.join(app_root, 'common', 'title.png'), box_art_target_path)
     if bios_dir:
         copy_dir_contents(bios_dir, os.path.join(game_dir, 'roms'))
     os.symlink(box_art_target_path, os.path.join(game_dir, 'title.png'))
@@ -78,15 +79,14 @@ def build_uce(output_dir, game_dir):
     build_uce_tool.run(game_dir, target_path)
 
 
-def build_uces(output_dir, core_path, bios_dir, temp_dir=None, game_list_source_dir=None):
-    if not temp_dir:
-        temp_dir_obj = tempfile.TemporaryDirectory()
-        temp_dir = temp_dir_obj.name
-    game_list_path = os.path.join(game_list_source_dir, 'gamelist.xml') if game_list_source_dir else \
-        os.path.join(temp_dir, 'gamelist.xml')
-    game_list = read_gamelist(game_list_path)
+def build_uces(output_dir, core_path, bios_dir, temp_dir, gamelist_path=None):
+    # if not temp_dir:
+    #     temp_dir_obj = tempfile.TemporaryDirectory()
+    #     temp_dir = temp_dir_obj.name
+    gamelist_path = gamelist_path if gamelist_path else os.path.join(temp_dir, 'gamelist.xml')
+    gamelist = read_gamelist(gamelist_path)
     common_utils.safe_make_dir(output_dir)
-    for game_entry in game_list:
+    for game_entry in gamelist:
         game_data = parse_game_entry(game_entry)
         game_dir = os.path.join(temp_dir, os.path.splitext(os.path.basename(game_data['rom_path']))[0])
         setup_uce_source(core_path, bios_dir, game_data, game_dir)

@@ -1,10 +1,11 @@
-CONFIG = [  
+import os
+
+CONFIG = [
     '[main]\n',
     'videos="false"\n',
     'unattend="true"\n',
     'verbosity="1"\n'
-    ]
-
+]
 
 ARTWORK = [
     '<?xml version="1.0" encoding="UTF-8"?>\n',
@@ -32,3 +33,18 @@ EXEC_SH = [
 SCRAPE_FLAGS = ['onlymissing', 'nosubdirs', 'noscreenshots', 'nomarquees']
 
 GAME_LIST_FLAGS = ['nobrackets', 'skipped']
+
+GUI_PLATFORMS = ['', '3do', '3ds', 'amiga', 'amigacd32', 'amstradcpc', 'apple2', 'arcade', 'arcadia', 'astrocde',
+                 'atari800', 'atari2600', 'atari5200', 'atari7800', 'atarijaguar', 'atarilynx', 'atarist', 'c16', 'c64',
+                 'c128', 'coco', 'coleco', 'daphne', 'dragon32', 'dreamcast', 'fba', 'fds', 'gameandwatch', 'gamegear',
+                 'gb', 'gba', 'gbc', 'gc', 'genesis', 'intellivision', 'mame-advmame', 'mame-libretro', 'mame-mame4all',
+                 'mastersystem', 'megacd', 'megadrive', 'msx', 'n64', 'nds', 'neogeo', 'neogeocd', 'nes', 'ngp', 'ngpc',
+                 'oric', 'pc', 'pc88', 'pc98', 'pcfx', 'pcengine', 'pokemini', 'ports', 'ps2', 'psp', 'psx', 'saturn',
+                 'scummvm', 'sega32x', 'segacd', 'sg-1000', 'snes', 'steam', 'ti99', 'trs-80', 'vectrex', 'vic20',
+                 'videopac', 'virtualboy', 'wii', 'wiiu', 'wonderswan', 'wonderswancolor', 'x68000', 'x1', 'zmachine',
+                 'zx81', 'zxspectrum']
+
+GUI_SCRAPING_MODULES = ['', 'arcadedb', 'igdb', 'mobygames', 'openretro', 'screenscraper', 'thegamesdb',
+                        'worldofspectrum']
+
+APP_ROOT = os.path.split(os.path.realpath(__file__))[0]
