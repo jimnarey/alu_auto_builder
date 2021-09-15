@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import math
 import os
-import shutil
 import stat
 import hashlib
-import sys
 import tempfile
 from optparse import OptionParser
+import logging
 
 import cmd_help
 import common_utils
@@ -15,18 +14,13 @@ import configs
 PLATFORM = common_utils.get_platform()
 
 
-def pre_flight():
+def pre_flight(input_dir):
     if PLATFORM not in ('linux', 'win32'):
-        print('This tool requires either Linux or Windows')
+        logging.error('This tool requires either Linux or Windows')
         return False
+    if not os.path.isdir(input_dir):
+        logging.error('{0} is not a directory'.format(input_dir))
     return True
-
-
-def execute(cmd):
-    print(cmd)
-    cmd_out = os.popen(cmd).read()
-    print(cmd_out)
-    return cmd_out
 
 
 def set_755(file_path):
@@ -49,8 +43,8 @@ def call_mksquashfs(input_dir, target_file, app_root):
         cmd = '"{0}" "{1}" "{2}" -b 262144 -root-owned -nopad'.format(exe, input_dir, target_file)
     else:
         cmd = 'mksquashfs "{0}" "{1}" -b 262144 -root-owned -nopad'.format(input_dir, target_file)
+    logging.info('Running command: {0}'.format(cmd))
     cmd_out = os.popen(cmd).read()
-    print(cmd_out)
 
 
 def get_sq_image_real_bytes_used(sq_img_file_size):
@@ -62,26 +56,23 @@ def get_sq_image_real_bytes_used(sq_img_file_size):
 
 def get_md5(cart_temp_file):
     md5_hash = hashlib.md5()
-    with open(cart_temp_file, 'rb') as input_file:
-        content = input_file.read()
-        md5_hash.update(content)
+    content = common_utils.get_file_content(cart_temp_file, 'rb')
+    md5_hash.update(content)
     return md5_hash.hexdigest()
 
 
 def create_hex_file(md5_hex_digest, file_path):
     binary_md5 = bytearray.fromhex(md5_hex_digest)
-    with open(file_path, 'wb') as hex_file:
-        hex_file.write(binary_md5)
+    common_utils.write_file(file_path, binary_md5, 'wb')
 
 
 def append_file_to_file(start_file, end_file):
-    with open(end_file, 'rb') as e_file:
-        append_to_file(start_file, e_file.read())
+    end_content = common_utils.get_file_content(end_file, 'rb')
+    append_to_file(start_file, end_content)
 
 
 def append_to_file(start_file, append_data):
-    with open(start_file, 'ab') as s_file:
-        s_file.write(append_data)
+    common_utils.write_file(start_file, append_data, 'ab')
 
 
 def make_ext4_part(cart_save_file, app_root):
@@ -92,22 +83,27 @@ def make_ext4_part(cart_save_file, app_root):
         bash_script_dir = os.path.join(app_root, 'bash_scripts')
         script = os.path.join(bash_script_dir, 'make_ext4_part.sh')
     cmd = '"{0}" "{1}"'.format(script, cart_save_file)
-    execute(cmd)
+    logging.info('Running command: {0}'.format(cmd))
+    cmd_out = os.popen(cmd).read()
 
 
-def run(input_dir, output_file):
-    if not pre_flight():
-        sys.exit(0)
+def main(input_dir, output_file):
+    logging.basicConfig(level=logging.INFO)
+    if not pre_flight(input_dir):
+        return
+    logging.info('Building new UCE')
     app_root = configs.APP_ROOT
-    work_dir = tempfile.TemporaryDirectory()
-    cart_tmp_file = os.path.join(work_dir.name, 'cart_tmp_file.img')
-    cart_save_file = os.path.join(work_dir.name, 'cart_save_file.img')
-    md5_file = os.path.join(work_dir.name, 'md5_file')
-    data_dir = os.path.join(work_dir.name, 'data')
-    save_dir = os.path.join(work_dir.name, 'data', 'save')
+    temp_dir_obj = tempfile.TemporaryDirectory()
+    temp_dir = temp_dir_obj.name
+    cart_tmp_file = os.path.join(temp_dir, 'cart_tmp_file.img')
+    cart_save_file = os.path.join(temp_dir, 'cart_save_file.img')
+    md5_file = os.path.join(temp_dir, 'md5_file')
+    data_dir = os.path.join(temp_dir, 'data')
+    save_dir = os.path.join(temp_dir, 'data', 'save')
     # TODO Can we avoid the need for re-linking boxart here?
-    shutil.copytree(input_dir, data_dir, symlinks=True)
-    common_utils.safe_make_dir(save_dir)
+    logging.info('Copying from input directory to temp directory')
+    common_utils.copytree(input_dir, data_dir, symlinks=True)
+    common_utils.make_dir(save_dir)
     set_755(os.path.join(data_dir, 'exec.sh'))
     relink_boxart(data_dir)
     call_mksquashfs(data_dir, cart_tmp_file, app_root)
@@ -126,7 +122,8 @@ def run(input_dir, output_file):
     create_hex_file(md5_string, md5_file)
     append_file_to_file(cart_tmp_file, md5_file)
     append_file_to_file(cart_tmp_file, cart_save_file)
-    shutil.copy(cart_tmp_file, output_file)
+    common_utils.copyfile(cart_tmp_file, output_file)
+    logging.info('Built: {0}\n\n\n'.format(output_file))
 
 
 def get_opts_parser():
@@ -148,5 +145,5 @@ if __name__ == "__main__":
     parser = get_opts_parser()
     (opts, args) = validate_opts(parser)
 
-    run(opts.input_dir, opts.output_file)
+    main(opts.input_dir, opts.output_file)
 

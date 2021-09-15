@@ -6,9 +6,6 @@ if (($# < 1)); then
   exit 1
 fi
 
-echo "Filepath passed to make_save_partition.sh:"
-echo "$1"
-
 cart_save_file="$1"
 
 truncate -s 4M "$cart_save_file"

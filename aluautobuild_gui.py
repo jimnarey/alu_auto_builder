@@ -74,7 +74,7 @@ class Window(QMainWindow):
     def _create_scraping_opts_layout(self):
         platform_row = self._create_combo_select('platform', 'Choose Platform:', configs.GUI_PLATFORMS)
         scrape_module_row = self._create_combo_select('scrape_module', 'Choose Scraping Module:',
-                                                      configs.GUI_SCRAPING_MODULES)
+                                                      configs.SCRAPING_MODULES)
         user_name_row = self._create_text_input('user_name', 'Username:')
         password_row = self._create_text_input('password', 'Password:')
         widget = self._create_vertical_layout_widget('scrape', platform_row, scrape_module_row, user_name_row,
@@ -248,11 +248,10 @@ class Controller:
 
     def _run(self):
         self._opts.user_creds = '{0}:{1}'.format(self._opts.user_name, self._opts.password)
-        aluautobuild.run(self._opts)
+        aluautobuild.main(self._opts)
 
 
 if __name__ == '__main__':
-    # app_root = os.path.split(os.path.realpath(__file__))[0]
     app_root = configs.APP_ROOT
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(app_root, 'common', 'title.png')))

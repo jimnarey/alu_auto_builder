@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import os
-import shutil
 import tempfile
 from optparse import OptionParser
+import logging
 
 import cmd_help
 import create_gamelist
@@ -31,15 +31,16 @@ import build_uces
 # Failing that uses a generic, custom save.zip
 
 
-def run(opts):
+def main(opts):
+    logging.basicConfig(level=logging.INFO)
     temp_dir_obj = tempfile.TemporaryDirectory()
     temp_dir = temp_dir_obj.name
     if opts.gamelist:
-        shutil.copy(opts.gamelist, os.path.join(temp_dir, 'gamelist.xml'))
+        common_utils.copyfile(opts.gamelist, os.path.join(temp_dir, 'gamelist.xml'))
     else:
-        create_gamelist.run(opts.platform, opts.input_dir, scrape_module=opts.scrape_module,
-                            user_creds=opts.user_creds, temp_dir=temp_dir)
-    build_uces.build_uces(opts.output_dir, opts.core_path, opts.bios_dir, temp_dir)
+        create_gamelist.main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module,
+                             user_creds=opts.user_creds, temp_dir=temp_dir)
+    build_uces.main(opts.output_dir, opts.core_path, opts.bios_dir, temp_dir)
 
 
 # TODO - Allow keeping of rom attributes, region, rom-code, none, etc
@@ -73,7 +74,7 @@ def validate_opts(parser):
 if __name__ == "__main__":
     parser = get_opts_parser()
     (options, args) = validate_opts(parser)
-    run(options)
+    main(options)
 
 # parser.add_option('-k', '--keepbrackets', dest='keep_brackets', help=cmd_help.KEEP_BRACKETS)
 # parser.add_option('-a', '--allroms', dest='all_roms', help=cmd_help.ALL_ROMS)
