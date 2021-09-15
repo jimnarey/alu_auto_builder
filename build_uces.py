@@ -4,10 +4,12 @@ import os
 import shutil
 import tempfile
 import xml.etree.ElementTree as ET
+from optparse import OptionParser
 
 import common_utils
 import configs
 import build_uce_tool
+import cmd_help
 
 
 def read_gamelist(gamelist_path):
@@ -52,7 +54,6 @@ def copy_dir_contents(source_dir, dest_dir):
 
 
 def copy_source_files(core_path, bios_dir, game_data, game_dir):
-    # app_root = os.path.split(os.path.realpath(__file__))[0]
     app_root = configs.APP_ROOT
     box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
     shutil.copyfile(core_path, os.path.join(game_dir, 'emu', os.path.basename(core_path)))
@@ -79,10 +80,11 @@ def build_uce(output_dir, game_dir):
     build_uce_tool.run(game_dir, target_path)
 
 
-def build_uces(output_dir, core_path, bios_dir, temp_dir, gamelist_path=None):
-    # if not temp_dir:
-    #     temp_dir_obj = tempfile.TemporaryDirectory()
-    #     temp_dir = temp_dir_obj.name
+# gamelist_path is only optional if a temp_dir containing a gamelist is passed in
+def build_uces(output_dir, core_path, bios_dir=None, temp_dir=None, gamelist_path=None):
+    if not temp_dir:
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        temp_dir = temp_dir_obj.name
     gamelist_path = gamelist_path if gamelist_path else os.path.join(temp_dir, 'gamelist.xml')
     gamelist = read_gamelist(gamelist_path)
     common_utils.safe_make_dir(output_dir)
@@ -92,5 +94,29 @@ def build_uces(output_dir, core_path, bios_dir, temp_dir, gamelist_path=None):
         setup_uce_source(core_path, bios_dir, game_data, game_dir)
         build_uce(output_dir, game_dir)
 
+
+def get_opts_parser():
+    parser = OptionParser()
+    parser.add_option('-g', '--gamelist', dest='gamelist', help=cmd_help.GAME_LIST, default=None)
+    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR,
+                      default=os.path.join(os.getcwd(), 'output'))
+    parser.add_option('-c', '--core', dest='core_path', help=cmd_help.CORE, default=None)
+    parser.add_option('-b', '--bios', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
+    return parser
+
+
+def validate_opts(parser):
+    (options, args) = parser.parse_args()
+    if options.gamelist is None:
+        parser.print_help()
+        exit(0)
+    return options, args
+
+
+if __name__ == "__main__":
+    parser = get_opts_parser()
+    (opts, args) = validate_opts(parser)
+
+    build_uces(opts.output_dir, opts.core_path, bios_dir=opts.bios_dir, gamelist_path=opts.gamelist)
 
 

@@ -6,7 +6,9 @@ import stat
 import hashlib
 import sys
 import tempfile
+from optparse import OptionParser
 
+import cmd_help
 import common_utils
 import configs
 
@@ -96,7 +98,6 @@ def make_ext4_part(cart_save_file, app_root):
 def run(input_dir, output_file):
     if not pre_flight():
         sys.exit(0)
-    # app_root = os.path.split(os.path.realpath(__file__))[0]
     app_root = configs.APP_ROOT
     work_dir = tempfile.TemporaryDirectory()
     cart_tmp_file = os.path.join(work_dir.name, 'cart_tmp_file.img')
@@ -126,4 +127,26 @@ def run(input_dir, output_file):
     append_file_to_file(cart_tmp_file, md5_file)
     append_file_to_file(cart_tmp_file, cart_save_file)
     shutil.copy(cart_tmp_file, output_file)
+
+
+def get_opts_parser():
+    parser = OptionParser()
+    parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
+    parser.add_option('-o', '--output', dest='output_file', help=cmd_help.OUTPUT_DIR, default=os.path.join(os.getcwd(), 'output.uce'))
+    return parser
+
+
+def validate_opts(parser):
+    (options, args) = parser.parse_args()
+    if options.input_dir is None:
+        parser.print_help()
+        exit(0)
+    return options, args
+
+
+if __name__ == "__main__":
+    parser = get_opts_parser()
+    (opts, args) = validate_opts(parser)
+
+    run(opts.input_dir, opts.output_file)
 

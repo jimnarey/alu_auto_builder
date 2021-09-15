@@ -15,8 +15,6 @@ import build_uces
 # TODO - Something if user-provided gamelist points nowhere
 
 # TODO - FEATURE
-# TODO - Command line interface for build_uces
-# TODO - Add marquees
 # TODO - Allow creation of gamelist without scraping (not very useful, implement without Skyscraper)
 # TODO - Add option to discontinue based on scrape results
 # TODO - Add option to allow user to specify default png
@@ -37,9 +35,9 @@ def run(opts):
     temp_dir_obj = tempfile.TemporaryDirectory()
     temp_dir = temp_dir_obj.name
     if opts.gamelist:
-        shutil.copy(opts.game_list, os.path.join(temp_dir, 'gamelist.xml'))
+        shutil.copy(opts.gamelist, os.path.join(temp_dir, 'gamelist.xml'))
     else:
-        create_gamelist.run(opts.platform, opts.input_dir, scrape_source=opts.scrape_source,
+        create_gamelist.run(opts.platform, opts.input_dir, scrape_module=opts.scrape_module,
                             user_creds=opts.user_creds, temp_dir=temp_dir)
     build_uces.build_uces(opts.output_dir, opts.core_path, opts.bios_dir, temp_dir)
 
@@ -48,13 +46,13 @@ def run(opts):
 def get_opts_parser():
     parser = OptionParser()
     parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM, default=None)
-    parser.add_option('-s', '--scraper', dest='scrape_source', help=cmd_help.SCRAPE_MODULE, default=None)
+    parser.add_option('-s', '--scraper', dest='scrape_module', help=cmd_help.SCRAPE_MODULE, default=None)
     parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS, default=None)
     parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
     parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR,
                       default=os.path.join(os.getcwd(), 'output'))
     parser.add_option('-c', '--core', dest='core_path', help=cmd_help.CORE, default=None)
-    parser.add_option('-b', '--other', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
+    parser.add_option('-b', '--bios', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
     parser.add_option('-g', '--gamelist', dest='gamelist', help=cmd_help.GAME_LIST, default=None)
     return parser
 

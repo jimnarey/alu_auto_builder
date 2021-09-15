@@ -30,4 +30,4 @@ BIOS_DIR = "Path to directory containing common files (e.g. bios files) to be in
 
 # Combined only
 
-GAME_LIST = "Specify existing gamelist.xml in EmulationStation format. This means Skyscraper will not be run and the following options are ignored: -p, -s, -u"
+GAME_LIST = "Specify existing gamelist.xml in EmulationStation format."
