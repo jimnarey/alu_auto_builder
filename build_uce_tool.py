@@ -19,7 +19,7 @@ def pre_flight(input_dir):
         logging.error('This tool requires either Linux or Windows')
         return False
     if not os.path.isdir(input_dir):
-        logging.error('{0} is not a directory'.format(input_dir))
+        logging.error('Input dir: {0} is not a directory'.format(input_dir))
     return True
 
 
@@ -134,11 +134,11 @@ def get_opts_parser():
 
 
 def validate_opts(parser):
-    (options, args) = parser.parse_args()
-    if options.input_dir is None:
+    (opts, args) = parser.parse_args()
+    if opts.input_dir is None:
         parser.print_help()
         exit(0)
-    return options, args
+    return opts, args
 
 
 if __name__ == "__main__":

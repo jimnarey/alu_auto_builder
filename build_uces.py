@@ -15,14 +15,14 @@ import cmd_help
 
 def validate_args(output_dir, core_path, bios_dir, gamelist_path):
     if not os.path.isdir(output_dir):
-        logging.error('{0} is not a valid directory'.format(output_dir))
+        logging.error('Output dir: {0} is not a valid directory'.format(output_dir))
         return False
     if bios_dir and not os.path.isdir(bios_dir):
-        logging.error('{0} is not a valid directory'.format(bios_dir))
+        logging.error('Bios dir: {0} is not a valid directory'.format(bios_dir))
         return False
     for file in core_path, gamelist_path:
         if not os.path.isfile(file):
-            logging.error('{0} is not a file'.format(file))
+            logging.error('Specified core: {0} is not a file'.format(file))
             return False
     return True
 
@@ -77,6 +77,7 @@ def copy_source_files(core_path, bios_dir, game_data, game_dir):
     box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
     common_utils.copyfile(core_path, os.path.join(game_dir, 'emu', os.path.basename(core_path)))
     common_utils.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
+    # TODO - Something with this
     try:
         common_utils.copyfile(game_data['boxart_path'], box_art_target_path)
     except (TypeError, FileNotFoundError):
@@ -122,7 +123,7 @@ def main(output_dir, core_path, bios_dir=None, temp_dir=None, gamelist_path=None
 
 def get_opts_parser():
     parser = OptionParser()
-    parser.add_option('-g', '--gamelist', dest='gamelist', help=cmd_help.GAME_LIST, default=None)
+    parser.add_option('-g', '--gamelist', dest='gamelist_path', help=cmd_help.GAME_LIST, default=None)
     parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR,
                       default=os.path.join(os.getcwd(), 'output'))
     parser.add_option('-c', '--core', dest='core_path', help=cmd_help.CORE, default=None)
@@ -131,17 +132,22 @@ def get_opts_parser():
 
 
 def validate_opts(parser):
-    (options, args) = parser.parse_args()
-    if options.gamelist is None:
+    (opts, args) = parser.parse_args()
+    valid = True
+    if opts.gamelist_path is None:
+        valid = False
+    if opts.core_path is None:
+        valid = False
+    if valid is False:
         parser.print_help()
         exit(0)
-    return options, args
+    return opts, args
 
 
 if __name__ == "__main__":
     parser = get_opts_parser()
     (opts, args) = validate_opts(parser)
 
-    main(opts.output_dir, opts.core_path, bios_dir=opts.bios_dir, gamelist_path=opts.gamelist)
+    main(opts.output_dir, opts.core_path, bios_dir=opts.bios_dir, gamelist_path=opts.gamelist_path)
 
 

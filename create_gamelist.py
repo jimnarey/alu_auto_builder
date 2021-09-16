@@ -11,11 +11,10 @@ import cmd_help
 
 
 def validate_args(platform, input_dir, scrape_module):
-    if not platform:
-        logging.error('You must specify a platform when scraping')
+    if platform not in configs.PLATFORMS:
+        logging.error('You must specify a valid platform when scraping')
         return False
     if not os.path.isdir(input_dir):
-        print(input_dir)
         logging.error('{0} is not a valid directory'.format(input_dir))
         return False
     if scrape_module not in configs.SCRAPING_MODULES:
@@ -69,14 +68,21 @@ def get_opts_parser():
     parser.add_option('-s', '--scraper', dest='scrape_module', help=cmd_help.SCRAPE_MODULE, default=None)
     parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS, default=None)
     parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
-    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.GAME_LIST_TARGET_DIR,
-                      default=os.getcwd())
+    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.GAME_LIST_TARGET_DIR, default=os.getcwd())
     return parser
+
+
+def validate_opts(parser):
+    (opts, args) = parser.parse_args()
+    if opts.platform is None:
+        parser.print_help()
+        exit(0)
+    return opts, args
 
 
 if __name__ == "__main__":
     parser = get_opts_parser()
-    (opts, args) = parser.parse_args()
+    (opts, args) = validate_opts(parser)
     main(opts.platform, opts.input_dir, opts.scrape_module, opts.user_creds,
          output_dir=opts.output_dir)
 

@@ -36,7 +36,7 @@ def copyfile(source, dest):
     try:
         shutil.copy(source, dest)
     except OSError as e:
-        logging.error('Error copying {0} to {1}: {2)'.format(source, dest, e))
+        logging.error('Error copying {0} to {1}: {2}'.format(source, dest, e))
 
 
 def copytree(source, dest, symlinks=False):

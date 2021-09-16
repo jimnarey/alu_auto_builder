@@ -8,6 +8,7 @@ import logging
 import cmd_help
 import create_gamelist
 import build_uces
+import common_utils
 
 
 # TODO - ESSENTIAL
@@ -35,8 +36,8 @@ def main(opts):
     logging.basicConfig(level=logging.INFO)
     temp_dir_obj = tempfile.TemporaryDirectory()
     temp_dir = temp_dir_obj.name
-    if opts.gamelist:
-        common_utils.copyfile(opts.gamelist, os.path.join(temp_dir, 'gamelist.xml'))
+    if opts.gamelist_path:
+        common_utils.copyfile(opts.gamelist_path, os.path.join(temp_dir, 'gamelist.xml'))
     else:
         create_gamelist.main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module,
                              user_creds=opts.user_creds, temp_dir=temp_dir)
@@ -54,27 +55,27 @@ def get_opts_parser():
                       default=os.path.join(os.getcwd(), 'output'))
     parser.add_option('-c', '--core', dest='core_path', help=cmd_help.CORE, default=None)
     parser.add_option('-b', '--bios', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
-    parser.add_option('-g', '--gamelist', dest='gamelist', help=cmd_help.GAME_LIST, default=None)
+    parser.add_option('-g', '--gamelist', dest='gamelist_path', help=cmd_help.GAME_LIST, default=None)
     return parser
 
 
 def validate_opts(parser):
-    (options, args) = parser.parse_args()
+    (opts, args) = parser.parse_args()
     valid = True
-    if options.core_path is None:
+    if opts.core_path is None:
         valid = False
-    if options.platform is None and options.game_list is None:
+    if opts.platform is None and opts.gamelist_path is None:
         valid = False
     if valid is False:
         parser.print_help()
         exit(0)
-    return options, args
+    return opts, args
 
 
 if __name__ == "__main__":
     parser = get_opts_parser()
-    (options, args) = validate_opts(parser)
-    main(options)
+    (opts, args) = validate_opts(parser)
+    main(opts)
 
 # parser.add_option('-k', '--keepbrackets', dest='keep_brackets', help=cmd_help.KEEP_BRACKETS)
 # parser.add_option('-a', '--allroms', dest='all_roms', help=cmd_help.ALL_ROMS)

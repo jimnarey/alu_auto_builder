@@ -3,11 +3,13 @@
 import os
 import sys
 import functools
+from pathlib import Path
+import logging
 
-from PyQt5.QtCore import QDir, QFile
+from PyQt5.QtCore import QDir
 from PyQt5.QtGui import QFontMetrics, QFont, QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFormLayout, QLineEdit, QHBoxLayout, QLabel, \
-    QPushButton, QDialog, QWidget, QFileDialog, QComboBox, QRadioButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, \
+    QPushButton, QWidget, QFileDialog, QComboBox, QRadioButton
 
 import configs
 import aluautobuild
@@ -24,7 +26,7 @@ class Window(QMainWindow):
         self.title_label_width_px = 250
         self.setWindowTitle('Auto UCE Builder')
         self.setStyleSheet("background-color: grey")
-        self.run_type = 'scrape'
+        # self.run_type = 'scrape'
         self.layout_widgets = {}
         self.fields = {}
         self.combos = {}
@@ -56,7 +58,7 @@ class Window(QMainWindow):
         self.main_layout.addWidget(widget)
 
     def _create_output_path_layout(self):
-        output_dir_row = self._create_fs_select('output_dir', 'Choose Output Dir', 'Optional')
+        output_dir_row = self._create_fs_select('output_dir', 'Choose Output Dir', '')
         widget = self._create_vertical_layout_widget('output_dir', output_dir_row)
         self.main_layout.addWidget(widget)
 
@@ -72,7 +74,7 @@ class Window(QMainWindow):
         self.main_layout.addWidget(widget)
 
     def _create_scraping_opts_layout(self):
-        platform_row = self._create_combo_select('platform', 'Choose Platform:', configs.GUI_PLATFORMS)
+        platform_row = self._create_combo_select('platform', 'Choose Platform:', configs.PLATFORMS)
         scrape_module_row = self._create_combo_select('scrape_module', 'Choose Scraping Module:',
                                                       configs.SCRAPING_MODULES)
         user_name_row = self._create_text_input('user_name', 'Username:')
@@ -179,16 +181,53 @@ class Window(QMainWindow):
 class RunOpts:
 
     def __init__(self):
-        self.gamelist = None
+        self.gamelist_path = None
         self.input_dir = None
         self.output_dir = None
         self.core_path = None
         self.bios_dir = None
         self.platform = None
-        self.scrape_source = None
+        self.scrape_module = None
         self.user_name = None
         self.password = None
         self.user_creds = None
+        self.run_type = 'scrape'
+
+    def _validate_gamelist_opts(self):
+        valid = True
+        if not self.gamelist_path:
+            logging.error('You must provide a gamelist.xml')
+            valid = False
+        if not self.output_dir:
+            logging.error('You must provide an output dir in gamelist.xml mode')
+            valid = False
+        return valid
+
+    def _validate_scrape_opts(self):
+        valid = True
+        if not self.platform:
+            logging.error('You must provide a platform')
+            valid = False
+        if not self.input_dir:
+            logging.error('You must provide an input directory (containing your roms)')
+            valid = False
+        return valid
+
+    def validate_opts(self):
+        valid = True
+        if not self.core_path:
+            logging.error('You must provide an emulator core file')
+            valid = False
+        if self.run_type == 'gamelist':
+            valid = self._validate_gamelist_opts()
+        elif self.run_type == 'scrape':
+            valid = self._validate_scrape_opts()
+        return valid
+
+    def set_derived_opts(self):
+        if not self.output_dir:
+            self.output_dir = os.path.join(self.input_dir, 'output')
+        self.user_creds = '{0}:{1}'.format(self.user_name, self.password)
 
 
 class Controller:
@@ -196,6 +235,7 @@ class Controller:
     def __init__(self, view, opts):
         self._view = view
         self._opts = opts
+        self.dialog_dir = str(Path.home())
         self._connect_signals()
 
     def _connect_signals(self):
@@ -218,27 +258,31 @@ class Controller:
         if button_name == 'scrape_op':
             for name in ('input_dir', 'output_dir', 'other_dir', 'scrape', 'main_buttons'):
                 self._view.layout_widgets[name].show()
-            self._view.run_type = 'scrape'
+                self._view.fields['output_dir'].setText('Optional')
+            self._opts.run_type = 'scrape'
         else:
             for name in ('output_dir', 'other_dir', 'gamelist', 'main_buttons'):
                 self._view.layout_widgets[name].show()
-            self._view.run_type = 'gamelist'
+                self._view.fields['output_dir'].setText('Required')
+            self._opts.run_type = 'gamelist'
 
     def _choose_dir(self, name):
-        dir_name = QFileDialog.getExistingDirectory(self._view, 'Select Directory', '.')
+        dir_name = QFileDialog.getExistingDirectory(self._view, 'Select Directory', self.dialog_dir)
         if dir_name:
             dir_name = QDir.toNativeSeparators(dir_name)
         if os.path.isdir(dir_name):
             self._view.fields[name].setText(self._view.get_elided_text(dir_name))
             setattr(self._opts, name, dir_name)
+            self.dialog_dir = dir_name
 
     def _choose_file(self, name):
-        file_name = QFileDialog.getOpenFileName(self._view, 'Select File', '.')[0]
+        file_name = QFileDialog.getOpenFileName(self._view, 'Select File', self.dialog_dir)[0]
         if file_name:
             file_name = QDir.toNativeSeparators(file_name)
         if os.path.isfile(file_name):
             self._view.fields[name].setText(self._view.get_elided_text(file_name))
             setattr(self._opts, name, file_name)
+            self.dialog_dir = os.path.split(file_name)[0]
 
     def _combo_select(self, name):
         setattr(self._opts, name, self._view.combos[name].currentText())
@@ -247,16 +291,22 @@ class Controller:
         setattr(self._opts, name, self._view.fields[name].text())
 
     def _run(self):
-        self._opts.user_creds = '{0}:{1}'.format(self._opts.user_name, self._opts.password)
-        aluautobuild.main(self._opts)
+        if self._opts.validate_opts():
+            self._opts.set_derived_opts()
+            aluautobuild.main(self._opts)
 
 
-if __name__ == '__main__':
+def main():
+    logging.basicConfig(level=logging.INFO)
     app_root = configs.APP_ROOT
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(app_root, 'common', 'title.png')))
     main_window = Window()
     run_opts = RunOpts()
-    controller = Controller(main_window, run_opts)
+    Controller(main_window, run_opts)
     main_window.show()
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()

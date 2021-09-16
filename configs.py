@@ -34,7 +34,7 @@ SCRAPE_FLAGS = ['onlymissing', 'nosubdirs', 'noscreenshots', 'nomarquees']
 
 GAME_LIST_FLAGS = ['nobrackets', 'skipped']
 
-GUI_PLATFORMS = ['', '3do', '3ds', 'amiga', 'amigacd32', 'amstradcpc', 'apple2', 'arcade', 'arcadia', 'astrocde',
+PLATFORMS = ['', '3do', '3ds', 'amiga', 'amigacd32', 'amstradcpc', 'apple2', 'arcade', 'arcadia', 'astrocde',
                  'atari800', 'atari2600', 'atari5200', 'atari7800', 'atarijaguar', 'atarilynx', 'atarist', 'c16', 'c64',
                  'c128', 'coco', 'coleco', 'daphne', 'dragon32', 'dreamcast', 'fba', 'fds', 'gameandwatch', 'gamegear',
                  'gb', 'gba', 'gbc', 'gc', 'genesis', 'intellivision', 'mame-advmame', 'mame-libretro', 'mame-mame4all',
