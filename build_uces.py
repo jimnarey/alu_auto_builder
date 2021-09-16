@@ -11,18 +11,19 @@ import common_utils
 import configs
 import build_uce_tool
 import cmd_help
+import errors
 
 
 def validate_args(output_dir, core_path, bios_dir, gamelist_path):
     if not os.path.isdir(output_dir):
-        logging.error('Output dir: {0} is not a valid directory'.format(output_dir))
+        logging.error(errors.invalid_path(output_dir, 'directory'))
         return False
     if bios_dir and not os.path.isdir(bios_dir):
-        logging.error('Bios dir: {0} is not a valid directory'.format(bios_dir))
+        logging.error(errors.invalid_path(bios_dir, 'directory'))
         return False
     for file in core_path, gamelist_path:
         if not os.path.isfile(file):
-            logging.error('Specified input file: {0} is not valid'.format(file))
+            logging.error(errors.invalid_path(file, 'file'))
             return False
     return True
 
@@ -136,8 +137,10 @@ def validate_opts(parser):
     (opts, args) = parser.parse_args()
     valid = True
     if opts.gamelist_path is None:
+        print(errors.NO_INPUT_GAMELIST)
         valid = False
     if opts.core_path is None:
+        print(errors.NO_CORE_FILE)
         valid = False
     if valid is False:
         parser.print_help()

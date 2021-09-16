@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLineEdit, Q
 
 import configs
 import aluautobuild
+import errors
 
 
 class Window(QMainWindow):
@@ -26,7 +27,6 @@ class Window(QMainWindow):
         self.title_label_width_px = 250
         self.setWindowTitle('Auto UCE Builder')
         self.setStyleSheet("background-color: grey")
-        # self.run_type = 'scrape'
         self.layout_widgets = {}
         self.fields = {}
         self.combos = {}
@@ -196,27 +196,27 @@ class RunOpts:
     def _validate_gamelist_opts(self):
         valid = True
         if not self.gamelist_path:
-            logging.error('You must provide a gamelist.xml')
+            logging.error(errors.NO_INPUT_GAMELIST)
             valid = False
         if not self.output_dir:
-            logging.error('You must provide an output dir in gamelist.xml mode')
+            logging.error(errors.GAMELIST_NO_OUTPUT_DIR)
             valid = False
         return valid
 
     def _validate_scrape_opts(self):
         valid = True
         if not self.platform:
-            logging.error('You must provide a platform')
+            logging.error(errors.SCRAPE_NO_PLATFORM)
             valid = False
         if not self.input_dir:
-            logging.error('You must provide an input directory (containing your roms)')
+            logging.error(errors.SCRAPE_NO_INPUT_DIR)
             valid = False
         return valid
 
     def validate_opts(self):
         valid = True
         if not self.core_path:
-            logging.error('You must provide an emulator core file')
+            logging.error(errors.NO_CORE_FILE)
             valid = False
         if self.run_type == 'gamelist':
             valid = self._validate_gamelist_opts()

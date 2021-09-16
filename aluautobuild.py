@@ -9,6 +9,7 @@ import cmd_help
 import create_gamelist
 import build_uces
 import common_utils
+import errors
 
 
 # TODO - ESSENTIAL
@@ -63,8 +64,10 @@ def validate_opts(parser):
     (opts, args) = parser.parse_args()
     valid = True
     if opts.core_path is None:
+        print(errors.NO_CORE_FILE)
         valid = False
     if opts.platform is None and opts.gamelist_path is None:
+        print(errors.NO_GAMELIST_OR_PLATFORM)
         valid = False
     if valid is False:
         parser.print_help()

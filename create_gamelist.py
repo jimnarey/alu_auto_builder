@@ -8,17 +8,18 @@ import logging
 import configs
 import common_utils
 import cmd_help
+import errors
 
 
 def validate_args(platform, input_dir, scrape_module):
     if platform not in configs.PLATFORMS:
-        logging.error('You must specify a valid platform when scraping')
+        logging.error(errors.SCRAPE_INVALID_PLATFORM)
         return False
     if not os.path.isdir(input_dir):
-        logging.error('{0} is not a valid directory'.format(input_dir))
+        logging.error(errors.invalid_path(input_dir, 'directory'))
         return False
     if scrape_module not in configs.SCRAPING_MODULES:
-        logging.error('{0} is not a valid scraping module - run "Skyscraper --help"'.format(scrape_module))
+        logging.error(errors.SCRAPE_INVALID_MODULE)
         return False
     return True
 
@@ -80,6 +81,7 @@ def get_opts_parser():
 def validate_opts(parser):
     (opts, args) = parser.parse_args()
     if opts.platform is None:
+        print(errors.SCRAPE_NO_PLATFORM)
         parser.print_help()
         exit(0)
     return opts, args

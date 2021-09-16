@@ -11,6 +11,7 @@ import logging
 import cmd_help
 import common_utils
 import configs
+import errors
 
 
 class UCEBuildPaths:
@@ -30,10 +31,10 @@ PLATFORM = common_utils.get_platform()
 
 def pre_flight(input_dir):
     if PLATFORM not in ('linux', 'win32'):
-        logging.error('This tool requires either Linux or Windows')
+        logging.error(errors.INVALID_OS)
         return False
     if not os.path.isdir(input_dir):
-        logging.error('Input dir: {0} is not a directory'.format(input_dir))
+        logging.error(errors.invalid_path(input_dir, 'directory'))
     return True
 
 
@@ -154,9 +155,6 @@ def get_opts_parser():
 
 def validate_opts(parser):
     (opts, args) = parser.parse_args()
-    if opts.input_dir is None:
-        parser.print_help()
-        exit(0)
     return opts, args
 
 
