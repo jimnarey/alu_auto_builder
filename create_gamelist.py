@@ -2,6 +2,7 @@
 
 import os
 import tempfile
+from subprocess import Popen, PIPE
 from optparse import OptionParser
 import logging
 
@@ -23,34 +24,38 @@ def validate_args(platform, input_dir, scrape_module):
     return True
 
 
-def scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_creds):
-    sky_args = ['-s', scrape_module]
-    # opts = '-s {0}'.format(scrape_module)
-    sky_args += ['-u', user_creds] if user_creds else sky_args
-    # opts = opts + ' -u {0}'.format(user_creds) if user_creds else opts
-    run_skyscraper(platform, input_dir, scrape_flags, config_path, sky_args)
-
-
-def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, temp_dir, output_dir):
-    output_dir = os.path.abspath(output_dir) if output_dir else temp_dir
-    sky_args = ['-a', '"{0}"'.format(art_xml_path),
-                '-g', '"{0}"'.format(output_dir),
-                '-o', '"{0}"'.format(os.path.join(output_dir, 'media'))]
-    # opts = '-a "{0}" -g "{1}" -o "{2}"'.format(art_xml_path, output_dir, os.path.join(output_dir, 'media'))
-    run_skyscraper(platform, input_dir, game_list_flags, config_path, sky_args)
+def execute_with_output(cmd):
+    with Popen(cmd, stdout=PIPE, bufsize=1,
+               universal_newlines=True) as p:
+        for line in p.stdout:
+            print(line, end='')
+        return_code = p.wait()
+    if return_code:
+        logging.error('Last command does not appear to have completed successfully')
 
 
 def run_skyscraper(platform, input_dir, flags, config_path, sky_args):
     cmd = ['Skyscraper',
            '-p', platform,
-           '-i', '"{0}"'.format(input_dir),
-           '-c', '"{0}"'.format(config_path)] + sky_args
-    # cmd = 'Skyscraper -p {0} -i "{1}" -c "{2}" {3}'.format(platform, input_dir, config_path, opts)
+           '-i', '{0}'.format(input_dir),
+           '-c', '{0}'.format(config_path)] + sky_args
     cmd += ['--flags', ','.join(flags)] if flags else cmd
-    # cmd = cmd + ' --flags {0}'.format(','.join(flags)) if flags else cmd
-    full_cmd = ' '.join(cmd)
-    logging.info('Running command: {0}'.format(full_cmd))
-    cmd_out = os.popen(full_cmd).read()
+    logging.info('Running command: {0}'.format(' '.join(cmd)))
+    execute_with_output(cmd)
+
+
+def scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_creds):
+    sky_args = ['-s', scrape_module]
+    sky_args += ['-u', user_creds] if user_creds else sky_args
+    run_skyscraper(platform, input_dir, scrape_flags, config_path, sky_args)
+
+
+def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, temp_dir, output_dir):
+    output_dir = os.path.abspath(output_dir) if output_dir else temp_dir
+    sky_args = ['-a', '{0}'.format(art_xml_path),
+                '-g', '{0}'.format(output_dir),
+                '-o', '{0}'.format(os.path.join(output_dir, 'media'))]
+    run_skyscraper(platform, input_dir, game_list_flags, config_path, sky_args)
 
 
 def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=None, game_list_flags=None,
