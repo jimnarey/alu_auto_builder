@@ -85,6 +85,7 @@ def make_squashfs_img(app_root, ub_paths):
     sq_img_file_size = os.path.getsize(ub_paths.cart_tmp_file)
     real_bytes_used = get_sq_image_real_bytes_used(sq_img_file_size)
     count = int(real_bytes_used) - int(sq_img_file_size)
+    logging.info('Appending {0} bytes to {1}'.format(count, ub_paths.cart_tmp_file))
     append_to_file(ub_paths.cart_tmp_file, bytearray(count))
 
 
@@ -92,7 +93,9 @@ def get_md5(cart_temp_file):
     md5_hash = hashlib.md5()
     content = common_utils.get_file_content(cart_temp_file, 'rb')
     md5_hash.update(content)
-    return md5_hash.hexdigest()
+    md5_hex_digest = md5_hash.hexdigest()
+    logging.info('md5 of {0} is {1}'.format(cart_temp_file, md5_hex_digest))
+    return md5_hex_digest
 
 
 def create_hex_file(md5_hex_digest, file_path):
