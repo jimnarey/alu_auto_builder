@@ -33,7 +33,7 @@ import common_utils
 
 
 def main(opts):
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     temp_dir_obj = tempfile.TemporaryDirectory()
     temp_dir = temp_dir_obj.name
     if opts.gamelist_path:

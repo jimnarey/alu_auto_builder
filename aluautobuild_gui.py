@@ -297,7 +297,7 @@ class Controller:
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     app_root = configs.APP_ROOT
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(app_root, 'common', 'title.png')))

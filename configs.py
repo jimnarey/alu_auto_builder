@@ -44,7 +44,8 @@ PLATFORMS = ['', '3do', '3ds', 'amiga', 'amigacd32', 'amstradcpc', 'apple2', 'ar
                  'videopac', 'virtualboy', 'wii', 'wiiu', 'wonderswan', 'wonderswancolor', 'x68000', 'x1', 'zmachine',
                  'zx81', 'zxspectrum']
 
+
 SCRAPING_MODULES = ['', 'arcadedb', 'igdb', 'mobygames', 'openretro', 'screenscraper', 'thegamesdb',
-                        'worldofspectrum']
+                    'worldofspectrum']
 
 APP_ROOT = os.path.split(os.path.realpath(__file__))[0]

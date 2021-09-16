@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import math
 import os
 import stat
@@ -10,6 +11,19 @@ import logging
 import cmd_help
 import common_utils
 import configs
+
+
+class UCEBuildPaths:
+
+    def __init__(self):
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        self.temp_dir = temp_dir_obj.name
+        self.cart_tmp_file = os.path.join(self.temp_dir, 'cart_tmp_file.img')
+        self.cart_save_file = os.path.join(self.temp_dir, 'cart_save_file.img')
+        self.md5_file = os.path.join(self.temp_dir, 'md5_file')
+        self.data_dir = os.path.join(self.temp_dir, 'data')
+        self.save_dir = os.path.join(self.temp_dir, 'data', 'save')
+
 
 PLATFORM = common_utils.get_platform()
 
@@ -36,15 +50,27 @@ def relink_boxart(data_dir):
     os.symlink('boxart/boxart.png', title_png)
 
 
+def prepare_source_files(input_dir, ub_paths):
+    common_utils.copytree(input_dir, ub_paths.data_dir, symlinks=True)
+    common_utils.make_dir(ub_paths.save_dir)
+    set_755(os.path.join(ub_paths.data_dir, 'exec.sh'))
+    relink_boxart(ub_paths.data_dir)
+
+
 def call_mksquashfs(input_dir, target_file, app_root):
+    mksquashfs_args = [
+        input_dir,
+        target_file,
+        '-b', '262144',
+        '-root-owned',
+        '-nopad'
+    ]
     if PLATFORM == 'win32':
-        exe_dir = os.path.join(app_root, 'windows')
-        exe = os.path.join(exe_dir, 'mksquashfs.exe')
-        cmd = '"{0}" "{1}" "{2}" -b 262144 -root-owned -nopad'.format(exe, input_dir, target_file)
+        cmd = [os.path.join(app_root, 'windows', 'mksquashfs.exe')]
     else:
-        cmd = 'mksquashfs "{0}" "{1}" -b 262144 -root-owned -nopad'.format(input_dir, target_file)
-    logging.info('Running command: {0}'.format(cmd))
-    cmd_out = os.popen(cmd).read()
+        cmd = ['mksquashfs']
+    cmd += mksquashfs_args
+    common_utils.execute_with_output(cmd)
 
 
 def get_sq_image_real_bytes_used(sq_img_file_size):
@@ -52,6 +78,14 @@ def get_sq_image_real_bytes_used(sq_img_file_size):
     if sq_img_file_size % 4096 != 0:
         real_bytes_used_divided_by_4K = real_bytes_used_divided_by_4K + 1
     return real_bytes_used_divided_by_4K * 4096
+
+
+def make_squashfs_img(app_root, ub_paths):
+    call_mksquashfs(ub_paths.data_dir, ub_paths.cart_tmp_file, app_root)
+    sq_img_file_size = os.path.getsize(ub_paths.cart_tmp_file)
+    real_bytes_used = get_sq_image_real_bytes_used(sq_img_file_size)
+    count = int(real_bytes_used) - int(sq_img_file_size)
+    append_to_file(ub_paths.cart_tmp_file, bytearray(count))
 
 
 def get_md5(cart_temp_file):
@@ -66,63 +100,45 @@ def create_hex_file(md5_hex_digest, file_path):
     common_utils.write_file(file_path, binary_md5, 'wb')
 
 
+def append_to_file(start_file, append_data):
+    common_utils.write_file(start_file, append_data, 'ab')
+
+
 def append_file_to_file(start_file, end_file):
     end_content = common_utils.get_file_content(end_file, 'rb')
     append_to_file(start_file, end_content)
 
 
-def append_to_file(start_file, append_data):
-    common_utils.write_file(start_file, append_data, 'ab')
+def append_md5_to_img(md5_source, md5_file, append_target):
+    md5_string = get_md5(md5_source)
+    create_hex_file(md5_string, md5_file)
+    append_file_to_file(append_target, md5_file)
 
 
 def make_ext4_part(cart_save_file, app_root):
     if PLATFORM == 'win32':
-        exe_dir = os.path.join(app_root, 'windows')
-        script = os.path.join(exe_dir, 'make_ext4_part.bat')
+        bin = os.path.join(app_root, 'windows', 'make_ext4_part.bat')
     else:
-        bash_script_dir = os.path.join(app_root, 'bash_scripts')
-        script = os.path.join(bash_script_dir, 'make_ext4_part.sh')
-    cmd = '"{0}" "{1}"'.format(script, cart_save_file)
-    logging.info('Running command: {0}'.format(cmd))
-    cmd_out = os.popen(cmd).read()
+        bin = os.path.join(app_root, 'bash_scripts', 'make_ext4_part.sh')
+    cmd = [bin, cart_save_file]
+    common_utils.execute_with_output(cmd)
 
 
 def main(input_dir, output_file):
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     if not pre_flight(input_dir):
         return
     logging.info('Building new UCE')
     app_root = configs.APP_ROOT
-    temp_dir_obj = tempfile.TemporaryDirectory()
-    temp_dir = temp_dir_obj.name
-    cart_tmp_file = os.path.join(temp_dir, 'cart_tmp_file.img')
-    cart_save_file = os.path.join(temp_dir, 'cart_save_file.img')
-    md5_file = os.path.join(temp_dir, 'md5_file')
-    data_dir = os.path.join(temp_dir, 'data')
-    save_dir = os.path.join(temp_dir, 'data', 'save')
-    # TODO Can we avoid the need for re-linking boxart here?
-    logging.info('Copying from input directory to temp directory')
-    common_utils.copytree(input_dir, data_dir, symlinks=True)
-    common_utils.make_dir(save_dir)
-    set_755(os.path.join(data_dir, 'exec.sh'))
-    relink_boxart(data_dir)
-    call_mksquashfs(data_dir, cart_tmp_file, app_root)
-    sq_img_file_size = os.path.getsize(cart_tmp_file)
-    real_bytes_used = get_sq_image_real_bytes_used(sq_img_file_size)
-    count = int(real_bytes_used) - int(sq_img_file_size)
-    append_to_file(cart_tmp_file, bytearray(count))
-    md5_string = get_md5(cart_tmp_file)
-    create_hex_file(md5_string, md5_file)
-    append_file_to_file(cart_tmp_file, md5_file)
-    append_to_file(cart_tmp_file, bytearray(32))
-    # TODO - Is this next line needed?
-    os.remove(md5_file)
-    make_ext4_part(cart_save_file, app_root)
-    md5_string = get_md5(cart_save_file)
-    create_hex_file(md5_string, md5_file)
-    append_file_to_file(cart_tmp_file, md5_file)
-    append_file_to_file(cart_tmp_file, cart_save_file)
-    common_utils.copyfile(cart_tmp_file, output_file)
+    ub_paths = UCEBuildPaths()
+    prepare_source_files(input_dir, ub_paths)
+    make_squashfs_img(app_root, ub_paths)
+    append_md5_to_img(ub_paths.cart_tmp_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
+    append_to_file(ub_paths.cart_tmp_file, bytearray(32))
+    make_ext4_part(ub_paths.cart_save_file, app_root)
+    append_md5_to_img(ub_paths.cart_save_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
+    append_file_to_file(ub_paths.cart_tmp_file, ub_paths.cart_save_file)
+    common_utils.copyfile(ub_paths.cart_tmp_file, output_file)
     logging.info('Built: {0}\n\n\n'.format(output_file))
 
 

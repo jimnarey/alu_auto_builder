@@ -2,7 +2,6 @@
 
 import os
 import tempfile
-from subprocess import Popen, PIPE
 from optparse import OptionParser
 import logging
 
@@ -24,16 +23,6 @@ def validate_args(platform, input_dir, scrape_module):
     return True
 
 
-def execute_with_output(cmd):
-    with Popen(cmd, stdout=PIPE, bufsize=1,
-               universal_newlines=True) as p:
-        for line in p.stdout:
-            print(line, end='')
-        return_code = p.wait()
-    if return_code:
-        logging.error('Last command does not appear to have completed successfully')
-
-
 def run_skyscraper(platform, input_dir, flags, config_path, sky_args):
     cmd = ['Skyscraper',
            '-p', platform,
@@ -41,7 +30,7 @@ def run_skyscraper(platform, input_dir, flags, config_path, sky_args):
            '-c', '{0}'.format(config_path)] + sky_args
     cmd += ['--flags', ','.join(flags)] if flags else cmd
     logging.info('Running command: {0}'.format(' '.join(cmd)))
-    execute_with_output(cmd)
+    common_utils.execute_with_output(cmd)
 
 
 def scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_creds):
@@ -60,7 +49,7 @@ def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_p
 
 def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=None, game_list_flags=None,
          temp_dir=None, output_dir=None):
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     logging.info('Starting gamelist builder\n\n\n')
     scrape_module = scrape_module if scrape_module else 'screenscraper'
     if not validate_args(platform, input_dir, scrape_module):

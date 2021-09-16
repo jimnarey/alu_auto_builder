@@ -52,6 +52,7 @@ def make_uce_sub_dirs(game_dir):
 
 
 def write_cart_xml(game_dir, game_name, game_desc):
+    logging.info('Creating cartridge.xml file for {0}'.format(game_name))
     cart_xml = ''.join(configs.CARTRIDGE_XML)\
         .replace('GAME_TITLE', game_name)\
         .replace('GAME_DESCRIPTION', game_desc if game_desc else '')
@@ -59,6 +60,7 @@ def write_cart_xml(game_dir, game_name, game_desc):
 
 
 def write_exec_sh(game_dir, core_file_name, game_file_name):
+    logging.info('Creating exec.sh for {0}'.format(game_file_name))
     exec_sh = ''.join(configs.EXEC_SH) \
         .replace('CORE_FILE_NAME', core_file_name) \
         .replace('GAME_FILE_NAME', game_file_name)
@@ -77,10 +79,9 @@ def copy_source_files(core_path, bios_dir, game_data, game_dir):
     box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
     common_utils.copyfile(core_path, os.path.join(game_dir, 'emu', os.path.basename(core_path)))
     common_utils.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
-    # TODO - Something with this
-    try:
+    if os.path.isfile(game_data['boxart_path']):
         common_utils.copyfile(game_data['boxart_path'], box_art_target_path)
-    except (TypeError, FileNotFoundError):
+    else:
         logging.info('No boxart file found, using default')
         common_utils.copyfile(os.path.join(app_root, 'common', 'title.png'), box_art_target_path)
     if bios_dir:
@@ -103,7 +104,7 @@ def build_uce(output_dir, game_dir):
 
 # gamelist_path is only optional if a temp_dir containing a gamelist is passed in
 def main(output_dir, core_path, bios_dir=None, temp_dir=None, gamelist_path=None):
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     logging.info('Starting a new batch build run\n\n\n')
     if not temp_dir:
         temp_dir_obj = tempfile.TemporaryDirectory()
