@@ -22,7 +22,7 @@ def validate_args(output_dir, core_path, bios_dir, gamelist_path):
         return False
     for file in core_path, gamelist_path:
         if not os.path.isfile(file):
-            logging.error('Specified core: {0} is not a file'.format(file))
+            logging.error('Specified input file: {0} is not valid'.format(file))
             return False
     return True
 

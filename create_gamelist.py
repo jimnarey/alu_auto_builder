@@ -24,22 +24,33 @@ def validate_args(platform, input_dir, scrape_module):
 
 
 def scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_creds):
-    opts = '-s {0}'.format(scrape_module)
-    opts = opts + ' -u {0}'.format(user_creds) if user_creds else opts
-    run_skyscraper(platform, input_dir, scrape_flags, config_path, opts)
+    sky_args = ['-s', scrape_module]
+    # opts = '-s {0}'.format(scrape_module)
+    sky_args += ['-u', user_creds] if user_creds else sky_args
+    # opts = opts + ' -u {0}'.format(user_creds) if user_creds else opts
+    run_skyscraper(platform, input_dir, scrape_flags, config_path, sky_args)
 
 
 def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, temp_dir, output_dir):
     output_dir = os.path.abspath(output_dir) if output_dir else temp_dir
-    opts = '-a "{0}" -g "{1}" -o "{2}"'.format(art_xml_path, output_dir, os.path.join(output_dir, 'media'))
-    run_skyscraper(platform, input_dir, game_list_flags, config_path, opts)
+    sky_args = ['-a', '"{0}"'.format(art_xml_path),
+                '-g', '"{0}"'.format(output_dir),
+                '-o', '"{0}"'.format(os.path.join(output_dir, 'media'))]
+    # opts = '-a "{0}" -g "{1}" -o "{2}"'.format(art_xml_path, output_dir, os.path.join(output_dir, 'media'))
+    run_skyscraper(platform, input_dir, game_list_flags, config_path, sky_args)
 
 
-def run_skyscraper(platform, input_dir, flags, config_path, opts):
-    cmd = 'Skyscraper -p {0} -i "{1}" -c "{2}" {3}'.format(platform, input_dir, config_path, opts)
-    cmd = cmd + ' --flags {0}'.format(','.join(flags)) if flags else cmd
-    logging.info('Running command: {0}'.format(cmd))
-    cmd_out = os.popen(cmd).read()
+def run_skyscraper(platform, input_dir, flags, config_path, sky_args):
+    cmd = ['Skyscraper',
+           '-p', platform,
+           '-i', '"{0}"'.format(input_dir),
+           '-c', '"{0}"'.format(config_path)] + sky_args
+    # cmd = 'Skyscraper -p {0} -i "{1}" -c "{2}" {3}'.format(platform, input_dir, config_path, opts)
+    cmd += ['--flags', ','.join(flags)] if flags else cmd
+    # cmd = cmd + ' --flags {0}'.format(','.join(flags)) if flags else cmd
+    full_cmd = ' '.join(cmd)
+    logging.info('Running command: {0}'.format(full_cmd))
+    cmd_out = os.popen(full_cmd).read()
 
 
 def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=None, game_list_flags=None,
