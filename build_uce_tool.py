@@ -133,7 +133,7 @@ def main(input_dir, output_file):
     if not pre_flight(input_dir):
         return
     logging.info('Building new UCE')
-    app_root = configs.APP_ROOT
+    app_root = common_utils.get_app_root()
     ub_paths = UCEBuildPaths()
     prepare_source_files(input_dir, ub_paths)
     make_squashfs_img(app_root, ub_paths)

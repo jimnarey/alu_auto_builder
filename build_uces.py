@@ -76,13 +76,13 @@ def copy_dir_contents(source_dir, dest_dir):
 
 
 def copy_source_files(core_path, bios_dir, game_data, game_dir):
-    app_root = configs.APP_ROOT
+    app_root = common_utils.get_app_root()
     box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
     common_utils.copyfile(core_path, os.path.join(game_dir, 'emu', os.path.basename(core_path)))
     common_utils.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
-    if os.path.isfile(game_data['boxart_path']):
+    try:
         common_utils.copyfile(game_data['boxart_path'], box_art_target_path)
-    else:
+    except TypeError:
         logging.info('No boxart file found, using default')
         common_utils.copyfile(os.path.join(app_root, 'common', 'title.png'), box_art_target_path)
     if bios_dir:

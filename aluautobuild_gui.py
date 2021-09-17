@@ -11,6 +11,7 @@ from PyQt5.QtGui import QFontMetrics, QFont, QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, \
     QPushButton, QWidget, QFileDialog, QComboBox, QRadioButton
 
+import common_utils
 import configs
 import aluautobuild
 import errors
@@ -298,7 +299,7 @@ class Controller:
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    app_root = configs.APP_ROOT
+    app_root = common_utils.get_app_root()
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(app_root, 'common', 'title.png')))
     main_window = Window()

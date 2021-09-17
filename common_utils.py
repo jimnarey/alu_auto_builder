@@ -71,3 +71,11 @@ def get_platform():
         return sys.platform
     return False
 
+
+def get_app_root():
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.split(os.path.realpath(__file__))[0]
+    
+
+# APP_ROOT = os.path.split(os.path.realpath(__file__))[0]

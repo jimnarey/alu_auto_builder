@@ -6,3 +6,5 @@ hextest.py
 hexbi*
 *.uce
 buildtemp/
+build/
+windows/skyscraper/
