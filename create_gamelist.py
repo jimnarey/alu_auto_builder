@@ -18,11 +18,13 @@ APP_ROOT = common_utils.get_app_root()
 
 def setup_windows_skyscraper(local_skyscraper_dir):
     home_dir = str(Path.home())
-    for dir_ in (os.path.join(home_dir, '.skyscraper'), os.path.join(home_dir, 'RetroPie')):
+    skyscraper_target = os.path.join(home_dir, '.skyscraper')
+    retro_pie_target = os.path.join(home_dir, 'RetroPie')
+    for dir_ in (skyscraper_target, retro_pie_target):
         if not os.path.isdir(dir_):
             logging.info('Attempting to copy required .skyscraper and RetroPie dirs to user home dir')
-            common_utils.copytree(os.path.join(local_skyscraper_dir, '.skyscraper'), home_dir)
-            common_utils.copytree(os.path.join(local_skyscraper_dir, 'RetroPie'), home_dir)
+            common_utils.copytree(os.path.join(local_skyscraper_dir, 'deploy', '.skyscraper'), skyscraper_target)
+            common_utils.copytree(os.path.join(local_skyscraper_dir, 'deploy', 'RetroPie'), retro_pie_target)
 
 
 def get_skyscraper_bin():

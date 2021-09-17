@@ -56,11 +56,27 @@ def copyfile(source, dest):
 
 
 def copytree(source, dest, symlinks=False):
-    logging.info('Copying whole directory {0} to new parent {1}'.format(source, dest))
+    logging.info('Copying whole directory {0} to {1}'.format(source, dest))
     try:
         shutil.copytree(source, dest, symlinks=symlinks)
     except OSError as e:
-        logging.error('Error copying whole directory {0} to new parent {1}: {2}'.format(source, dest, e))
+        logging.error('Error copying whole directory {0} to {1}: {2}'.format(source, dest, e))
+
+
+def create_symlink(target, symlink):
+    logging.info('Attempting to create symlink {0} to target {1}'.format(symlink, target))
+    try:
+        os.symlink(target, symlink)
+    except OSError:
+        logging.error('Failed to create symlink {0} to target {1}'.format(symlink, target))
+
+
+def delete_file(file_path):
+    logging.info('Attempting to delete {0}'.format(file_path))
+    try:
+        os.remove(file_path)
+    except OSError:
+        logging.error('Failed to delete {0}'.format(file_path))
 
 
 def get_platform():
@@ -76,6 +92,3 @@ def get_app_root():
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     return os.path.split(os.path.realpath(__file__))[0]
-    
-
-# APP_ROOT = os.path.split(os.path.realpath(__file__))[0]

@@ -87,7 +87,7 @@ def copy_source_files(core_path, bios_dir, game_data, game_dir):
         common_utils.copyfile(os.path.join(app_root, 'common', 'title.png'), box_art_target_path)
     if bios_dir:
         copy_dir_contents(bios_dir, os.path.join(game_dir, 'roms'))
-    os.symlink(box_art_target_path, os.path.join(game_dir, 'title.png'))
+    common_utils.create_symlink(box_art_target_path, os.path.join(game_dir, 'title.png'))
 
 
 def setup_uce_source(core_path, bios_dir, game_data, game_dir):

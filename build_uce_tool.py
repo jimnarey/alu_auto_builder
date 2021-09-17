@@ -47,8 +47,8 @@ def set_755(file_path):
 # Subsequently tested on Linux, same result.
 def relink_boxart(data_dir):
     title_png = os.path.join(data_dir, 'title.png')
-    os.remove(title_png)
-    os.symlink('boxart/boxart.png', title_png)
+    common_utils.delete_file(title_png)
+    common_utils.create_symlink('boxart/boxart.png', title_png)
 
 
 def prepare_source_files(input_dir, ub_paths):
