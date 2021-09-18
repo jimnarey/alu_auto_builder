@@ -12,27 +12,6 @@ import common_utils
 import errors
 
 
-# TODO - ESSENTIAL
-# TODO - Print some output
-# TODO - Something if user-provided gamelist points nowhere
-
-# TODO - FEATURE
-# TODO - Allow creation of gamelist without scraping (not very useful, implement without Skyscraper)
-# TODO - Add option to discontinue based on scrape results
-# TODO - Add option to allow user to specify default png
-# TODO - Handle (MAME) roms which need individual config file/metadata subfolder
-# TODO - Check images are png (check whether this is a requirement first)
-# TODO - Look in input dir for core
-# TODO - Error handling:
-# - Skyscraper fail
-# - Can't create dirs/write files
-# - Can't read gamelist.xml
-# TODO - Custom save concept:
-# User points to an overall 'save' dir
-# Contains custom saves with same names as games
-# Failing that uses a generic, custom save.zip
-
-
 def main(opts):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     temp_dir_obj = tempfile.TemporaryDirectory()
@@ -80,5 +59,3 @@ if __name__ == "__main__":
     (opts, args) = validate_opts(parser)
     main(opts)
 
-# parser.add_option('-k', '--keepbrackets', dest='keep_brackets', help=cmd_help.KEEP_BRACKETS)
-# parser.add_option('-a', '--allroms', dest='all_roms', help=cmd_help.ALL_ROMS)
