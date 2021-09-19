@@ -9,7 +9,7 @@ import logging
 from PyQt5.QtCore import QDir
 from PyQt5.QtGui import QFontMetrics, QFont, QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, \
-    QPushButton, QWidget, QFileDialog, QComboBox, QRadioButton
+    QPushButton, QWidget, QFileDialog, QComboBox
 
 import common_utils
 import configs
@@ -44,131 +44,77 @@ class Window(QMainWindow):
 
     def init_ui(self):
         self._create_operation_type_widget()
-        self._create_input_path_layout()
-        self._create_output_path_layout()
-        self._create_core_path_layout()
-        self._create_bios_path_layout()
-        self._create_gamelist_path_layout()
-        self._create_scraping_opts_layout()
+        for path_widget_params in (
+                ('input_dir', 'Choose Input Dir', 'Required'),
+                ('output_dir', 'Choose Output Dir', ''),
+                ('core_path', 'Choose Core', 'Required'),
+                ('bios_dir', 'Choose Bios Dir', 'Optional'),
+                ('gamelist_path', 'Choose gamelist.xml', 'Required')
+        ):
+
+            self._create_path_select_widget(path_widget_params[0], path_widget_params[1], path_widget_params[2])
+
+        for combo_widget_params in (
+                ('platform', 'Choose Platform:', configs.PLATFORMS),
+                ('scrape_module', 'Choose Scraping Module:', configs.SCRAPING_MODULES)
+        ):
+            self._create_combo_select_widget(combo_widget_params[0], combo_widget_params[1], combo_widget_params[2])
+
+        for text_widget_params in (
+                ('user_name', 'Username:'),
+                ('password', 'Password:')
+        ):
+            self._create_text_input_widget(text_widget_params[0], text_widget_params[1])
+
         self._create_main_buttons_widget()
-        for widget_name in ('input_dir', 'output_dir', 'bios_dir', 'core_path', 'gamelist', 'scrape', 'main_buttons'):
+        for widget_name in ('input_dir', 'output_dir', 'bios_dir', 'core_path', 'gamelist_path', 'platform', 'scrape_module', 'user_name', 'password',  'main_buttons'):
             self.layout_widgets[widget_name].hide()
 
-    def _create_input_path_layout(self):
-        input_dir_row = self._create_fs_select('input_dir', 'Choose Input Dir', 'Required')
-        widget = self._create_vertical_layout_widget('input_dir', input_dir_row)
-        self.main_layout.addWidget(widget)
-
-    def _create_output_path_layout(self):
-        output_dir_row = self._create_fs_select('output_dir', 'Choose Output Dir', '')
-        widget = self._create_vertical_layout_widget('output_dir', output_dir_row)
-        self.main_layout.addWidget(widget)
-
-    def _create_core_path_layout(self):
-        core_path_row = self._create_fs_select('core_path', 'Choose Core', 'Required')
-        widget = self._create_vertical_layout_widget('core_path', core_path_row)
-        self.main_layout.addWidget(widget)
-
-    def _create_bios_path_layout(self):
-        bios_dir_row = self._create_fs_select('bios_dir', 'Choose Bios Dir', 'Optional')
-        widget = self._create_vertical_layout_widget('bios_dir', bios_dir_row)
-        self.main_layout.addWidget(widget)
-
-    def _create_gamelist_path_layout(self):
-        gamelist_path_row = self._create_fs_select('gamelist_path', 'Choose gamelist.xml', 'Required')
-        widget = self._create_vertical_layout_widget('gamelist', gamelist_path_row)
-        self.main_layout.addWidget(widget)
-
-    def _create_scraping_opts_layout(self):
-        platform_row = self._create_combo_select('platform', 'Choose Platform:', configs.PLATFORMS)
-        scrape_module_row = self._create_combo_select('scrape_module', 'Choose Scraping Module:',
-                                                      configs.SCRAPING_MODULES)
-        user_name_row = self._create_text_input('user_name', 'Username:')
-        password_row = self._create_text_input('password', 'Password:')
-        widget = self._create_vertical_layout_widget('scrape', platform_row, scrape_module_row, user_name_row,
-                                                     password_row)
-        self.main_layout.addWidget(widget)
-
-    def _create_operation_type_widget(self):
+    def _create_user_input_widget(self, *args):
         layout = QHBoxLayout()
         widget = QWidget()
         widget.setLayout(layout)
+        for arg in args:
+            layout.addWidget(arg)
+        return widget
+
+    def _create_path_select_widget(self, name, button_text, init_text):
+        path_label = self._create_path_field(name, init_text)
+        button = self._create_button(name, button_text)
+        widget = self._create_user_input_widget(path_label, button)
+        self.layout_widgets[name] = widget
+        self.main_layout.addWidget(widget)
+
+    def _create_combo_select_widget(self, name, label_text, items):
+        title_label = self._create_title_label(label_text)
+        option_select = QComboBox()
+        option_select.addItems(items)
+        widget = self._create_user_input_widget(title_label, option_select)
+        self.layout_widgets[name] = widget
+        self.combos[name] = option_select
+        self.main_layout.addWidget(widget)
+
+    def _create_text_input_widget(self, name, label_text):
+        title_label = self._create_title_label(label_text)
+        text_input = QLineEdit()
+        widget = self._create_user_input_widget(title_label, text_input)
+        self.layout_widgets[name] = widget
+        self.fields[name] = text_input
+        self.main_layout.addWidget(widget)
+
+    def _create_operation_type_widget(self):
         scrape = self._create_button('scrape_op', 'Scrape')
         gamelist = self._create_button('gamelist_op', 'Gamelist.xml')
-        layout.addWidget(scrape)
-        layout.addWidget(gamelist)
-        widget.setLayout(layout)
+        widget = self._create_user_input_widget(scrape, gamelist)
         self.layout_widgets['op_type'] = widget
         self.main_layout.addWidget(widget)
 
     def _create_main_buttons_widget(self):
-        layout = QHBoxLayout()
-        widget = QWidget()
-        widget.setLayout(layout)
         run = self._create_button('run', 'Run')
         exit_ = self._create_button('exit', 'Exit')
-        layout.addWidget(run)
-        layout.addWidget(exit_)
-        widget.setLayout(layout)
+        widget = self._create_user_input_widget(run, exit_)
         self.layout_widgets['main_buttons'] = widget
         self.main_layout.addWidget(widget)
-
-    def _create_vertical_layout_widget(self, name, *args):
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        for arg in args:
-            layout.addLayout(arg)
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.layout_widgets[name] = widget
-        return widget
-
-    def _create_title_label(self, label_text):
-        title_label = QLabel()
-        title_label.setFont(self.font)
-        title_label.setFixedWidth(self.title_label_width_px)
-        title_label.setText(label_text)
-        return title_label
-
-    def _create_text_input(self, name, label_text):
-        layout = QHBoxLayout()
-        title_label = self._create_title_label(label_text)
-        text_input = QLineEdit()
-        layout.addWidget(title_label)
-        layout.addWidget(text_input)
-        self.fields[name] = text_input
-        return layout
-
-    def _create_combo_select(self, name, label_text, items):
-        layout = QHBoxLayout()
-        title_label = self._create_title_label(label_text)
-        option_select = QComboBox()
-        option_select.addItems(items)
-        layout.addWidget(title_label)
-        layout.addWidget(option_select)
-        self.combos[name] = option_select
-        return layout
-
-    def _create_fs_select(self, name, button_text, init_text):
-        layout = QHBoxLayout()
-        path_label = self._create_path_field(name, init_text)
-        button = self._create_button(name, button_text)
-        layout.addWidget(button)
-        layout.addWidget(path_label)
-        return layout
-
-    def _create_radio_button(self, name, text, checked=False):
-        radio = QRadioButton(text)
-        radio.setChecked(checked)
-        self.radios[name] = radio
-        return radio
-
-    def _create_button(self, name, text):
-        button = QPushButton(text)
-        button.setFont(self.font)
-        button.setFixedHeight(30)
-        self.buttons[name] = button
-        return button
 
     def _create_path_field(self, name, init_text):
         label = QLabel()
@@ -179,6 +125,20 @@ class Window(QMainWindow):
         label.setText(init_text)
         self.fields[name] = label
         return label
+
+    def _create_title_label(self, label_text):
+        title_label = QLabel()
+        title_label.setFont(self.font)
+        title_label.setFixedWidth(self.title_label_width_px)
+        title_label.setText(label_text)
+        return title_label
+
+    def _create_button(self, name, text):
+        button = QPushButton(text)
+        button.setFont(self.font)
+        button.setFixedHeight(30)
+        self.buttons[name] = button
+        return button
 
     def get_elided_text(self, text):
         return self.font_metrics.elidedText(text, 0, self.path_label_width_px - 10, 0)
@@ -262,12 +222,12 @@ class Controller:
     def _toggle_layout(self, button_name):
         self._view.layout_widgets['op_type'].hide()
         if button_name == 'scrape_op':
-            for name in ('input_dir', 'output_dir', 'bios_dir', 'core_path', 'scrape', 'main_buttons'):
+            for name in ('input_dir', 'output_dir', 'bios_dir', 'core_path', 'platform', 'scrape_module', 'user_name', 'password', 'main_buttons'):
                 self._view.layout_widgets[name].show()
                 self._view.fields['output_dir'].setText('Optional')
             self._opts.run_type = 'scrape'
         else:
-            for name in ('output_dir', 'bios_dir', 'core_path', 'gamelist', 'main_buttons'):
+            for name in ('output_dir', 'bios_dir', 'core_path', 'gamelist_path', 'main_buttons'):
                 self._view.layout_widgets[name].show()
                 self._view.fields['output_dir'].setText('Required')
             self._opts.run_type = 'gamelist'
