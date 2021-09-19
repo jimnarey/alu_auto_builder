@@ -363,7 +363,26 @@ until it is out of beta.
 Please raise an issue on GitHub if you get an unhandled exception or problems which it doesn't seem are down to user
 input.
 
-### To do
+## Building
+
+On either Linux or Windows 10 clone the repo.
+
+From within the cloned directory run:
+
+```
+pip install -r requirements.txt
+
+python setup.py build_exe
+
+python build_copy.py
+```
+
+The first command installs python dependencies which are then built, along with the source code, by the second command.
+
+The third command copies the right files for Windows/Linux into the newly created build directory. Look in the newly
+created 'build' directory for your build.
+
+## To do
 
 In short, loads: 
 - The GUI needs a some work
@@ -378,7 +397,7 @@ mount writable ext4 partitions, which is what the save images are.
 - The ability to build from pre-made 'recipe' directories, which people who've been building UCEs for a while probably
 have stored
 
-### Credits
+## Credits
 
 - The [ultimate_addon repo](https://github.com/FalkensMaze1983/ultimate_addon) which has the Windows tool for creating
   addon roms and a Linux script for doing the same. All of the logic used to build this tool was ported from this repo
@@ -386,7 +405,7 @@ have stored
 - dudemo from the Legends Ultimate Reddit for a huge amount of help in understanding the Legends Ultimate internals,
   UCEs and testing.
 
-### Licence
+## Licence
 
 Because this tool uses the GP3 licensed PyQT library it is also released under GPL3. If you breach this I may send
 squirrels after you but the people behind (Py)QT probably have lawyers. I don't know anyone else who uses squirrels.
