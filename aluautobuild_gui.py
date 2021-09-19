@@ -46,11 +46,12 @@ class Window(QMainWindow):
         self._create_operation_type_widget()
         self._create_input_path_layout()
         self._create_output_path_layout()
-        self._create_other_paths_layout()
-        self._create_gamelist_opts_layout()
+        self._create_core_path_layout()
+        self._create_bios_path_layout()
+        self._create_gamelist_path_layout()
         self._create_scraping_opts_layout()
         self._create_main_buttons_widget()
-        for widget_name in ('input_dir', 'output_dir', 'other_dir', 'gamelist', 'scrape', 'main_buttons'):
+        for widget_name in ('input_dir', 'output_dir', 'bios_dir', 'core_path', 'gamelist', 'scrape', 'main_buttons'):
             self.layout_widgets[widget_name].hide()
 
     def _create_input_path_layout(self):
@@ -63,13 +64,17 @@ class Window(QMainWindow):
         widget = self._create_vertical_layout_widget('output_dir', output_dir_row)
         self.main_layout.addWidget(widget)
 
-    def _create_other_paths_layout(self):
+    def _create_core_path_layout(self):
         core_path_row = self._create_fs_select('core_path', 'Choose Core', 'Required')
-        bios_dir_row = self._create_fs_select('bios_dir', 'Choose Bios Dir', 'Optional')
-        widget = self._create_vertical_layout_widget('other_dir', core_path_row, bios_dir_row)
+        widget = self._create_vertical_layout_widget('core_path', core_path_row)
         self.main_layout.addWidget(widget)
 
-    def _create_gamelist_opts_layout(self):
+    def _create_bios_path_layout(self):
+        bios_dir_row = self._create_fs_select('bios_dir', 'Choose Bios Dir', 'Optional')
+        widget = self._create_vertical_layout_widget('bios_dir', bios_dir_row)
+        self.main_layout.addWidget(widget)
+
+    def _create_gamelist_path_layout(self):
         gamelist_path_row = self._create_fs_select('gamelist_path', 'Choose gamelist.xml', 'Required')
         widget = self._create_vertical_layout_widget('gamelist', gamelist_path_row)
         self.main_layout.addWidget(widget)
@@ -257,12 +262,12 @@ class Controller:
     def _toggle_layout(self, button_name):
         self._view.layout_widgets['op_type'].hide()
         if button_name == 'scrape_op':
-            for name in ('input_dir', 'output_dir', 'other_dir', 'scrape', 'main_buttons'):
+            for name in ('input_dir', 'output_dir', 'bios_dir', 'core_path', 'scrape', 'main_buttons'):
                 self._view.layout_widgets[name].show()
                 self._view.fields['output_dir'].setText('Optional')
             self._opts.run_type = 'scrape'
         else:
-            for name in ('output_dir', 'other_dir', 'gamelist', 'main_buttons'):
+            for name in ('output_dir', 'bios_dir', 'core_path', 'gamelist', 'main_buttons'):
                 self._view.layout_widgets[name].show()
                 self._view.fields['output_dir'].setText('Required')
             self._opts.run_type = 'gamelist'
