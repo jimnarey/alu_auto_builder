@@ -25,6 +25,10 @@ def rebuild_uce(uce_path, squashfs_etc, img_path):
 
 def open_file_manager(path, opts):
     bin_ = common_utils.get_platform_bin('explorer.exe', opts.file_manager)
+    if common_utils.get_platform() == 'win32':
+        bin_ = 'explorer.exe'
+    else:
+        bin_ = opts.file_manager
     common_utils.execute_with_output([bin_, path])
 
 
@@ -33,6 +37,7 @@ def edit_contents(save_part_contents_path, opts):
         common_utils.copyfile(opts.retro_ini_path, os.path.join(save_part_contents_path, 'upper', 'retroplayer.ini'))
     else:
         open_file_manager(save_part_contents_path, opts)
+        print('After file manager')
         input('Press enter when ready')
 
 
