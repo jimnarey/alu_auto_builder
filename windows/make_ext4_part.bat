@@ -2,7 +2,7 @@
 
 if [%1] == [] GOTO Syntax
 
-echo %1
+@REM echo %1
 
 @REM truncate.exe -s 4M %1
 

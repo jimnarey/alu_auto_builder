@@ -2,7 +2,6 @@
 
 import math
 import os
-import stat
 import hashlib
 import tempfile
 from optparse import OptionParser
@@ -10,7 +9,6 @@ import logging
 
 import cmd_help
 import common_utils
-import configs
 import errors
 
 
@@ -38,10 +36,6 @@ def pre_flight(input_dir):
     return True
 
 
-def set_755(file_path):
-    os.chmod(file_path, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
-
-
 # This doesn't appear to be needed.
 # When not called as part of Windows development all worked anyway
 # Subsequently tested on Linux, same result.
@@ -54,7 +48,7 @@ def relink_boxart(data_dir):
 def prepare_source_files(input_dir, ub_paths):
     common_utils.copytree(input_dir, ub_paths.data_dir, symlinks=True)
     common_utils.make_dir(ub_paths.save_dir)
-    set_755(os.path.join(ub_paths.data_dir, 'exec.sh'))
+    common_utils.set_755(os.path.join(ub_paths.data_dir, 'exec.sh'))
     relink_boxart(ub_paths.data_dir)
 
 
@@ -119,6 +113,7 @@ def append_md5_to_img(md5_source, md5_file, append_target):
     append_file_to_file(append_target, md5_file)
 
 
+# TODO - Use common utils version
 def make_ext4_part(cart_save_file, app_root):
     if PLATFORM == 'win32':
         bin = os.path.join(app_root, 'windows', 'make_ext4_part.bat')
