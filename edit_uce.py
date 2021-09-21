@@ -24,7 +24,6 @@ def rebuild_uce(uce_path, squashfs_etc, img_path):
 
 
 def open_file_manager(path, opts):
-    bin_ = common_utils.get_platform_bin('explorer.exe', opts.file_manager)
     if common_utils.get_platform() == 'win32':
         bin_ = 'explorer.exe'
     else:
