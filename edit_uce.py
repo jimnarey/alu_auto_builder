@@ -147,6 +147,7 @@ def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path):
         img_path
     ]
     common_utils.execute_with_output(cmd)
+    os.chdir(common_utils.get_app_root())
 
 
 def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
@@ -164,12 +165,13 @@ def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
 
 def main(opts):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
+    uce_path = os.path.abspath(opts.uce_path)
     temp_dir = common_utils.create_temp_dir()
     if opts.do_backup:
-        backup_path = opts.uce_path + '.bak'
+        backup_path = uce_path + '.bak'
         common_utils.copyfile(opts.uce_path, backup_path)
     # Split the UCE and store the two parts in byte-strings
-    squashfs_etc, save_data = split_uce(opts.uce_path)
+    squashfs_etc, save_data = split_uce(uce_path)
     # Set paths
     img_path = os.path.join(temp_dir, 'save.img')
     save_part_contents_path = os.path.join(temp_dir, 'save_part_contents')
@@ -183,7 +185,7 @@ def main(opts):
     common_utils.delete_file(img_path)
     common_utils.make_ext4_part(img_path)
     copy_into_save_img(temp_dir, save_part_contents_path, img_path)
-    rebuild_uce(opts.uce_path, squashfs_etc, img_path)
+    rebuild_uce(uce_path, squashfs_etc, img_path)
     common_utils.remove_dir(temp_dir)
 
 
