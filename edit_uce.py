@@ -70,9 +70,24 @@ def unmount_image(save_part_contents_path):
 
 # The scripts this calls assume a fixed name for the dir to be extracted to
 # due to limitations in passing variables to parts of the debugfs command
+# def extract_img_contents(temp_dir):
+#     bin_ = common_utils.get_platform_bin('debugfs_extract.bat', 'debugfs_extract.sh', linux_script=True)
+#     common_utils.execute_with_output([bin_, temp_dir])
+
+
 def extract_img_contents(temp_dir):
-    bin_ = common_utils.get_platform_bin('debugfs_extract.bat', 'debugfs_extract.sh', linux_script=True)
-    common_utils.execute_with_output([bin_, temp_dir])
+    bin_ = common_utils.get_platform_bin('debugfs.exe', 'debugfs')
+    cmd_file_path = os.path.join(temp_dir, 'extract_cmd.txt')
+    common_utils.write_file(cmd_file_path, 'rdump / save_part_contents', 'w')
+    os.chdir(temp_dir)
+    cmd = [
+        bin_,
+        '-f',
+        cmd_file_path,
+        'save.img'
+    ]
+    common_utils.execute_with_output(cmd)
+    os.chdir(common_utils.get_app_root())
 
 
 def get_save_contents(save_part_contents_path):
@@ -98,22 +113,32 @@ def create_debugfs_cmd_file(temp_dir, save_part_contents_path, items, cmd):
     cmd_file_contents = []
     for item in items:
         item = item.replace(save_part_contents_path, '')
-        print(item)
         if cmd == 'mkdir':
             cmd_file_contents.append('{0} {1}'.format(cmd, item))
         elif cmd == 'write':
             cmd_file_contents.append('{0} {1} {2}'.format(cmd, item[1:], item))
-    cmd_file_path = os.path.join(temp_dir, '{0}.txt'.format(cmd))
+    cmd_file_path = os.path.join(temp_dir, '{0}_cmd.txt'.format(cmd))
     common_utils.write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
-    print(common_utils.get_file_content(cmd_file_path, 'r'))
     return cmd_file_path
 
 
+# def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path):
+#     bin_ = common_utils.get_platform_bin('debugfs_run_cmds.bat', 'debugfs_run_cmds.sh', linux_script=True)
+#     cmd = [
+#         bin_,
+#         save_part_contents_path,
+#         cmd_file,
+#         img_path
+#     ]
+#     common_utils.execute_with_output(cmd)
+
 def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path):
-    bin_ = common_utils.get_platform_bin('debugfs_run_cmds.bat', 'debugfs_run_cmds.sh', linux_script=True)
+    bin_ = common_utils.get_platform_bin('debugfs.exe', 'debugfs')
+    os.chdir(save_part_contents_path)
     cmd = [
         bin_,
-        save_part_contents_path,
+        '-w',
+        '-f',
         cmd_file,
         img_path
     ]
