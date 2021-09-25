@@ -7,21 +7,23 @@ import logging
 
 import cmd_help
 import create_gamelist
-import build_uces
+import build_recipes
 import common_utils
 import errors
 
 
 def main(opts):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    temp_dir_obj = tempfile.TemporaryDirectory()
-    temp_dir = temp_dir_obj.name
+    temp_dir = common_utils.create_temp_dir(__name__)
+    # temp_dir_obj = tempfile.TemporaryDirectory()
+    # temp_dir = temp_dir_obj.name
     if opts.gamelist_path:
         common_utils.copyfile(opts.gamelist_path, os.path.join(temp_dir, 'gamelist.xml'))
     else:
         create_gamelist.main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module,
                              user_creds=opts.user_creds, temp_dir=temp_dir)
-    build_uces.main(opts.output_dir, opts.core_path, opts.bios_dir, temp_dir)
+    build_recipes.main(opts.output_dir, opts.core_path, opts.bios_dir, temp_dir)
+    common_utils.cleanup_temp_dir(__name__)
 
 
 # TODO - Allow keeping of rom attributes, region, rom-code, none, etc

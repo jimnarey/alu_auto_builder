@@ -15,13 +15,17 @@ import errors
 class UCEBuildPaths:
 
     def __init__(self):
-        temp_dir_obj = tempfile.TemporaryDirectory()
-        self.temp_dir = temp_dir_obj.name
+        # temp_dir_obj = tempfile.TemporaryDirectory()
+        # self.temp_dir = temp_dir_obj.name
+        self.temp_dir = common_utils.create_temp_dir(__name__)
         self.cart_tmp_file = os.path.join(self.temp_dir, 'cart_tmp_file.img')
         self.cart_save_file = os.path.join(self.temp_dir, 'cart_save_file.img')
         self.md5_file = os.path.join(self.temp_dir, 'md5_file')
         self.data_dir = os.path.join(self.temp_dir, 'data')
         self.save_dir = os.path.join(self.temp_dir, 'data', 'save')
+
+    def cleanup(self):
+        common_utils.cleanup_temp_dir(__name__)
 
 
 PLATFORM = common_utils.get_platform()
@@ -139,6 +143,7 @@ def main(input_dir, output_file):
     append_file_to_file(ub_paths.cart_tmp_file, ub_paths.cart_save_file)
     common_utils.copyfile(ub_paths.cart_tmp_file, output_file)
     logging.info('Built: {0}\n\n\n'.format(output_file))
+    ub_paths.cleanup()
 
 
 def get_opts_parser():

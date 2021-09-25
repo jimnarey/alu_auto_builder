@@ -166,7 +166,7 @@ def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
 def main(opts):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     uce_path = os.path.abspath(opts.uce_path)
-    temp_dir = common_utils.create_temp_dir()
+    temp_dir = common_utils.create_temp_dir(__name__)
     if opts.do_backup:
         backup_path = uce_path + '.bak'
         common_utils.copyfile(opts.uce_path, backup_path)
@@ -186,7 +186,7 @@ def main(opts):
     common_utils.make_ext4_part(img_path)
     copy_into_save_img(temp_dir, save_part_contents_path, img_path)
     rebuild_uce(uce_path, squashfs_etc, img_path)
-    common_utils.remove_dir(temp_dir)
+    common_utils.cleanup_temp_dir(__name__)
 
 
 def get_opts_parser():

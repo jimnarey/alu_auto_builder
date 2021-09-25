@@ -83,8 +83,9 @@ def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=
     if not validate_args(platform, input_dir, scrape_module):
         return
     if not temp_dir:
-        temp_dir_obj = tempfile.TemporaryDirectory()
-        temp_dir = temp_dir_obj.name
+        temp_dir = common_utils.create_temp_dir(__name__)
+        # temp_dir_obj = tempfile.TemporaryDirectory()
+        # temp_dir = temp_dir_obj.name
     config_path = os.path.join(temp_dir, 'config.ini')
     art_xml_path = os.path.join(temp_dir, 'artwork.xml')
     scrape_flags = scrape_flags if scrape_flags else configs.SCRAPE_FLAGS
@@ -93,6 +94,7 @@ def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=
     common_utils.write_file(art_xml_path, ''.join(configs.ARTWORK), 'w')
     scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_creds, skyscraper_bin)
     create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, temp_dir, output_dir, skyscraper_bin)
+    common_utils.cleanup_temp_dir(__name__)
 
 
 def get_opts_parser():

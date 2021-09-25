@@ -9,6 +9,27 @@ import stat
 import errno
 from subprocess import Popen, PIPE
 
+active_temp_dirs = {}
+
+
+# TODO - Issue a critical if this doesn't happen
+def create_temp_dir(calling_module):
+    logging.info('Attempting to create temp dir')
+    try:
+        temp_dir = tempfile.mkdtemp()
+    except OSError as e:
+        logging.error('Failed to create temp dir: '.format(e))
+        return False
+    active_temp_dirs[calling_module] = temp_dir
+    return temp_dir
+
+
+# TODO - Issue a warning if this doesn't happen
+def cleanup_temp_dir(calling_module):
+    if calling_module in active_temp_dirs:
+        logging.info('Attempting to remove temp dir')
+        remove_dir(active_temp_dirs[calling_module])
+
 
 def execute_with_output(cmd):
     logging.info('Running command: {0}'.format(' '.join(cmd)))
@@ -50,16 +71,6 @@ def make_dir(path):
         logging.info('Directory {0} already exists'.format(path))
     except OSError as e:
         logging.error('Failed to create directory {0}: {1}'.format(path, e))
-
-
-def create_temp_dir():
-    logging.info('Attempting to create temp dir')
-    try:
-        temp_dir = tempfile.mkdtemp()
-    except OSError as e:
-        logging.error('Failed to create temp dir: '.format(e))
-        return False
-    return temp_dir
 
 
 def remove_dir(dir_path):

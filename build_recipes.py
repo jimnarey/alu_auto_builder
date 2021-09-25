@@ -108,8 +108,9 @@ def main(output_dir, core_path, bios_dir=None, temp_dir=None, gamelist_path=None
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     logging.info('Starting a new batch build run\n\n\n')
     if not temp_dir:
-        temp_dir_obj = tempfile.TemporaryDirectory()
-        temp_dir = temp_dir_obj.name
+        temp_dir = common_utils.create_temp_dir(__name__)
+        # temp_dir_obj = tempfile.TemporaryDirectory()
+        # temp_dir = temp_dir_obj.name
     gamelist_path = gamelist_path if gamelist_path else os.path.join(temp_dir, 'gamelist.xml')
     common_utils.make_dir(output_dir)
     if not validate_args(output_dir, core_path, bios_dir, gamelist_path):
@@ -121,6 +122,7 @@ def main(output_dir, core_path, bios_dir=None, temp_dir=None, gamelist_path=None
             game_dir = os.path.join(temp_dir, os.path.splitext(os.path.basename(game_data['rom_path']))[0])
             setup_uce_source(core_path, bios_dir, game_data, game_dir)
             build_uce(output_dir, game_dir)
+    common_utils.cleanup_temp_dir(__name__)
 
 
 def get_opts_parser():
