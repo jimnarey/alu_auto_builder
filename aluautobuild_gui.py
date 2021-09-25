@@ -5,35 +5,51 @@ import sys
 import functools
 from pathlib import Path
 import logging
+import pprint
 
 from PyQt5.QtCore import QDir
 from PyQt5.QtGui import QFontMetrics, QFont, QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, \
-    QPushButton, QWidget, QFileDialog, QComboBox, QRadioButton
+    QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QFormLayout, QDialogButtonBox
 
 import common_utils
-import configs
+# import configs
 import aluautobuild
 import errors
+import gui_opts
 
 
-class Window(QMainWindow):
+def get_opt_type(name):
+    name_parts = name.split('_')
+    try:
+        suffix = name_parts[1]
+        if suffix in ('dir', 'path'):
+            return suffix
+    except IndexError:
+        pass
+    return 'text'
 
-    def __init__(self, parent=None):
+
+def title_from_name(name):
+    return name.replace('_', ' ').title()
+
+
+class OptionSet:
+
+    def __init__(self):
+        pass
+
+
+class MainWindow(QMainWindow):
+
+    def __init__(self, operations, parent=None):
         super().__init__(parent)
-        self.font = QFont('Arial', 10)
-        self.font_metrics = QFontMetrics(self.font)
-        self.path_label_width_px = 300
-        self.path_label_height_px = 30
-        self.title_label_width_px = 250
         self.setWindowTitle('Auto UCE Builder')
-        self.setStyleSheet("background-color: grey")
-        self.layout_widgets = {}
-        self.fields = {}
-        self.combos = {}
-        self.buttons = {}
         self.main_layout = self._create_main_layout()
-        self.init_ui()
+        self.op_buttons = {}
+        self._create_operation_buttons(operations.keys())
+        self.exit_button = QPushButton('Exit')
+        self.main_layout.addWidget(self.exit_button)
 
     def _create_main_layout(self):
         main_layout = QVBoxLayout()
@@ -42,277 +58,141 @@ class Window(QMainWindow):
         self.setCentralWidget(layout_container)
         return main_layout
 
-    def init_ui(self):
-        self._create_operation_type_widget()
-        self._create_input_path_layout()
-        self._create_output_path_layout()
-        self._create_core_path_layout()
-        self._create_bios_path_layout()
-        self._create_gamelist_path_layout()
-        self._create_scraping_opts_layout()
-        self._create_main_buttons_widget()
-        for widget_name in ('input_dir', 'output_dir', 'bios_dir', 'core_path', 'gamelist', 'scrape', 'main_buttons'):
-            self.layout_widgets[widget_name].hide()
+    def _create_operation_buttons(self, op_names):
+        for op_name in op_names:
+            self._create_button(op_name)
 
-    def _create_input_path_layout(self):
-        input_dir_row = self._create_fs_select('input_dir', 'Choose Input Dir', 'Required')
-        widget = self._create_vertical_layout_widget('input_dir', input_dir_row)
-        self.main_layout.addWidget(widget)
+    def _create_button(self, op_name):
+        button = QPushButton(title_from_name(op_name))
+        self.op_buttons[op_name] = button
+        self.main_layout.addWidget(button)
 
-    def _create_output_path_layout(self):
-        output_dir_row = self._create_fs_select('output_dir', 'Choose Output Dir', '')
-        widget = self._create_vertical_layout_widget('output_dir', output_dir_row)
-        self.main_layout.addWidget(widget)
 
-    def _create_core_path_layout(self):
-        core_path_row = self._create_fs_select('core_path', 'Choose Core', 'Required')
-        widget = self._create_vertical_layout_widget('core_path', core_path_row)
-        self.main_layout.addWidget(widget)
+class OperationDialog(QDialog):
 
-    def _create_bios_path_layout(self):
-        bios_dir_row = self._create_fs_select('bios_dir', 'Choose Bios Dir', 'Optional')
-        widget = self._create_vertical_layout_widget('bios_dir', bios_dir_row)
-        self.main_layout.addWidget(widget)
+    def __init__(self, name, opts, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title_from_name(name))
+        self.dialog_layout = QVBoxLayout()
+        self.fields = {}
+        self.select_buttons = {}
+        for opt in opts:
+            self._create_select_widget(opt)
+        self.ok_button = QPushButton('OK')
+        self.close_button = QPushButton('Close')
+        self._create_user_input_widget(self.ok_button, self.close_button)
+        self.setLayout(self.dialog_layout)
 
-    def _create_gamelist_path_layout(self):
-        gamelist_path_row = self._create_fs_select('gamelist_path', 'Choose gamelist.xml', 'Required')
-        widget = self._create_vertical_layout_widget('gamelist', gamelist_path_row)
-        self.main_layout.addWidget(widget)
-
-    def _create_scraping_opts_layout(self):
-        platform_row = self._create_combo_select('platform', 'Choose Platform:', configs.PLATFORMS)
-        scrape_module_row = self._create_combo_select('scrape_module', 'Choose Scraping Module:',
-                                                      configs.SCRAPING_MODULES)
-        user_name_row = self._create_text_input('user_name', 'Username:')
-        password_row = self._create_text_input('password', 'Password:')
-        widget = self._create_vertical_layout_widget('scrape', platform_row, scrape_module_row, user_name_row,
-                                                     password_row)
-        self.main_layout.addWidget(widget)
-
-    def _create_operation_type_widget(self):
+    def _create_user_input_widget(self, *args):
         layout = QHBoxLayout()
         widget = QWidget()
         widget.setLayout(layout)
-        scrape = self._create_button('scrape_op', 'Scrape')
-        gamelist = self._create_button('gamelist_op', 'Gamelist.xml')
-        layout.addWidget(scrape)
-        layout.addWidget(gamelist)
-        widget.setLayout(layout)
-        self.layout_widgets['op_type'] = widget
-        self.main_layout.addWidget(widget)
-
-    def _create_main_buttons_widget(self):
-        layout = QHBoxLayout()
-        widget = QWidget()
-        widget.setLayout(layout)
-        run = self._create_button('run', 'Run')
-        exit_ = self._create_button('exit', 'Exit')
-        layout.addWidget(run)
-        layout.addWidget(exit_)
-        widget.setLayout(layout)
-        self.layout_widgets['main_buttons'] = widget
-        self.main_layout.addWidget(widget)
-
-    def _create_vertical_layout_widget(self, name, *args):
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
         for arg in args:
-            layout.addLayout(arg)
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.layout_widgets[name] = widget
-        return widget
+            layout.addWidget(arg)
+        self.dialog_layout.addWidget(widget)
 
     def _create_title_label(self, label_text):
         title_label = QLabel()
-        title_label.setFont(self.font)
-        title_label.setFixedWidth(self.title_label_width_px)
+        title_label.setFixedWidth(100)
         title_label.setText(label_text)
         return title_label
 
-    def _create_text_input(self, name, label_text):
-        layout = QHBoxLayout()
-        title_label = self._create_title_label(label_text)
-        text_input = QLineEdit()
-        layout.addWidget(title_label)
-        layout.addWidget(text_input)
-        self.fields[name] = text_input
-        return layout
-
-    def _create_combo_select(self, name, label_text, items):
-        layout = QHBoxLayout()
-        title_label = self._create_title_label(label_text)
-        option_select = QComboBox()
-        option_select.addItems(items)
-        layout.addWidget(title_label)
-        layout.addWidget(option_select)
-        self.combos[name] = option_select
-        return layout
-
-    def _create_fs_select(self, name, button_text, init_text):
-        layout = QHBoxLayout()
-        path_label = self._create_path_field(name, init_text)
-        button = self._create_button(name, button_text)
-        layout.addWidget(button)
-        layout.addWidget(path_label)
-        return layout
-
-    def _create_radio_button(self, name, text, checked=False):
-        radio = QRadioButton(text)
-        radio.setChecked(checked)
-        self.radios[name] = radio
-        return radio
-
-    def _create_button(self, name, text):
-        button = QPushButton(text)
-        button.setFont(self.font)
+    def _create_select_button(self, name):
+        button = QPushButton('Select')
         button.setFixedHeight(30)
-        self.buttons[name] = button
+        self.select_buttons[name] = button
         return button
 
-    def _create_path_field(self, name, init_text):
-        label = QLabel()
-        label.setFixedWidth(self.path_label_width_px)
-        label.setFixedHeight(self.path_label_height_px)
-        label.setFont(self.font)
-        label.setStyleSheet("border: 1px solid black;")
-        label.setText(init_text)
-        self.fields[name] = label
-        return label
-
-    def get_elided_text(self, text):
-        return self.font_metrics.elidedText(text, 0, self.path_label_width_px - 10, 0)
-
-
-class RunOpts:
-
-    def __init__(self):
-        self.gamelist_path = None
-        self.input_dir = None
-        self.output_dir = None
-        self.core_path = None
-        self.bios_dir = None
-        self.platform = None
-        self.scrape_module = None
-        self.user_name = None
-        self.password = None
-        self.user_creds = None
-        self.run_type = 'scrape'
-
-    def _validate_gamelist_opts(self):
-        valid = True
-        if not self.gamelist_path:
-            logging.error(errors.NO_INPUT_GAMELIST)
-            valid = False
-        if not self.output_dir:
-            logging.error(errors.GAMELIST_NO_OUTPUT_DIR)
-            valid = False
-        return valid
-
-    def _validate_scrape_opts(self):
-        valid = True
-        if not self.platform:
-            logging.error(errors.SCRAPE_NO_PLATFORM)
-            valid = False
-        if not self.input_dir:
-            logging.error(errors.SCRAPE_NO_INPUT_DIR)
-            valid = False
-        return valid
-
-    def validate_opts(self):
-        valid = True
-        if not self.core_path:
-            logging.error(errors.NO_CORE_FILE)
-            valid = False
-        if self.run_type == 'gamelist':
-            valid = self._validate_gamelist_opts()
-        elif self.run_type == 'scrape':
-            valid = self._validate_scrape_opts()
-        return valid
-
-    def set_derived_opts(self):
-        if not self.output_dir:
-            self.output_dir = os.path.join(self.input_dir, 'output')
-        self.user_creds = '{0}:{1}'.format(self.user_name, self.password)
+    def _create_select_widget(self, opts):
+        widgets = [self._create_title_label(title_from_name(opts['name']))]
+        field = QComboBox()
+        field.addItems(opts.get('selections', []))
+        field.setFixedWidth(200)
+        field.setEditable(True)
+        self.fields[opts['name']] = field
+        widgets.append(field)
+        if get_opt_type(opts['name']) in ('dir', 'path'):
+            widgets.append(self._create_select_button(opts['name']))
+        self._create_user_input_widget(*widgets)
 
 
 class Controller:
 
-    def __init__(self, view, opts):
-        self._view = view
-        self._opts = opts
+    def __init__(self, option_set, operations):
         self.dialog_dir = str(Path.home())
-        self._connect_signals()
+        self.option_set = option_set
+        self.current_view = None
+        self.operations = operations
 
-    def _connect_signals(self):
-        for name in ('gamelist_op', 'scrape_op'):
-            self._view.buttons[name].clicked.connect(functools.partial(self._toggle_layout, name))
-        for name in ('input_dir', 'output_dir', 'bios_dir'):
-            self._view.buttons[name].clicked.connect(functools.partial(self._choose_dir, name))
-        for name in ('core_path', 'gamelist_path'):
-            self._view.buttons[name].clicked.connect(functools.partial(self._choose_file, name))
-        for name in ('platform', 'scrape_module'):
-            self._view.combos[name].currentIndexChanged.connect(functools.partial(self._combo_select, name))
-        for name in ('user_name', 'password'):
-            self._view.fields[name].textChanged.connect(functools.partial(self._text_field_edit, name))
+    def _close_current_view(self):
+        if self.current_view:
+            self.current_view.close()
 
-        self._view.buttons['run'].clicked.connect(self._run)
-        self._view.buttons['exit'].clicked.connect(sys.exit)
+    def _show_view(self, view):
+        self.current_view = view
+        view.show()
 
-    def _toggle_layout(self, button_name):
-        self._view.layout_widgets['op_type'].hide()
-        if button_name == 'scrape_op':
-            for name in ('input_dir', 'output_dir', 'bios_dir', 'core_path', 'scrape', 'main_buttons'):
-                self._view.layout_widgets[name].show()
-                self._view.fields['output_dir'].setText('Optional')
-            self._opts.run_type = 'scrape'
-        else:
-            for name in ('output_dir', 'bios_dir', 'core_path', 'gamelist', 'main_buttons'):
-                self._view.layout_widgets[name].show()
-                self._view.fields['output_dir'].setText('Required')
-            self._opts.run_type = 'gamelist'
+    def _connect_dialog_signals(self, view):
+        for name, button in view.select_buttons.items():
+            if get_opt_type(name) == 'dir':
+                button.clicked.connect(functools.partial(self._choose_dir, view, name))
+            elif get_opt_type(name) == 'path':
+                button.clicked.connect(functools.partial(self._choose_file, view, name))
+        view.ok_button.clicked.connect(self._run)
+        view.close_button.clicked.connect(self.show_main_window)
 
-    def _choose_dir(self, name):
-        dir_name = QFileDialog.getExistingDirectory(self._view, 'Select Directory', self.dialog_dir)
+    def _show_dialog(self, name):
+        self._close_current_view()
+        view = OperationDialog(name, gui_opts.operations[name])
+        self._connect_dialog_signals(view)
+        self._show_view(view)
+
+    def show_main_window(self):
+        self._close_current_view()
+        view = MainWindow(self.operations)
+        for name, button in view.op_buttons.items():
+            button.clicked.connect(functools.partial(self._show_dialog, name))
+        view.exit_button.clicked.connect(sys.exit)
+        self._show_view(view)
+
+
+    # TODO - choose dir in combo box if valid
+    def _choose_dir(self, view, name):
+        dir_name = QFileDialog.getExistingDirectory(view, 'Select Directory', self.dialog_dir)
         if dir_name:
             dir_name = QDir.toNativeSeparators(dir_name)
         if os.path.isdir(dir_name):
-            self._view.fields[name].setText(self._view.get_elided_text(dir_name))
-            setattr(self._opts, name, dir_name)
+            view.fields[name].setCurrentText(dir_name)
             self.dialog_dir = dir_name
 
-    def _choose_file(self, name):
-        file_name = QFileDialog.getOpenFileName(self._view, 'Select File', self.dialog_dir)[0]
+    def _choose_file(self, view, name):
+        file_name = QFileDialog.getOpenFileName(view, 'Select File', self.dialog_dir)[0]
         if file_name:
             file_name = QDir.toNativeSeparators(file_name)
         if os.path.isfile(file_name):
-            self._view.fields[name].setText(self._view.get_elided_text(file_name))
-            setattr(self._opts, name, file_name)
+            view.fields[name].setCurrentText(file_name)
             self.dialog_dir = os.path.split(file_name)[0]
 
-    def _combo_select(self, name):
-        setattr(self._opts, name, self._view.combos[name].currentText())
-
-    def _text_field_edit(self, name):
-        setattr(self._opts, name, self._view.fields[name].text())
-
     def _run(self):
-        if self._opts.validate_opts():
-            self._opts.set_derived_opts()
-            aluautobuild.main(self._opts)
+        pass
 
-
-def main():
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    app_root = common_utils.get_app_root()
-    app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(os.path.join(app_root, 'common', 'title.png')))
-    main_window = Window()
-    run_opts = RunOpts()
-    Controller(main_window, run_opts)
-    main_window.show()
-    sys.exit(app.exec_())
+    # def _combo_select(self, name):
+    #     setattr(self._opts, name, self._view.combos[name].currentText())
+    #
+    # def _text_field_edit(self, name):
+    #     setattr(self._opts, name, self._view.fields[name].text())
+    #
+    # def _run(self):
+    #     if self._opts.validate_opts():
+    #         self._opts.set_derived_opts()
+    #         aluautobuild.main(self._opts)
 
 
 if __name__ == '__main__':
-    main()
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
+    app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'common', 'title.png')))
+    option_set = OptionSet()
+    controller = Controller(option_set, gui_opts.operations)
+    controller.show_main_window()
+    sys.exit(app.exec_())
