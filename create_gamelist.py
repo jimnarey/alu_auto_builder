@@ -17,6 +17,8 @@ APP_ROOT = common_utils.get_app_root()
 
 
 def validate_args(platform, input_dir, scrape_module):
+    if not platform:
+        logging.error(errors.SCRAPE_NO_PLATFORM)
     if platform not in configs.PLATFORMS:
         logging.error(errors.SCRAPE_INVALID_PLATFORM)
         return False
@@ -66,9 +68,9 @@ def scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_c
     run_skyscraper(platform, input_dir, scrape_flags, config_path, sky_args, skyscraper_bin)
 
 
-def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, temp_dir, output_dir, skyscraper_bin):
+def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, output_dir, skyscraper_bin):
     # TODO - move this to main and re-do signatures
-    output_dir = os.path.abspath(output_dir) if output_dir else temp_dir
+    # output_dir = os.path.abspath(output_dir) if output_dir else temp_dir
     sky_args = ['-a', '{0}'.format(art_xml_path),
                 '-g', '{0}'.format(output_dir),
                 '-o', '{0}'.format(os.path.join(output_dir, 'media'))]
@@ -76,15 +78,15 @@ def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_p
 
 
 def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=None, game_list_flags=None,
-         temp_dir=None, output_dir=None):
+         output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     logging.info('Starting gamelist builder\n\n\n')
     skyscraper_bin = get_skyscraper_bin()
     scrape_module = scrape_module if scrape_module else 'screenscraper'
+    output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(input_dir, 'gamelist')
     if not validate_args(platform, input_dir, scrape_module):
         return
-    if not temp_dir:
-        temp_dir = common_utils.create_temp_dir(__name__)
+    temp_dir = common_utils.create_temp_dir(__name__)
     config_path = os.path.join(temp_dir, 'config.ini')
     art_xml_path = os.path.join(temp_dir, 'artwork.xml')
     scrape_flags = scrape_flags if scrape_flags else configs.SCRAPE_FLAGS
@@ -92,7 +94,7 @@ def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=
     common_utils.write_file(config_path, ''.join(configs.CONFIG), 'w')
     common_utils.write_file(art_xml_path, ''.join(configs.ARTWORK), 'w')
     scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_creds, skyscraper_bin)
-    create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, temp_dir, output_dir, skyscraper_bin)
+    create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, output_dir, skyscraper_bin)
     common_utils.cleanup_temp_dir(__name__)
 
 
@@ -102,23 +104,23 @@ def get_opts_parser():
     parser.add_option('-s', '--scraper', dest='scrape_module', help=cmd_help.SCRAPE_MODULE, default=None)
     parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS, default=None)
     parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
-    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.GAME_LIST_TARGET_DIR, default=os.getcwd())
+    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.GAME_LIST_TARGET_DIR, default=None)
     return parser
 
 
-def validate_opts(parser):
-    (opts, args) = parser.parse_args()
-    if opts.platform is None:
-        print(errors.SCRAPE_NO_PLATFORM)
-        parser.print_help()
-        exit(0)
-    return opts, args
+# def validate_opts(parser):
+#     (opts, args) = parser.parse_args()
+#     if opts.platform is None:
+#         print(errors.SCRAPE_NO_PLATFORM)
+#         parser.print_help()
+#         exit(0)
+#     return opts, args
 
 
 if __name__ == "__main__":
     parser = get_opts_parser()
-    (opts, args) = validate_opts(parser)
-    main(opts.platform, opts.input_dir, opts.scrape_module, opts.user_creds,
+    (opts, args) = parser.parse_args()
+    main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module, user_creds=opts.user_creds,
          output_dir=opts.output_dir)
 
 # TODO - Allow user manipulation of scraping/gamelist flags

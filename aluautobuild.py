@@ -20,7 +20,7 @@ def main(opts):
         common_utils.copyfile(opts.gamelist_path, temp_gamelist_path)
     else:
         create_gamelist.main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module,
-                             user_creds=opts.user_creds, temp_dir=temp_dir)
+                             user_creds=opts.user_creds, output_dir=temp_dir)
     build_recipes.main(temp_gamelist_path, opts.core_path, bios_dir=opts.bios_dir, output_dir=temp_dir)
     common_utils.cleanup_temp_dir(__name__)
 
