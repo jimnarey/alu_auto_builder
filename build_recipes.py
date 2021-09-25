@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-import tempfile
+# import tempfile
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import ParseError
 from optparse import OptionParser
@@ -9,22 +9,21 @@ import logging
 
 import common_utils
 import configs
-import build_uce_tool
+# import build_uce_tool
 import cmd_help
 import errors
 
 
-def validate_args(output_dir, core_path, bios_dir, gamelist_path):
-    if not os.path.isdir(output_dir):
-        logging.error(errors.invalid_path(output_dir, 'directory'))
+def validate_args(gamelist_path, core_path, bios_dir, output_dir):
+    if not gamelist_path or not core_path:
+        logging.error('You must specify at least a path to a gamelist.xml and a path to a core')
         return False
-    if bios_dir and not os.path.isdir(bios_dir):
-        logging.error(errors.invalid_path(bios_dir, 'directory'))
-        return False
-    for file in core_path, gamelist_path:
-        if not os.path.isfile(file):
-            logging.error(errors.invalid_path(file, 'file'))
-            return False
+    for dir_path in (bios_dir, output_dir):
+        print(os.path.abspath(dir_path))
+        if dir_path:
+            if not os.path.isdir(dir_path):
+                logging.error(errors.invalid_path(dir_path, 'dir'))
+                return False
     return True
 
 
@@ -98,62 +97,58 @@ def setup_uce_source(core_path, bios_dir, game_data, game_dir):
     copy_source_files(core_path, bios_dir, game_data, game_dir)
 
 
-def build_uce(output_dir, game_dir):
-    target_path = os.path.join(output_dir, '{0}{1}'.format(os.path.basename(game_dir), '.UCE'))
-    build_uce_tool.main(game_dir, target_path)
+# def build_uce(output_dir, game_dir):
+#     target_path = os.path.join(output_dir, '{0}{1}'.format(os.path.basename(game_dir), '.UCE'))
+#     build_uce_tool.main(game_dir, target_path)
 
 
 # gamelist_path is only optional if a temp_dir containing a gamelist is passed in
-def main(output_dir, core_path, bios_dir=None, temp_dir=None, gamelist_path=None):
+def main(gamelist_path, core_path, bios_dir=None, output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    logging.info('Starting a new batch build run\n\n\n')
-    if not temp_dir:
-        temp_dir = common_utils.create_temp_dir(__name__)
-        # temp_dir_obj = tempfile.TemporaryDirectory()
-        # temp_dir = temp_dir_obj.name
-    gamelist_path = gamelist_path if gamelist_path else os.path.join(temp_dir, 'gamelist.xml')
+    output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(gamelist_path))[0], 'recipes')
     common_utils.make_dir(output_dir)
-    if not validate_args(output_dir, core_path, bios_dir, gamelist_path):
+    if not validate_args(gamelist_path, core_path, bios_dir, output_dir):
         return
+    logging.info('Starting new recipes build run\n\n\n')
+    common_utils.make_dir(output_dir)
     gamelist = read_gamelist(gamelist_path)
     if gamelist:
         for game_entry in gamelist:
             game_data = parse_game_entry(game_entry)
-            game_dir = os.path.join(temp_dir, os.path.splitext(os.path.basename(game_data['rom_path']))[0])
+            game_dir = os.path.join(output_dir, os.path.splitext(os.path.basename(game_data['rom_path']))[0])
             setup_uce_source(core_path, bios_dir, game_data, game_dir)
-            build_uce(output_dir, game_dir)
-    common_utils.cleanup_temp_dir(__name__)
+
 
 
 def get_opts_parser():
     parser = OptionParser()
     parser.add_option('-g', '--gamelist', dest='gamelist_path', help=cmd_help.GAME_LIST, default=None)
-    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR,
-                      default=os.path.join(os.getcwd(), 'output'))
+    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR, default=None)
     parser.add_option('-c', '--core', dest='core_path', help=cmd_help.CORE, default=None)
     parser.add_option('-b', '--bios', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
     return parser
 
-
-def validate_opts(parser):
-    (opts, args) = parser.parse_args()
-    valid = True
-    if opts.gamelist_path is None:
-        print(errors.NO_INPUT_GAMELIST)
-        valid = False
-    if opts.core_path is None:
-        print(errors.NO_CORE_FILE)
-        valid = False
-    if valid is False:
-        parser.print_help()
-        exit(0)
-    return opts, args
+# Check required options have been passed on the command line
+# validate_args checks they make sense
+# def validate_opts(parser):
+#     (opts, args) = parser.parse_args()
+#     valid = True
+#     if opts.gamelist_path is None:
+#         print(errors.NO_INPUT_GAMELIST)
+#         valid = False
+#     if opts.core_path is None:
+#         print(errors.NO_CORE_FILE)
+#         valid = False
+#     if valid is False:
+#         parser.print_help()
+#         exit(0)
+#     return opts, args
 
 
 if __name__ == "__main__":
     parser = get_opts_parser()
-    (opts, args) = validate_opts(parser)
+    (opts, args) = parser.parse_args()
 
-    main(opts.output_dir, opts.core_path, bios_dir=opts.bios_dir, gamelist_path=opts.gamelist_path)
+    main(opts.gamelist_path, opts.core_path, opts.bios_dir, opts.output_dir)
 
 

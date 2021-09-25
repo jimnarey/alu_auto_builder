@@ -15,16 +15,16 @@ import errors
 def main(opts):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     temp_dir = common_utils.create_temp_dir(__name__)
-    # temp_dir_obj = tempfile.TemporaryDirectory()
-    # temp_dir = temp_dir_obj.name
+    temp_gamelist_path = os.path.join(temp_dir, 'gamelist.xml')
     if opts.gamelist_path:
-        common_utils.copyfile(opts.gamelist_path, os.path.join(temp_dir, 'gamelist.xml'))
+        common_utils.copyfile(opts.gamelist_path, temp_gamelist_path)
     else:
         create_gamelist.main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module,
                              user_creds=opts.user_creds, temp_dir=temp_dir)
-    build_recipes.main(opts.output_dir, opts.core_path, opts.bios_dir, temp_dir)
+    build_recipes.main(temp_gamelist_path, opts.core_path, bios_dir=opts.bios_dir, output_dir=temp_dir)
     common_utils.cleanup_temp_dir(__name__)
 
+# (gamelist_path, core_path, bios_dir=None, output_dir=None)
 
 # TODO - Allow keeping of rom attributes, region, rom-code, none, etc
 def get_opts_parser():

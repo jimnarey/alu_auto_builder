@@ -16,6 +16,19 @@ PLATFORM = common_utils.get_platform()
 APP_ROOT = common_utils.get_app_root()
 
 
+def validate_args(platform, input_dir, scrape_module):
+    if platform not in configs.PLATFORMS:
+        logging.error(errors.SCRAPE_INVALID_PLATFORM)
+        return False
+    if not os.path.isdir(input_dir):
+        logging.error(errors.invalid_path(input_dir, 'directory'))
+        return False
+    if scrape_module not in configs.SCRAPING_MODULES:
+        logging.error(errors.SCRAPE_INVALID_MODULE)
+        return False
+    return True
+
+
 def setup_windows_skyscraper(local_skyscraper_dir):
     home_dir = str(Path.home())
     skyscraper_target = os.path.join(home_dir, '.skyscraper')
@@ -38,19 +51,6 @@ def get_skyscraper_bin():
     return 'Skyscraper'
 
 
-def validate_args(platform, input_dir, scrape_module):
-    if platform not in configs.PLATFORMS:
-        logging.error(errors.SCRAPE_INVALID_PLATFORM)
-        return False
-    if not os.path.isdir(input_dir):
-        logging.error(errors.invalid_path(input_dir, 'directory'))
-        return False
-    if scrape_module not in configs.SCRAPING_MODULES:
-        logging.error(errors.SCRAPE_INVALID_MODULE)
-        return False
-    return True
-
-
 def run_skyscraper(platform, input_dir, flags, config_path, sky_args, skyscraper_bin):
     cmd = [skyscraper_bin,
            '-p', platform,
@@ -67,6 +67,7 @@ def scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_c
 
 
 def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, temp_dir, output_dir, skyscraper_bin):
+    # TODO - move this to main and re-do signatures
     output_dir = os.path.abspath(output_dir) if output_dir else temp_dir
     sky_args = ['-a', '{0}'.format(art_xml_path),
                 '-g', '{0}'.format(output_dir),
@@ -84,8 +85,6 @@ def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=
         return
     if not temp_dir:
         temp_dir = common_utils.create_temp_dir(__name__)
-        # temp_dir_obj = tempfile.TemporaryDirectory()
-        # temp_dir = temp_dir_obj.name
     config_path = os.path.join(temp_dir, 'config.ini')
     art_xml_path = os.path.join(temp_dir, 'artwork.xml')
     scrape_flags = scrape_flags if scrape_flags else configs.SCRAPE_FLAGS
