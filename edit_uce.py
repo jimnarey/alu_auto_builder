@@ -36,8 +36,6 @@ def edit_contents(save_part_contents_path, opts):
         common_utils.copyfile(opts.retro_ini_path, os.path.join(save_part_contents_path, 'upper', 'retroplayer.ini'))
     else:
         open_file_manager(save_part_contents_path, opts)
-        print('After file manager')
-        input('Press enter when ready')
 
 
 #
@@ -71,15 +69,7 @@ def unmount_image(save_part_contents_path):
 # START debugfs method functions
 #
 
-
-# The scripts this calls assume a fixed name for the dir to be extracted to
-# due to limitations in passing variables to parts of the debugfs command
-# def extract_img_contents(temp_dir):
-#     bin_ = common_utils.get_platform_bin('debugfs_extract.bat', 'debugfs_extract.sh', linux_script=True)
-#     common_utils.execute_with_output([bin_, temp_dir])
-
-
-def extract_img_contents(temp_dir):
+def extract_img_contents(temp_dir, return_dir=os.getcwd()):
     bin_ = common_utils.get_platform_bin('debugfs.exe', 'debugfs')
     cmd_file_path = os.path.join(temp_dir, 'extract_cmd.txt')
     common_utils.write_file(cmd_file_path, 'rdump / save_part_contents', 'w')
@@ -91,7 +81,7 @@ def extract_img_contents(temp_dir):
         'save.img'
     ]
     common_utils.execute_with_output(cmd)
-    os.chdir(common_utils.get_app_root())
+    os.chdir(return_dir)
 
 
 def get_save_contents(save_part_contents_path):
@@ -118,25 +108,16 @@ def create_debugfs_cmd_file(temp_dir, save_part_contents_path, items, cmd):
     for item in items:
         item = item.replace(save_part_contents_path, '')
         if cmd == 'mkdir':
+            # TODO - Add " to dirname and test
             cmd_file_contents.append('{0} {1}'.format(cmd, item))
         elif cmd == 'write':
-            cmd_file_contents.append('{0} {1} {2}'.format(cmd, item[1:], item))
+            cmd_file_contents.append('{0} "{1}" "{2}"'.format(cmd, item[1:], item))
     cmd_file_path = os.path.join(temp_dir, '{0}_cmd.txt'.format(cmd))
     common_utils.write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
     return cmd_file_path
 
 
-# def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path):
-#     bin_ = common_utils.get_platform_bin('debugfs_run_cmds.bat', 'debugfs_run_cmds.sh', linux_script=True)
-#     cmd = [
-#         bin_,
-#         save_part_contents_path,
-#         cmd_file,
-#         img_path
-#     ]
-#     common_utils.execute_with_output(cmd)
-
-def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path):
+def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path, return_dir=os.getcwd()):
     bin_ = common_utils.get_platform_bin('debugfs.exe', 'debugfs')
     os.chdir(save_part_contents_path)
     cmd = [
@@ -147,7 +128,7 @@ def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path):
         img_path
     ]
     common_utils.execute_with_output(cmd)
-    os.chdir(common_utils.get_app_root())
+    os.chdir(return_dir)
 
 
 def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
@@ -163,8 +144,30 @@ def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
 #
 
 
+def access_save_contents(opts, temp_dir, img_path, save_part_contents_path):
+    if opts.do_mount:
+        if common_utils.get_platform() == 'linux' and os.getuid() == 0:
+            mount_image(img_path, save_part_contents_path)
+            edit_contents(save_part_contents_path, opts)
+            unmount_image(save_part_contents_path)
+            return True
+        else:
+            logging.error('Mount option is only available under Linux and when running as root')
+            return False
+    else:
+        extract_img_contents(temp_dir)
+        set_all_755(save_part_contents_path)
+        edit_contents(save_part_contents_path, opts)
+        input('Press enter when ready')
+        common_utils.delete_file(img_path)
+        common_utils.make_ext4_part(img_path)
+        copy_into_save_img(temp_dir, save_part_contents_path, img_path)
+        return True
+
+
 def main(opts):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
+    # cwd = os.getcwd()
     uce_path = os.path.abspath(opts.uce_path)
     temp_dir = common_utils.create_temp_dir(__name__)
     if opts.do_backup:
@@ -179,13 +182,8 @@ def main(opts):
     common_utils.write_file(img_path, save_data, 'wb')
     common_utils.make_dir(save_part_contents_path)
     # Read files from the save partition and create a replacement
-    extract_img_contents(temp_dir)
-    set_all_755(save_part_contents_path)
-    edit_contents(save_part_contents_path, opts)
-    common_utils.delete_file(img_path)
-    common_utils.make_ext4_part(img_path)
-    copy_into_save_img(temp_dir, save_part_contents_path, img_path)
-    rebuild_uce(uce_path, squashfs_etc, img_path)
+    if access_save_contents(opts, temp_dir, img_path, save_part_contents_path):
+        rebuild_uce(uce_path, squashfs_etc, img_path)
     common_utils.cleanup_temp_dir(__name__)
 
 

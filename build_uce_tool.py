@@ -3,10 +3,11 @@
 import math
 import os
 import hashlib
-import tempfile
+from zipfile import ZipFile, BadZipfile
 from optparse import OptionParser
 import logging
 
+import edit_uce
 import cmd_help
 import common_utils
 import errors
@@ -15,14 +16,13 @@ import errors
 class UCEBuildPaths:
 
     def __init__(self):
-        # temp_dir_obj = tempfile.TemporaryDirectory()
-        # self.temp_dir = temp_dir_obj.name
         self.temp_dir = common_utils.create_temp_dir(__name__)
         self.cart_tmp_file = os.path.join(self.temp_dir, 'cart_tmp_file.img')
         self.cart_save_file = os.path.join(self.temp_dir, 'cart_save_file.img')
         self.md5_file = os.path.join(self.temp_dir, 'md5_file')
         self.data_dir = os.path.join(self.temp_dir, 'data')
         self.save_dir = os.path.join(self.temp_dir, 'data', 'save')
+        self.save_workdir = os.path.join(self.temp_dir, 'save_workdir')
 
     def cleanup(self):
         common_utils.cleanup_temp_dir(__name__)
@@ -49,9 +49,17 @@ def relink_boxart(data_dir):
     common_utils.create_symlink('boxart/boxart.png', title_png)
 
 
+def prepare_save_files(ub_paths):
+    if os.path.isdir(ub_paths.save_dir):
+        logging.info('Custom save data found')
+        common_utils.copytree(ub_paths.save_dir, ub_paths.save_workdir)
+        common_utils.remove_dir(ub_paths.save_dir)
+    common_utils.make_dir(ub_paths.save_dir)
+
+
 def prepare_source_files(input_dir, ub_paths):
     common_utils.copytree(input_dir, ub_paths.data_dir, symlinks=True)
-    common_utils.make_dir(ub_paths.save_dir)
+    prepare_save_files(ub_paths)
     common_utils.set_755(os.path.join(ub_paths.data_dir, 'exec.sh'))
     relink_boxart(ub_paths.data_dir)
 
@@ -117,14 +125,44 @@ def append_md5_to_img(md5_source, md5_file, append_target):
     append_file_to_file(append_target, md5_file)
 
 
-# TODO - Use common utils version
-def make_ext4_part(cart_save_file, app_root):
-    if PLATFORM == 'win32':
-        bin = os.path.join(app_root, 'windows', 'make_ext4_part.bat')
+def extract_and_copy_save_zip(ub_paths):
+    try:
+        with ZipFile(os.path.join(ub_paths.save_workdir, 'save.zip'), 'r') as zfile:
+            zfile.extract('save.img', ub_paths.save_workdir)
+            common_utils.copyfile(os.path.join(ub_paths.save_workdir, 'save.img'), ub_paths.cart_save_file)
+    except BadZipfile:
+        logging.error('save.zip is not a valid zipfile')
+    except KeyError:
+        logging.error('save.zip does not contain a file named save.img')
+    except OSError as e:
+        logging.error('Unable to extract and copy save.img file from zip: {0}'.format(e))
+
+
+def get_save_part(ub_paths):
+    if os.listdir(ub_paths.save_workdir):
+        save_img_path = os.path.join(ub_paths.save_workdir, 'save.img')
+        if os.path.isfile(save_img_path):
+            logging.info('Processing save.img as new save partition, ignoring any other contents of save dir')
+            common_utils.copyfile(save_img_path, ub_paths.cart_save_file)
+        elif os.path.isfile(os.path.join(ub_paths.save_workdir, 'save.zip')):
+            logging.info('Processing save.zip as new save partition, ignoring any other contents of save dir')
+            extract_and_copy_save_zip(ub_paths)
+        else:
+            logging.info('Creating save partition from contents of save dir')
+            common_utils.make_ext4_part(ub_paths.cart_save_file)
+            edit_uce.copy_into_save_img(ub_paths.temp_dir, ub_paths.save_workdir, ub_paths.cart_save_file)
     else:
-        bin = os.path.join(app_root, 'bash_scripts', 'make_ext4_part.sh')
-    cmd = [bin, cart_save_file]
-    common_utils.execute_with_output(cmd)
+        common_utils.make_ext4_part(ub_paths.cart_save_file)
+
+
+# # TODO - Use common utils version
+# def make_ext4_part(cart_save_file, app_root):
+#     if PLATFORM == 'win32':
+#         bin = os.path.join(app_root, 'windows', 'make_ext4_part.bat')
+#     else:
+#         bin = os.path.join(app_root, 'bash_scripts', 'make_ext4_part.sh')
+#     cmd = [bin, cart_save_file]
+#     common_utils.execute_with_output(cmd)
 
 
 def main(input_dir, output_file):
@@ -138,8 +176,14 @@ def main(input_dir, output_file):
     make_squashfs_img(app_root, ub_paths)
     append_md5_to_img(ub_paths.cart_tmp_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_to_file(ub_paths.cart_tmp_file, bytearray(32))
-    make_ext4_part(ub_paths.cart_save_file, app_root)
+
+
+    # make_ext4_part(ub_paths.cart_save_file, app_root)
+    get_save_part(ub_paths)
+
     append_md5_to_img(ub_paths.cart_save_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
+
+
     append_file_to_file(ub_paths.cart_tmp_file, ub_paths.cart_save_file)
     common_utils.copyfile(ub_paths.cart_tmp_file, output_file)
     logging.info('Built: {0}\n\n\n'.format(output_file))

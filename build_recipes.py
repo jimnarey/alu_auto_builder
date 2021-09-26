@@ -19,7 +19,6 @@ def validate_args(gamelist_path, core_path, bios_dir, output_dir):
         logging.error('You must specify at least a path to a gamelist.xml and a path to a core')
         return False
     for dir_path in (bios_dir, output_dir):
-        print(os.path.abspath(dir_path))
         if dir_path:
             if not os.path.isdir(dir_path):
                 logging.error(errors.invalid_path(dir_path, 'dir'))
