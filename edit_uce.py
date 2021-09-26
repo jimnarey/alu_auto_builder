@@ -56,7 +56,7 @@ def mount_image(img_path, save_part_contents_path):
 
 def unmount_image(save_part_contents_path):
     cmd = [
-        'mount',
+        'umount',
         save_part_contents_path
     ]
     common_utils.execute_with_output(cmd)
@@ -150,6 +150,7 @@ def access_save_contents(opts, temp_dir, img_path, save_part_contents_path):
             mount_image(img_path, save_part_contents_path)
             edit_contents(save_part_contents_path, opts)
             unmount_image(save_part_contents_path)
+            common_utils.remove_dir(save_part_contents_path)
             return True
         else:
             logging.error('Mount option is only available under Linux and when running as root')
