@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import pprint
 import sys
 import os
 import logging
@@ -145,12 +146,16 @@ def set_all_755(save_part_contents_path):
 
 def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
     dirs, files = get_save_contents(save_part_contents_path)
-    dirs = common_utils.remove_run_dir_prefixes(dirs, save_part_contents_path)
-    files = common_utils.remove_run_dir_prefixes(files, save_part_contents_path)
-    mkdir_cmd_file_path = common_utils.create_debugfs_mkdir_cmd_file(temp_dir, dirs)
-    write_cmd_file_path = common_utils.create_debugfs_write_cmd_file(temp_dir, files)
-    common_utils.run_debugfs_cmd_file(save_part_contents_path, mkdir_cmd_file_path, img_path)
-    common_utils.run_debugfs_cmd_file(save_part_contents_path, write_cmd_file_path, img_path)
+    pprint.pprint(dirs)
+    pprint.pprint(files)
+    # dirs = common_utils.remove_run_dir_prefixes(dirs, save_part_contents_path)
+    # files = common_utils.remove_run_dir_prefixes(files, save_part_contents_path)
+    pprint.pprint(dirs)
+    pprint.pprint(files)
+    mkdir_cmd_file_path = common_utils.create_debugfs_mkdir_cmd_file(temp_dir, dirs, save_part_contents_path)
+    write_cmd_file_path = common_utils.create_debugfs_write_cmd_file(temp_dir, files, save_part_contents_path)
+    common_utils.run_debugfs_cmd_file(mkdir_cmd_file_path, img_path)
+    common_utils.run_debugfs_cmd_file(write_cmd_file_path, img_path)
 
 
 #

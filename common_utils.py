@@ -6,7 +6,9 @@ import shutil
 import logging
 import tempfile
 import stat
+import time
 import errno
+import pprint
 from subprocess import Popen, PIPE
 
 active_temp_dirs = {}
@@ -32,16 +34,27 @@ def cleanup_temp_dir(calling_module):
 
 
 def execute_with_output(cmd):
-    logging.info('Running command: {0}'.format(' '.join(cmd)))
+    # logging.info('Running command: {0}'.format(' '.join(cmd)))
     with Popen(cmd, stdout=PIPE, bufsize=1,
                universal_newlines=True) as p:
-        print('PID ', p.pid)
         for line in p.stdout:
             print(line, end='')
         return_code = p.wait()
+    logging.info('Successfully ran command: {0}'.format(' '.join(cmd)))
     if return_code:
         logging.error('Last command does not appear to have completed successfully')
     return return_code
+
+
+def simple_execute(cmd):
+    try:
+        cmd_out = os.popen(' '.join(cmd)).read()
+        # logging.info('Waiting....')
+        # time.sleep(3)
+        print(cmd_out)
+        logging.info('Successfully ran command: {0}'.format(' '.join(cmd)))
+    except OSError as e:
+        logging.error('Last command does not appear to have completed successfully: {0}'.format(e))
 
 
 def write_file(file_path, file_content, write_type):
@@ -145,33 +158,41 @@ def make_ext4_part(cart_save_file):
     execute_with_output(cmd)
 
 
-def remove_run_dir_prefixes(items, run_dir):
-    return [item.replace('{0}/'.format(run_dir), '') for item in items]
+# def remove_run_dir_prefixes(items, run_dir):
+#     return [item.replace('{0}/'.format(run_dir), '') for item in items]
+
+def remove_source_path(item, source_path):
+    return item.replace('{0}/'.format(source_path), '')
 
 
-def create_debugfs_mkdir_cmd_file(temp_dir, items):
-    cmd_file_contents = []
-    for item in items:
-        cmd_file_contents.append('{0} "/{1}"'.format('mkdir', item))
-    cmd_file_path = os.path.join(temp_dir, 'mkdir_cmd.txt')
-    write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
+def write_cmd_file(temp_dir, contents):
+    cmd_file_path = os.path.join(temp_dir, 'debug_fs_cmd.txt')
+    write_file(cmd_file_path, '\n'.join(contents), 'w')
     print(get_file_content(cmd_file_path, 'r'))
     return cmd_file_path
 
+#
+# def split_dirs_debugfs(dirs):
 
-def create_debugfs_write_cmd_file(temp_dir, items):
+
+
+def create_debugfs_mkdir_cmd_file(temp_dir, items, source_path):
     cmd_file_contents = []
     for item in items:
-        cmd_file_contents.append('{0} "{1}" "/{2}"'.format('write', item, item))
-    cmd_file_path = os.path.join(temp_dir, 'write_cmd.txt')
-    write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
-    print(get_file_content(cmd_file_path, 'r'))
-    return cmd_file_path
+        cmd_file_contents.append('{0} /{1}'.format('mkdir', remove_source_path(item, source_path)))
+    return write_cmd_file(temp_dir, cmd_file_contents)
 
 
-def run_debugfs_cmd_file(run_dir, cmd_file, img_path, return_dir=os.getcwd()):
+def create_debugfs_write_cmd_file(temp_dir, items, source_path):
+    cmd_file_contents = []
+    for item in items:
+        cmd_file_contents.append('{0} "{1}" "/{2}"'.format('write', item, remove_source_path(item, source_path)))
+    return write_cmd_file(temp_dir, cmd_file_contents)
+
+
+def run_debugfs_cmd_file(cmd_file, img_path, return_dir=os.getcwd()):
     bin_ = get_platform_bin('debugfs.exe', 'debugfs')
-    os.chdir(run_dir)
+    # os.chdir(run_dir)
     cmd = [
         bin_,
         '-w',
@@ -179,8 +200,9 @@ def run_debugfs_cmd_file(run_dir, cmd_file, img_path, return_dir=os.getcwd()):
         cmd_file,
         img_path
     ]
-    execute_with_output(cmd)
-    os.chdir(return_dir)
+    # execute_with_output(cmd)
+    simple_execute(cmd)
+    # os.chdir(return_dir)
 
 
 # def create_debugfs_cmd_file(temp_dir, save_part_contents_path, items, cmd):
