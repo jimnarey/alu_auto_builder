@@ -14,9 +14,9 @@ def pre_flight(uce_path, file_manager):
     if not uce_path or not os.path.isfile(uce_path):
         logging.error('You must provide a path to a UCE file to edit')
         valid = False
-    if common_utils.get_platform() == 'linux' and os.getuid() != 0:
-        logging.error('This tool must be run as root under Linux')
-        valid = False
+    # if common_utils.get_platform() == 'linux' and os.getuid() != 0:
+    #     logging.error('This tool must be run as root under Linux')
+    #     valid = False
     return valid
     # TODO Check file_manager is a valid executable or select from those available
 
@@ -80,6 +80,7 @@ def unmount_image(save_part_contents_path):
 # START debugfs method functions
 #
 
+
 def extract_img_contents(temp_dir, return_dir=os.getcwd()):
     bin_ = common_utils.get_platform_bin('debugfs.exe', 'debugfs')
     cmd_file_path = os.path.join(temp_dir, 'extract_cmd.txt')
@@ -106,48 +107,50 @@ def get_save_contents(save_part_contents_path):
     return save_dirs, save_files
 
 
-# def set_all_755(save_part_contents_path):
-#     dirs, files = get_save_contents(save_part_contents_path)
-#     for file in files:
-#         common_utils.set_755(file)
-#     for dir_ in dirs:
-#         common_utils.set_755(dir_)
+def set_all_755(save_part_contents_path):
+    dirs, files = get_save_contents(save_part_contents_path)
+    for file in files:
+        common_utils.set_755(file)
+    for dir_ in dirs:
+        common_utils.set_755(dir_)
 
 
-def create_debugfs_cmd_file(temp_dir, save_part_contents_path, items, cmd):
-    cmd_file_contents = []
-    for item in items:
-        item = item.replace(save_part_contents_path, '')
-        if cmd == 'mkdir':
-            # TODO - Add " to dirname and test
-            cmd_file_contents.append('{0} {1}'.format(cmd, item))
-        elif cmd == 'write':
-            cmd_file_contents.append('{0} "{1}" "{2}"'.format(cmd, item[1:], item))
-    cmd_file_path = os.path.join(temp_dir, '{0}_cmd.txt'.format(cmd))
-    common_utils.write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
-    return cmd_file_path
+# def create_debugfs_cmd_file(temp_dir, save_part_contents_path, items, cmd):
+#     cmd_file_contents = []
+#     for item in items:
+#         item = item.replace(save_part_contents_path, '')
+#         if cmd == 'mkdir':
+#             # TODO - Add " to dirname and test
+#             cmd_file_contents.append('{0} {1}'.format(cmd, item))
+#         elif cmd == 'write':
+#             cmd_file_contents.append('{0} "{1}" "{2}"'.format(cmd, item[1:], item))
+#     cmd_file_path = os.path.join(temp_dir, '{0}_cmd.txt'.format(cmd))
+#     common_utils.write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
+#     return cmd_file_path
 
 
-def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path, return_dir=os.getcwd()):
-    bin_ = common_utils.get_platform_bin('debugfs.exe', 'debugfs')
-    os.chdir(save_part_contents_path)
-    cmd = [
-        bin_,
-        '-w',
-        '-f',
-        cmd_file,
-        img_path
-    ]
-    common_utils.execute_with_output(cmd)
-    os.chdir(return_dir)
+# def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path, return_dir=os.getcwd()):
+#     bin_ = common_utils.get_platform_bin('debugfs.exe', 'debugfs')
+#     os.chdir(save_part_contents_path)
+#     cmd = [
+#         bin_,
+#         '-w',
+#         '-f',
+#         cmd_file,
+#         img_path
+#     ]
+#     common_utils.execute_with_output(cmd)
+#     os.chdir(return_dir)
 
 
 def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
     dirs, files = get_save_contents(save_part_contents_path)
-    mkdir_cmd_file_path = create_debugfs_cmd_file(temp_dir, save_part_contents_path, dirs, 'mkdir')
-    write_cmd_file_path = create_debugfs_cmd_file(temp_dir, save_part_contents_path, files, 'write')
-    run_debugfs_cmd_file(save_part_contents_path, mkdir_cmd_file_path, img_path)
-    run_debugfs_cmd_file(save_part_contents_path, write_cmd_file_path, img_path)
+    dirs = common_utils.remove_run_dir_prefixes(dirs, save_part_contents_path)
+    files = common_utils.remove_run_dir_prefixes(files, save_part_contents_path)
+    mkdir_cmd_file_path = common_utils.create_debugfs_mkdir_cmd_file(temp_dir, dirs)
+    write_cmd_file_path = common_utils.create_debugfs_write_cmd_file(temp_dir, files)
+    common_utils.run_debugfs_cmd_file(save_part_contents_path, mkdir_cmd_file_path, img_path)
+    common_utils.run_debugfs_cmd_file(save_part_contents_path, write_cmd_file_path, img_path)
 
 
 #
@@ -168,10 +171,10 @@ def access_save_contents(temp_dir, img_path, save_part_contents_path, retro_ini_
             return False
     else:
         extract_img_contents(temp_dir)
-        # set_all_755(save_part_contents_path)
+        set_all_755(save_part_contents_path)
         edit_contents(save_part_contents_path, retro_ini_path, file_manager)
         # logging.info('Files available at {0}'.format(save_part_contents_path))
-        # input('Press enter when ready')
+        input('Press enter when ready')
         common_utils.delete_file(img_path)
         common_utils.make_ext4_part(img_path)
         copy_into_save_img(temp_dir, save_part_contents_path, img_path)

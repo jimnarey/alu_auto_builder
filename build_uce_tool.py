@@ -147,10 +147,10 @@ def get_save_part(ub_paths):
         elif os.path.isfile(os.path.join(ub_paths.save_workdir, 'save.zip')):
             logging.info('Processing save.zip as new save partition, ignoring any other contents of save dir')
             extract_and_copy_save_zip(ub_paths)
-        else:
-            logging.info('Creating save partition from contents of save dir')
-            common_utils.make_ext4_part(ub_paths.cart_save_file)
-            edit_uce.copy_into_save_img(ub_paths.temp_dir, ub_paths.save_workdir, ub_paths.cart_save_file)
+        # else:
+        #     logging.info('Creating save partition from contents of save dir')
+        #     common_utils.make_ext4_part(ub_paths.cart_save_file)
+        #     edit_uce.copy_into_save_img(ub_paths.temp_dir, ub_paths.save_workdir, ub_paths.cart_save_file)
     else:
         common_utils.make_ext4_part(ub_paths.cart_save_file)
 

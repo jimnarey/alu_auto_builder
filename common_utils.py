@@ -53,6 +53,7 @@ def write_file(file_path, file_content, write_type):
         logging.error('Unable to write to {0}: {1}'.format(file_path, e))
 
 
+# TODO - Fix ref before assignment
 def get_file_content(file_path, read_type):
     logging.info('Reading data from {0}'.format(file_path))
     try:
@@ -142,6 +143,76 @@ def make_ext4_part(cart_save_file):
     bin_ = get_platform_bin('make_ext4_part.bat', 'make_ext4_part.sh', linux_script=True)
     cmd = [bin_, cart_save_file]
     execute_with_output(cmd)
+
+
+def remove_run_dir_prefixes(items, run_dir):
+    return [item.replace('{0}/'.format(run_dir), '') for item in items]
+
+
+def create_debugfs_mkdir_cmd_file(temp_dir, items):
+    cmd_file_contents = []
+    for item in items:
+        cmd_file_contents.append('{0} "/{1}"'.format('mkdir', item))
+    cmd_file_path = os.path.join(temp_dir, 'mkdir_cmd.txt')
+    write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
+    print(get_file_content(cmd_file_path, 'r'))
+    return cmd_file_path
+
+
+def create_debugfs_write_cmd_file(temp_dir, items):
+    cmd_file_contents = []
+    for item in items:
+        cmd_file_contents.append('{0} "{1}" "/{2}"'.format('write', item, item))
+    cmd_file_path = os.path.join(temp_dir, 'write_cmd.txt')
+    write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
+    print(get_file_content(cmd_file_path, 'r'))
+    return cmd_file_path
+
+
+def run_debugfs_cmd_file(run_dir, cmd_file, img_path, return_dir=os.getcwd()):
+    bin_ = get_platform_bin('debugfs.exe', 'debugfs')
+    os.chdir(run_dir)
+    cmd = [
+        bin_,
+        '-w',
+        '-f',
+        cmd_file,
+        img_path
+    ]
+    execute_with_output(cmd)
+    os.chdir(return_dir)
+
+
+# def create_debugfs_cmd_file(temp_dir, save_part_contents_path, items, cmd):
+#     cmd_file_contents = []
+#     for item in items:
+#         item = item.replace(save_part_contents_path, '')
+#         if cmd == 'mkdir':
+#             # TODO - Add " to dirname and test
+#             cmd_file_contents.append('{0} {1}'.format(cmd, item))
+#         elif cmd == 'write':
+#             cmd_file_contents.append('{0} "{1}" "{2}"'.format(cmd, item[1:], item))
+#     cmd_file_path = os.path.join(temp_dir, '{0}_cmd.txt'.format(cmd))
+#     common_utils.write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
+#     return cmd_file_path
+
+
+def create_blank_file(file_path, size=4194304):
+    bin_ = get_platform_bin('truncate.exe', 'truncate')
+    cmd = [
+        bin_,
+        '-s',
+        size,
+        file_path
+    ]
+    execute_with_output(cmd)
+
+
+
+def make_ext4_part_2(temp_dir, cart_save_file):
+    create_blank_file(cart_save_file)
+    mkdir_cmd_file_path = create_debugfs_mkdir_cmd_file(temp_dir, ['upper', 'work'])
+    run_debugfs_cmd_file()
 
 
 def set_755(file_path):
