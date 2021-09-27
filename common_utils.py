@@ -33,10 +33,10 @@ def cleanup_temp_dir(calling_module):
         remove_dir(active_temp_dirs[calling_module])
 
 
-def execute_with_output(cmd):
+def execute_with_output(cmd, shell=False):
     # logging.info('Running command: {0}'.format(' '.join(cmd)))
     with Popen(cmd, stdout=PIPE, bufsize=1,
-               universal_newlines=True) as p:
+               universal_newlines=True, shell=shell) as p:
         for line in p.stdout:
             print(line, end='')
         return_code = p.wait()
@@ -166,9 +166,11 @@ def make_ext4_part(cart_save_file):
 
 
 def write_cmd_file(temp_dir, contents):
-    cmd_file_path = os.path.join(temp_dir, 'debug_fs_cmd.txt')
-    write_file(cmd_file_path, '\n'.join(contents), 'w')
+    cmd_file_path = os.path.join(temp_dir, 'debug_fs_cmd.txt-{0}'.format(time.time_ns()))
+    write_file(cmd_file_path, '\n'.join(contents) + '\n', 'w')
     print(get_file_content(cmd_file_path, 'r'))
+    print(cmd_file_path)
+    # breakpoint()
     return cmd_file_path
 
 #
@@ -195,14 +197,15 @@ def run_debugfs_cmd_file(cmd_file, img_path, return_dir=os.getcwd()):
     bin_ = get_platform_bin('debugfs.exe', 'debugfs')
     # os.chdir(run_dir)
     cmd = [
+        'bash',
         bin_,
         '-w',
         '-f',
         cmd_file,
         img_path
     ]
-    # execute_with_output(cmd)
-    simple_execute(cmd)
+    execute_with_output(cmd)
+    # simple_execute(cmd)
     # os.chdir(return_dir)
 
 
