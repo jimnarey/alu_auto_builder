@@ -152,8 +152,8 @@ def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
     # files = common_utils.remove_run_dir_prefixes(files, save_part_contents_path)
     pprint.pprint(dirs)
     pprint.pprint(files)
-    mkdir_cmd_file_path = common_utils.create_debugfs_mkdir_cmd_file(temp_dir, dirs, save_part_contents_path)
-    write_cmd_file_path = common_utils.create_debugfs_write_cmd_file(temp_dir, files, save_part_contents_path)
+    mkdir_cmd_file_path = common_utils.create_debugfs_mkdir_cmd_file(temp_dir, dirs, source_path=save_part_contents_path)
+    write_cmd_file_path = common_utils.create_debugfs_write_cmd_file(temp_dir, files, source_path=save_part_contents_path)
     common_utils.run_debugfs_cmd_file(mkdir_cmd_file_path, img_path)
     common_utils.run_debugfs_cmd_file(write_cmd_file_path, img_path)
 
@@ -181,7 +181,7 @@ def access_save_contents(temp_dir, img_path, save_part_contents_path, retro_ini_
         # logging.info('Files available at {0}'.format(save_part_contents_path))
         input('Press enter when ready')
         common_utils.delete_file(img_path)
-        common_utils.make_ext4_part(img_path)
+        common_utils.make_ext4_part_2(img_path)
         copy_into_save_img(temp_dir, save_part_contents_path, img_path)
         return True
 

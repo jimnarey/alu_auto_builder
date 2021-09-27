@@ -153,6 +153,8 @@ def get_save_part(ub_paths):
         #     edit_uce.copy_into_save_img(ub_paths.temp_dir, ub_paths.save_workdir, ub_paths.cart_save_file)
     else:
         common_utils.make_ext4_part(ub_paths.cart_save_file)
+        # TODO - add base dir generation
+        common_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
 
 
 # # TODO - Use common utils version

@@ -161,8 +161,8 @@ def make_ext4_part(cart_save_file):
 # def remove_run_dir_prefixes(items, run_dir):
 #     return [item.replace('{0}/'.format(run_dir), '') for item in items]
 
-def remove_source_path(item, source_path):
-    return item.replace('{0}/'.format(source_path), '')
+# def remove_source_path(item, source_path):
+#     return item.replace('{0}/'.format(source_path), '')
 
 
 def write_cmd_file(temp_dir, contents):
@@ -175,18 +175,19 @@ def write_cmd_file(temp_dir, contents):
 # def split_dirs_debugfs(dirs):
 
 
-
-def create_debugfs_mkdir_cmd_file(temp_dir, items, source_path):
+def create_debugfs_mkdir_cmd_file(temp_dir, items, source_path=None):
     cmd_file_contents = []
     for item in items:
-        cmd_file_contents.append('{0} /{1}'.format('mkdir', remove_source_path(item, source_path)))
+        target = item.replace('{0}/'.format(source_path), '') if source_path else item
+        cmd_file_contents.append('{0} "/{1}"'.format('mkdir', target))
     return write_cmd_file(temp_dir, cmd_file_contents)
 
 
-def create_debugfs_write_cmd_file(temp_dir, items, source_path):
+def create_debugfs_write_cmd_file(temp_dir, items, source_path=None):
     cmd_file_contents = []
     for item in items:
-        cmd_file_contents.append('{0} "{1}" "/{2}"'.format('write', item, remove_source_path(item, source_path)))
+        target = item.replace('{0}/'.format(source_path), '') if source_path else item
+        cmd_file_contents.append('{0} "{1}" "/{2}"'.format('write', item, target))
     return write_cmd_file(temp_dir, cmd_file_contents)
 
 
@@ -224,17 +225,27 @@ def create_blank_file(file_path, size=4194304):
     cmd = [
         bin_,
         '-s',
-        size,
+        str(size),
         file_path
     ]
     execute_with_output(cmd)
 
 
-
-def make_ext4_part_2(temp_dir, cart_save_file):
+def make_ext4_part_2(cart_save_file):
     create_blank_file(cart_save_file)
-    mkdir_cmd_file_path = create_debugfs_mkdir_cmd_file(temp_dir, ['upper', 'work'])
-    run_debugfs_cmd_file()
+    bin_ = get_platform_bin('mke2fs.exe', 'mke2fs')
+    cmd = [
+        bin_,
+        '-t',
+        'ext4',
+        cart_save_file
+    ]
+    execute_with_output(cmd)
+
+
+def create_save_part_base_dirs(temp_dir, img_path):
+    cmd_file = create_debugfs_mkdir_cmd_file(temp_dir, ['work', 'upper'])
+    run_debugfs_cmd_file(cmd_file, img_path)
 
 
 def set_755(file_path):
