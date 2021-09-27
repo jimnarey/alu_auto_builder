@@ -8,8 +8,6 @@ from optparse import OptionParser
 import common_utils
 
 
-# APP_ROOT = common_utils.get_app_root()
-
 def pre_flight(uce_path, file_manager):
     valid = True
     if not uce_path or not os.path.isfile(uce_path):
@@ -116,42 +114,8 @@ def set_all_755(save_part_contents_path):
         common_utils.set_755(dir_)
 
 
-# def create_debugfs_cmd_file(temp_dir, save_part_contents_path, items, cmd):
-#     cmd_file_contents = []
-#     for item in items:
-#         item = item.replace(save_part_contents_path, '')
-#         if cmd == 'mkdir':
-#             # TODO - Add " to dirname and test
-#             cmd_file_contents.append('{0} {1}'.format(cmd, item))
-#         elif cmd == 'write':
-#             cmd_file_contents.append('{0} "{1}" "{2}"'.format(cmd, item[1:], item))
-#     cmd_file_path = os.path.join(temp_dir, '{0}_cmd.txt'.format(cmd))
-#     common_utils.write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
-#     return cmd_file_path
-
-
-# def run_debugfs_cmd_file(save_part_contents_path, cmd_file, img_path, return_dir=os.getcwd()):
-#     bin_ = common_utils.get_platform_bin('debugfs.exe', 'debugfs')
-#     os.chdir(save_part_contents_path)
-#     cmd = [
-#         bin_,
-#         '-w',
-#         '-f',
-#         cmd_file,
-#         img_path
-#     ]
-#     common_utils.execute_with_output(cmd)
-#     os.chdir(return_dir)
-
-
 def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
     dirs, files = get_save_contents(save_part_contents_path)
-    # pprint.pprint(dirs)
-    # pprint.pprint(files)
-    # dirs = common_utils.remove_run_dir_prefixes(dirs, save_part_contents_path)
-    # files = common_utils.remove_run_dir_prefixes(files, save_part_contents_path)
-    # pprint.pprint(dirs)
-    # pprint.pprint(files)
     mkdir_cmd_file_path = common_utils.create_debugfs_mkdir_cmd_file(temp_dir, dirs, source_path=save_part_contents_path)
     common_utils.run_debugfs_cmd_file(mkdir_cmd_file_path, img_path)
     write_cmd_file_path = common_utils.create_debugfs_write_cmd_file(temp_dir, files, source_path=save_part_contents_path)
@@ -178,7 +142,6 @@ def access_save_contents(temp_dir, img_path, save_part_contents_path, retro_ini_
         extract_img_contents(temp_dir)
         set_all_755(save_part_contents_path)
         edit_contents(save_part_contents_path, retro_ini_path, file_manager)
-        # logging.info('Files available at {0}'.format(save_part_contents_path))
         input('Press enter when ready')
         common_utils.delete_file(img_path)
         common_utils.make_ext4_part_2(img_path)
@@ -186,7 +149,6 @@ def access_save_contents(temp_dir, img_path, save_part_contents_path, retro_ini_
         return True
 
 
-# def main(opts):
 def main(uce_path, do_backup=False, do_mount=False, retro_ini_path=None, file_manager=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     uce_path = os.path.abspath(uce_path)
@@ -218,16 +180,7 @@ def get_opts_parser():
     parser.add_option('-M', '--mount', dest='do_mount', action='store_true', help="Use mount method of editing UCE, Linux only", default=False)
     parser.add_option('-r', '--retroini', dest='retro_ini_path', help="The UCE file you want to edit", default=None)
     parser.add_option('-f', '--fileman', dest='file_manager', help="Specify a particular file manager on Linux", default=None)
-
     return parser
-
-
-# def validate_opts(parser):
-#     (opts, args) = parser.parse_args()
-#     if not opts.uce_path:
-#         parser.print_help()
-#         sys.exit(0)
-#     return opts, args
 
 
 if __name__ == "__main__":

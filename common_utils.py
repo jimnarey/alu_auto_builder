@@ -16,12 +16,12 @@ active_temp_dirs = {}
 
 # TODO - Issue a critical if this doesn't happen
 def create_temp_dir(calling_module):
-    logging.info('Attempting to create temp dir')
     try:
         temp_dir = tempfile.mkdtemp()
     except OSError as e:
         logging.error('Failed to create temp dir: '.format(e))
         return False
+    logging.info('Created temp dir for module {0}'.format(calling_module))
     active_temp_dirs[calling_module] = temp_dir
     return temp_dir
 
@@ -29,110 +29,123 @@ def create_temp_dir(calling_module):
 # TODO - Issue a warning if this doesn't happen
 def cleanup_temp_dir(calling_module):
     if calling_module in active_temp_dirs:
-        logging.info('Attempting to remove temp dir')
         remove_dir(active_temp_dirs[calling_module])
 
 
 def execute_with_output(cmd, shell=False):
-    # logging.info('Running command: {0}'.format(' '.join(cmd)))
-    with Popen(cmd, stdout=PIPE, bufsize=1,
-               universal_newlines=True, shell=shell) as p:
-        for line in p.stdout:
-            print(line, end='')
-        return_code = p.wait()
+    try:
+        with Popen(cmd, stdout=PIPE, bufsize=1,
+                   universal_newlines=True, shell=shell) as p:
+            for line in p.stdout:
+                print(line, end='')
+            return_code = p.wait()
+        if return_code:
+            logging.error('Last command exited with error code: {0}'.format(return_code))
+            return False
+    except OSError as e:
+        logging.error('Command failed to run: {0}'.format(' '.join(cmd)))
+        return False
     logging.info('Successfully ran command: {0}'.format(' '.join(cmd)))
-    if return_code:
-        logging.error('Last command does not appear to have completed successfully')
-    return return_code
+    return True
 
 
 def simple_execute(cmd):
     try:
         cmd_out = os.popen(' '.join(cmd)).read()
-        # logging.info('Waiting....')
-        # time.sleep(3)
-        print(cmd_out)
-        logging.info('Successfully ran command: {0}'.format(' '.join(cmd)))
     except OSError as e:
         logging.error('Last command does not appear to have completed successfully: {0}'.format(e))
+        return False
+    logging.info('Successfully ran command: {0}'.format(' '.join(cmd)))
+    return True
 
 
 def write_file(file_path, file_content, write_type):
-    logging.info('Writing data to {0}'.format(file_path))
     try:
         with open(file_path, write_type) as target_file:
             target_file.write(file_content)
     except OSError as e:
-        logging.error('Unable to write to {0}: {1}'.format(file_path, e))
+        logging.error('Failed to write data to {0}: {1}'.format(file_path, e))
+        return False
+    logging.info('Successfully wrote data to {0}'.format(file_path))
+    return True
 
 
-# TODO - Fix ref before assignment
 def get_file_content(file_path, read_type):
-    logging.info('Reading data from {0}'.format(file_path))
     try:
         with open(file_path, read_type) as read_file:
             content = read_file.read()
     except OSError as e:
-        logging.error('Unable to read from file {0}: {1}'.format(file_path, e))
+        logging.error('Failed to read from file {0}: {1}'.format(file_path, e))
+        return False
+    logging.info('Successfully read data from {0}'.format(file_path))
     return content
 
 
 def make_dir(path):
-    logging.info('Attempting to make new dir {0}'.format(path))
     try:
         os.mkdir(path)
     except FileExistsError:
         logging.info('Directory {0} already exists'.format(path))
     except OSError as e:
         logging.error('Failed to create directory {0}: {1}'.format(path, e))
+        return False
+    logging.info('Successfully made new dir {0}'.format(path))
+    return True
 
 
 def remove_dir(dir_path):
-    logging.info('Attempting to remove directory {0}'.format(dir_path))
     try:
         shutil.rmtree(dir_path)
     except OSError as e:
         logging.error('Failed to remove directory {0}: {1}'.format(dir_path, e))
         return False
+    logging.info('Successfully removed directory {0}'.format(dir_path))
     return True
 
 
 def copyfile(source, dest):
-    logging.info('Copying file {0} to {1}'.format(source, dest))
     try:
         shutil.copy(source, dest)
     except OSError as e:
         logging.error('Error copying {0} to {1}: {2}'.format(source, dest, e))
+        return False
+    logging.info('Successfully copied file {0} to {1}'.format(source, dest))
+    return True
 
 
 def copytree(source, dest, symlinks=False):
-    logging.info('Copying whole directory {0} to {1}'.format(source, dest))
     try:
         shutil.copytree(source, dest, symlinks=symlinks)
     except OSError as e:
         logging.error('Error copying whole directory {0} to {1}: {2}'.format(source, dest, e))
+        return False
+    logging.info('Successfully copied whole directory {0} to {1}'.format(source, dest))
+    return True
 
 
 def create_symlink(target, symlink):
-    logging.info('Attempting to create symlink {0} to target {1}'.format(symlink, target))
     try:
         os.symlink(target, symlink)
     except OSError as e:
         logging.error('Failed to create symlink {0} to target {1}: {2}'.format(symlink, target, e))
+        return False
+    logging.info('Successfully created symlink {0} to target {1}'.format(symlink, target))
+    return True
 
 
 def delete_file(file_path):
-    logging.info('Attempting to delete file {0}'.format(file_path))
     try:
         os.remove(file_path)
     except OSError as e:
         logging.error('Failed to delete file {0}: {1}'.format(file_path, e))
+        return False
+    logging.info('Successfully deleted file {0}'.format(file_path))
+    return True
 
 
 def get_platform():
     if sys.platform.startswith('linux'):
         return 'linux'
-    # if sys.platform in ('darwin', 'win32'):    
     if sys.platform in ('win32'):
         return sys.platform
     return False
@@ -158,23 +171,10 @@ def make_ext4_part(cart_save_file):
     execute_with_output(cmd)
 
 
-# def remove_run_dir_prefixes(items, run_dir):
-#     return [item.replace('{0}/'.format(run_dir), '') for item in items]
-
-# def remove_source_path(item, source_path):
-#     return item.replace('{0}/'.format(source_path), '')
-
-
 def write_cmd_file(temp_dir, contents):
     cmd_file_path = os.path.join(temp_dir, 'debug_fs_cmd.txt-{0}'.format(time.time_ns()))
     write_file(cmd_file_path, '\n'.join(contents) + '\n', 'w')
-    print(get_file_content(cmd_file_path, 'r'))
-    print(cmd_file_path)
-    # breakpoint()
     return cmd_file_path
-
-#
-# def split_dirs_debugfs(dirs):
 
 
 def create_debugfs_mkdir_cmd_file(temp_dir, items, source_path=None):
@@ -195,9 +195,7 @@ def create_debugfs_write_cmd_file(temp_dir, items, source_path=None):
 
 def run_debugfs_cmd_file(cmd_file, img_path, return_dir=os.getcwd()):
     bin_ = get_platform_bin('debugfs.exe', 'debugfs')
-    # os.chdir(run_dir)
     cmd = [
-        'bash',
         bin_,
         '-w',
         '-f',
@@ -206,21 +204,6 @@ def run_debugfs_cmd_file(cmd_file, img_path, return_dir=os.getcwd()):
     ]
     execute_with_output(cmd)
     # simple_execute(cmd)
-    # os.chdir(return_dir)
-
-
-# def create_debugfs_cmd_file(temp_dir, save_part_contents_path, items, cmd):
-#     cmd_file_contents = []
-#     for item in items:
-#         item = item.replace(save_part_contents_path, '')
-#         if cmd == 'mkdir':
-#             # TODO - Add " to dirname and test
-#             cmd_file_contents.append('{0} {1}'.format(cmd, item))
-#         elif cmd == 'write':
-#             cmd_file_contents.append('{0} "{1}" "{2}"'.format(cmd, item[1:], item))
-#     cmd_file_path = os.path.join(temp_dir, '{0}_cmd.txt'.format(cmd))
-#     common_utils.write_file(cmd_file_path, '\n'.join(cmd_file_contents), 'w')
-#     return cmd_file_path
 
 
 def create_blank_file(file_path, size=4194304):

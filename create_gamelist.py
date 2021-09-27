@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import tempfile
 from optparse import OptionParser
 from pathlib import Path
 import logging
@@ -69,8 +68,6 @@ def scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_c
 
 
 def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, output_dir, skyscraper_bin):
-    # TODO - move this to main and re-do signatures
-    # output_dir = os.path.abspath(output_dir) if output_dir else temp_dir
     sky_args = ['-a', '{0}'.format(art_xml_path),
                 '-g', '{0}'.format(output_dir),
                 '-o', '{0}'.format(os.path.join(output_dir, 'media'))]
@@ -106,15 +103,6 @@ def get_opts_parser():
     parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
     parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.GAME_LIST_TARGET_DIR, default=None)
     return parser
-
-
-# def validate_opts(parser):
-#     (opts, args) = parser.parse_args()
-#     if opts.platform is None:
-#         print(errors.SCRAPE_NO_PLATFORM)
-#         parser.print_help()
-#         exit(0)
-#     return opts, args
 
 
 if __name__ == "__main__":

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import tempfile
 from optparse import OptionParser
 import logging
 
@@ -24,7 +23,6 @@ def main(opts):
     build_recipes.main(temp_gamelist_path, opts.core_path, bios_dir=opts.bios_dir, output_dir=temp_dir)
     common_utils.cleanup_temp_dir(__name__)
 
-# (gamelist_path, core_path, bios_dir=None, output_dir=None)
 
 # TODO - Allow keeping of rom attributes, region, rom-code, none, etc
 def get_opts_parser():
@@ -41,6 +39,7 @@ def get_opts_parser():
     return parser
 
 
+# TODO - Remove this
 def validate_opts(parser):
     (opts, args) = parser.parse_args()
     valid = True

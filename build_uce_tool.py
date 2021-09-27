@@ -153,18 +153,7 @@ def get_save_part(ub_paths):
         #     edit_uce.copy_into_save_img(ub_paths.temp_dir, ub_paths.save_workdir, ub_paths.cart_save_file)
     else:
         common_utils.make_ext4_part(ub_paths.cart_save_file)
-        # TODO - add base dir generation
         common_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
-
-
-# # TODO - Use common utils version
-# def make_ext4_part(cart_save_file, app_root):
-#     if PLATFORM == 'win32':
-#         bin = os.path.join(app_root, 'windows', 'make_ext4_part.bat')
-#     else:
-#         bin = os.path.join(app_root, 'bash_scripts', 'make_ext4_part.sh')
-#     cmd = [bin, cart_save_file]
-#     common_utils.execute_with_output(cmd)
 
 
 def main(input_dir, output_file):
@@ -178,14 +167,8 @@ def main(input_dir, output_file):
     make_squashfs_img(app_root, ub_paths)
     append_md5_to_img(ub_paths.cart_tmp_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_to_file(ub_paths.cart_tmp_file, bytearray(32))
-
-
-    # make_ext4_part(ub_paths.cart_save_file, app_root)
     get_save_part(ub_paths)
-
     append_md5_to_img(ub_paths.cart_save_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
-
-
     append_file_to_file(ub_paths.cart_tmp_file, ub_paths.cart_save_file)
     common_utils.copyfile(ub_paths.cart_tmp_file, output_file)
     logging.info('Built: {0}\n\n\n'.format(output_file))
