@@ -40,7 +40,7 @@ def execute_with_output(cmd, shell=False):
                 print(line, end='')
             return_code = p.wait()
         if return_code:
-            logging.error('Last command exited with error code: {0}'.format(return_code))
+            logging.error('Last command exited with error code {0}: {1}'.format(return_code, ' '.join(cmd)))
             return False
     except OSError as e:
         logging.error('Command failed to run: {0}'.format(' '.join(cmd)))
