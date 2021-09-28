@@ -41,6 +41,12 @@ def setup_windows_skyscraper(local_skyscraper_dir):
             common_utils.copytree(os.path.join(local_skyscraper_dir, 'deploy', 'RetroPie'), retro_pie_target)
 
 
+def get_user_creds_arg(user_name, password):
+    if user_name and password:
+        return '{0}:{1}'.format(user_name, password)
+    return None
+
+
 def get_skyscraper_bin():
     if PLATFORM == 'win32':
         local_skyscraper_dir = os.path.join(APP_ROOT, 'windows', 'skyscraper')
@@ -74,8 +80,7 @@ def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_p
     run_skyscraper(platform, input_dir, game_list_flags, config_path, sky_args, skyscraper_bin)
 
 
-def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=None, game_list_flags=None,
-         output_dir=None):
+def main(platform, input_dir, scrape_module=None, user_name=None, password=None,  output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     logging.info('Starting gamelist builder\n\n\n')
     skyscraper_bin = get_skyscraper_bin()
@@ -86,12 +91,11 @@ def main(platform, input_dir, scrape_module=None, user_creds=None, scrape_flags=
     temp_dir = common_utils.create_temp_dir(__name__)
     config_path = os.path.join(temp_dir, 'config.ini')
     art_xml_path = os.path.join(temp_dir, 'artwork.xml')
-    scrape_flags = scrape_flags if scrape_flags else configs.SCRAPE_FLAGS
-    game_list_flags = game_list_flags if game_list_flags else configs.GAME_LIST_FLAGS
     common_utils.write_file(config_path, ''.join(configs.CONFIG), 'w')
     common_utils.write_file(art_xml_path, ''.join(configs.ARTWORK), 'w')
-    scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_creds, skyscraper_bin)
-    create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_path, output_dir, skyscraper_bin)
+    user_creds = get_user_creds_arg(user_name, password)
+    scrape(platform, input_dir, configs.SCRAPE_FLAGS, config_path, scrape_module, user_creds, skyscraper_bin)
+    create_gamelist(platform, input_dir, configs.GAME_LIST_FLAGS, config_path, art_xml_path, output_dir, skyscraper_bin)
     common_utils.cleanup_temp_dir(__name__)
 
 
@@ -99,7 +103,8 @@ def get_opts_parser():
     parser = OptionParser()
     parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM, default=None)
     parser.add_option('-s', '--scraper', dest='scrape_module', help=cmd_help.SCRAPE_MODULE, default=None)
-    parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS, default=None)
+    parser.add_option('-u', '--username', dest='user_name', help=cmd_help.USER_NAME, default=None)
+    parser.add_option('-q', '--password', dest='password', help=cmd_help.PASSWORD, default=None)
     parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
     parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.GAME_LIST_TARGET_DIR, default=None)
     return parser
@@ -108,7 +113,7 @@ def get_opts_parser():
 if __name__ == "__main__":
     parser = get_opts_parser()
     (opts, args) = parser.parse_args()
-    main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module, user_creds=opts.user_creds,
+    main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module, user_name=opts.user_name, password=opts.password,
          output_dir=opts.output_dir)
 
 # TODO - Allow user manipulation of scraping/gamelist flags

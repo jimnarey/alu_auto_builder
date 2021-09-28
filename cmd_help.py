@@ -12,7 +12,9 @@ PLATFORM = "Emulated platform. Passed to Skyscaper. Run 'Skyscraper --help' to s
 
 SCRAPE_MODULE = "Scraping source. Passed to Skyscaper. Run 'Skyscraper --help' to see available scraping modules."
 
-USER_CREDS = "Passed to Skyscaper. User credentials for scraping module."
+USER_NAME = "Passed to Skyscaper. User account name for scraping module."
+
+PASSWORD = "Passed to Skyscaper. Password for scraping module."
 
 # Gamelist generation only
 

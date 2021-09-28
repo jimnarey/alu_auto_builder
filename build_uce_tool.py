@@ -167,7 +167,7 @@ def main(input_dir, output_file):
     append_md5_to_img(ub_paths.cart_save_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_file_to_file(ub_paths.cart_tmp_file, ub_paths.cart_save_file)
     common_utils.copyfile(ub_paths.cart_tmp_file, output_file)
-    logging.info('Built: {0}\n\n\n'.format(output_file))
+    logging.info('Built: {0}'.format(output_file))
     ub_paths.cleanup()
 
 

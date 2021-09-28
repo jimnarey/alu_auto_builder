@@ -16,7 +16,7 @@ import common_utils
 # import configs
 import aluautobuild
 import errors
-import gui_opts
+import operations
 
 
 def get_opt_type(name):
@@ -143,7 +143,7 @@ class Controller:
 
     def _show_dialog(self, name):
         self._close_current_view()
-        view = OperationDialog(name, gui_opts.operations[name])
+        view = OperationDialog(name, operations.operations[name])
         self._connect_dialog_signals(view)
         self._show_view(view)
 
@@ -193,6 +193,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'common', 'title.png')))
     option_set = OptionSet()
-    controller = Controller(option_set, gui_opts.operations)
+    controller = Controller(option_set, operations.operations)
     controller.show_main_window()
     sys.exit(app.exec_())

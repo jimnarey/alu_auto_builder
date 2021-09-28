@@ -29,9 +29,9 @@ operations = {
     'scrape_and_build_uces': scrape_and_build_opts,
     'scrape_and_make_recipes': scrape_and_build_opts,
     'scrape_and_make_gamelist': (input_dir_opt, output_dir_opt, *scrape_opts),
-    'build_uces_from_game_list': build_from_game_list_opts,
-    'build_recipes_from_game_list': build_from_game_list_opts,
-    'build_from_recipes': (input_dir_opt, output_dir_opt),
+    'build_uces_from_gamelist': build_from_game_list_opts,
+    'build_recipes_from_gamelist': build_from_game_list_opts,
+    'build_uces_from_recipes': (input_dir_opt, output_dir_opt),
     'edit_uce_save_partition': (input_path_opt,)
 }
 

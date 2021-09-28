@@ -131,14 +131,14 @@ def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, retro_
     return True
 
 
-def edit_save_part(temp_dir, img_path, save_part_contents_path, retro_ini_path, file_manager, do_mount):
-    if do_mount:
+def edit_save_part(temp_dir, img_path, save_part_contents_path, retro_ini_path, file_manager, mount_method):
+    if mount_method:
         return edit_save_part_with_mount(img_path, save_part_contents_path, retro_ini_path, file_manager)
     else:
         return edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, retro_ini_path, file_manager)
 
 
-def main(uce_path, extract_path=None, replace_path=None, do_backup=False, do_mount=False, retro_ini_path=None, file_manager=None):
+def main(uce_path, extract_path=None, replace_path=None, backup_uce=False, mount_method=False, retro_ini_path=None, file_manager=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     uce_path = os.path.abspath(uce_path)
     if not pre_flight(uce_path, replace_path, file_manager):
@@ -154,7 +154,7 @@ def main(uce_path, extract_path=None, replace_path=None, do_backup=False, do_mou
     if extract_path:
         common_utils.copyfile(img_path, extract_path)
         return True
-    if do_backup:
+    if backup_uce:
         backup_path = uce_path + '.bak'
         common_utils.copyfile(uce_path, backup_path)
     # Read files from the save partition and create a replacement
@@ -163,7 +163,7 @@ def main(uce_path, extract_path=None, replace_path=None, do_backup=False, do_mou
         return True
     save_part_contents_path = os.path.join(temp_dir, 'save_part_contents')
     common_utils.make_dir(save_part_contents_path)
-    if edit_save_part(temp_dir, img_path, save_part_contents_path, retro_ini_path, file_manager, do_mount):
+    if edit_save_part(temp_dir, img_path, save_part_contents_path, retro_ini_path, file_manager, mount_method):
         rebuild_uce(uce_path, squashfs_etc, img_path)
     common_utils.cleanup_temp_dir(__name__)
 
@@ -172,10 +172,10 @@ def get_opts_parser():
     parser = OptionParser()
     parser.add_option('-u', '--uce', dest='uce_path', help="The UCE file you want to edit", default=None)
     parser.add_option('-e', '--extract', dest='extract_path', help="Extract the save partition to specified path and quit", default=None)
-    parser.add_option('-B', '--backup', dest='do_backup', action='store_true',
+    parser.add_option('-B', '--backup', dest='backup_uce', action='store_true',
                       help="Backup the UCE before any write operations", default=False)
     parser.add_option('-r', '--replace', dest='replace_path', help="Replace the save partition with the specified save.img, ignore subsequent options", default=None)
-    parser.add_option('-M', '--mount', dest='do_mount', action='store_true', help="Use mount method of editing UCE, Linux only", default=False)
+    parser.add_option('-M', '--mount', dest='mount_method', action='store_true', help="Use mount method of editing UCE, Linux only", default=False)
     parser.add_option('-i', '--retroini', dest='retro_ini_path', help="The UCE file you want to edit", default=None)
     parser.add_option('-f', '--fileman', dest='file_manager', help="Specify a particular file manager on Linux", default=None)
     return parser
@@ -184,5 +184,5 @@ def get_opts_parser():
 if __name__ == "__main__":
     parser = get_opts_parser()
     (opts, args) = parser.parse_args()
-    main(opts.uce_path,  extract_path=opts.extract_path, replace_path=opts.replace_path, do_backup=opts.do_backup,
-         do_mount=opts.do_mount, retro_ini_path=opts.retro_ini_path, file_manager=opts.file_manager)
+    main(opts.uce_path,  extract_path=opts.extract_path, replace_path=opts.replace_path, backup_uce=opts.backup_uce,
+         mount_method=opts.mount_method, retro_ini_path=opts.retro_ini_path, file_manager=opts.file_manager)
