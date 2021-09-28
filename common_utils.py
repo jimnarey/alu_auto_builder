@@ -205,6 +205,17 @@ def run_debugfs_cmd_file(cmd_file, img_path, return_dir=os.getcwd()):
     execute_with_output(cmd)
     # simple_execute(cmd)
 
+# Uses bash script - no joy with write commands
+# def run_debugfs_cmd_file(cmd_file, img_path, return_dir=os.getcwd()):
+#     bin_ = get_platform_bin('debugfs.exe', 'debugfs_run_cmds.sh', linux_script=True)
+#     cmd = [
+#         bin_,
+#         cmd_file,
+#         img_path
+#     ]
+#     execute_with_output(cmd)
+#     # simple_execute(cmd)
+
 
 def create_blank_file(file_path, size=4194304):
     bin_ = get_platform_bin('truncate.exe', 'truncate')

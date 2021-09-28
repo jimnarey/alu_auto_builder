@@ -30,6 +30,7 @@ def split_uce(uce_path):
 
 def rebuild_uce(uce_path, squashfs_etc, img_path):
     save_data = common_utils.get_file_content(img_path, 'rb')
+    # pprint.pprint(type(save_data), type(squashfs_etc), img_path)
     common_utils.write_file(uce_path, squashfs_etc + save_data, 'wb')
 
 
@@ -114,14 +115,26 @@ def set_all_755(save_part_contents_path):
         common_utils.set_755(dir_)
 
 
-def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
-    dirs, files = get_save_contents(save_part_contents_path)
-    mkdir_cmd_file_path = common_utils.create_debugfs_mkdir_cmd_file(temp_dir, dirs, source_path=save_part_contents_path)
-    common_utils.run_debugfs_cmd_file(mkdir_cmd_file_path, img_path)
-    write_cmd_file_path = common_utils.create_debugfs_write_cmd_file(temp_dir, files, source_path=save_part_contents_path)
-    common_utils.run_debugfs_cmd_file(write_cmd_file_path, img_path)
+# def copy_into_save_img(temp_dir, save_part_contents_path, img_path):
+#     dirs, files = get_save_contents(save_part_contents_path)
+#     mkdir_cmd_file_path = common_utils.create_debugfs_mkdir_cmd_file(temp_dir, dirs, source_path=save_part_contents_path)
+#     common_utils.run_debugfs_cmd_file(mkdir_cmd_file_path, img_path)
+#     write_cmd_file_path = common_utils.create_debugfs_write_cmd_file(temp_dir, files, source_path=save_part_contents_path)
+#     common_utils.run_debugfs_cmd_file(write_cmd_file_path, img_path)
 
+# mke2fs -d ./sonic3_part_contents_with_saves/ -t ext4
 
+def create_updated_save_part(save_part_contents_path, img_path):
+    bin_ = common_utils.get_platform_bin('mke2fs.exe', 'mke2fs')
+    cmd = [
+        bin_,
+        '-d',
+        save_part_contents_path,
+        '-t',
+        'ext4',
+        img_path
+    ]
+    common_utils.execute_with_output(cmd)
 #
 # END debugfs method functions
 #
@@ -141,11 +154,14 @@ def access_save_contents(temp_dir, img_path, save_part_contents_path, retro_ini_
     else:
         extract_img_contents(temp_dir)
         set_all_755(save_part_contents_path)
+        # breakpoint()
         edit_contents(save_part_contents_path, retro_ini_path, file_manager)
         input('Press enter when ready')
         common_utils.delete_file(img_path)
-        common_utils.make_ext4_part_2(img_path)
-        copy_into_save_img(temp_dir, save_part_contents_path, img_path)
+        # common_utils.make_ext4_part_2(img_path)
+        # copy_into_save_img(temp_dir, save_part_contents_path, img_path)
+        common_utils.create_blank_file(img_path)
+        create_updated_save_part(save_part_contents_path, img_path)
         return True
 
 
