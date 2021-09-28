@@ -102,11 +102,11 @@ def main(platform, input_dir, scrape_module=None, user_name=None, password=None,
 def get_opts_parser():
     parser = OptionParser()
     parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM, default=None)
-    parser.add_option('-s', '--scraper', dest='scrape_module', help=cmd_help.SCRAPE_MODULE, default=None)
+    parser.add_option('-s', '--scrape_module', dest='scrape_module', help=cmd_help.SCRAPE_MODULE, default=None)
     parser.add_option('-u', '--username', dest='user_name', help=cmd_help.USER_NAME, default=None)
     parser.add_option('-q', '--password', dest='password', help=cmd_help.PASSWORD, default=None)
     parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
-    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.GAME_LIST_TARGET_DIR, default=None)
+    parser.add_option('-o', '--outputdir', dest='output_dir', help=cmd_help.GAME_LIST_TARGET_DIR, default=None)
     return parser
 
 

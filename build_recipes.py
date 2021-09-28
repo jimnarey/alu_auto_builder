@@ -12,8 +12,8 @@ import cmd_help
 import errors
 
 
-def validate_args(gamelist_path, core_path, bios_dir, output_dir):
-    if not gamelist_path or not core_path:
+def validate_args(input_path, core_path, bios_dir, output_dir):
+    if not input_path or not core_path:
         logging.error('You must specify at least a path to a gamelist.xml and a path to a core')
         return False
     for dir_path in (bios_dir, output_dir):
@@ -24,11 +24,11 @@ def validate_args(gamelist_path, core_path, bios_dir, output_dir):
     return True
 
 
-def read_gamelist(gamelist_path):
+def read_gamelist(input_path):
     try:
-        tree = ET.parse(gamelist_path)
+        tree = ET.parse(input_path)
     except ParseError:
-        logging.error('{0} does not appear to be a valid XML file'.format(gamelist_path))
+        logging.error('{0} does not appear to be a valid XML file'.format(input_path))
         return False
     return tree.getroot()
 
@@ -94,15 +94,15 @@ def setup_uce_source(core_path, bios_dir, game_data, game_dir):
     copy_source_files(core_path, bios_dir, game_data, game_dir)
 
 
-def main(gamelist_path, core_path, bios_dir=None, output_dir=None):
+def main(input_path, core_path, bios_dir=None, output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(gamelist_path))[0], 'recipes')
+    output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
     common_utils.make_dir(output_dir)
-    if not validate_args(gamelist_path, core_path, bios_dir, output_dir):
+    if not validate_args(input_path, core_path, bios_dir, output_dir):
         return
     logging.info('Starting new recipes build run\n\n\n')
     common_utils.make_dir(output_dir)
-    gamelist = read_gamelist(gamelist_path)
+    gamelist = read_gamelist(input_path)
     if gamelist:
         for game_entry in gamelist:
             game_data = parse_game_entry(game_entry)
@@ -110,13 +110,12 @@ def main(gamelist_path, core_path, bios_dir=None, output_dir=None):
             setup_uce_source(core_path, bios_dir, game_data, game_dir)
 
 
-
 def get_opts_parser():
     parser = OptionParser()
-    parser.add_option('-g', '--gamelist', dest='gamelist_path', help=cmd_help.GAME_LIST, default=None)
-    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR, default=None)
-    parser.add_option('-c', '--core', dest='core_path', help=cmd_help.CORE, default=None)
-    parser.add_option('-b', '--bios', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
+    parser.add_option('-i', '--inputpath', dest='input_path', help=cmd_help.GAME_LIST, default=None)
+    parser.add_option('-c', '--corepath', dest='core_path', help=cmd_help.CORE, default=None)
+    parser.add_option('-o', '--outputdir', dest='output_dir', help=cmd_help.OUTPUT_DIR, default=None)
+    parser.add_option('-b', '--biosdir', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
     return parser
 
 
@@ -124,6 +123,6 @@ if __name__ == "__main__":
     parser = get_opts_parser()
     (opts, args) = parser.parse_args()
 
-    main(opts.gamelist_path, opts.core_path, opts.bios_dir, opts.output_dir)
+    main(opts.input_path, opts.core_path, opts.bios_dir, opts.output_dir)
 
 

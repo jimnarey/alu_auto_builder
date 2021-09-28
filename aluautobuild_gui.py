@@ -22,7 +22,7 @@ import operations
 def get_opt_type(name):
     name_parts = name.split('_')
     try:
-        suffix = name_parts[1]
+        suffix = name_parts[-1]
         if suffix in ('dir', 'path'):
             return suffix
     except IndexError:

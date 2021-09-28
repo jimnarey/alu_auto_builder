@@ -34,7 +34,7 @@ def pre_flight(input_dir):
     if PLATFORM not in ('linux', 'win32'):
         logging.error(errors.INVALID_OS)
         return False
-    if not os.path.isdir(input_dir):
+    if not input_dir or not os.path.isdir(input_dir):
         logging.error(errors.invalid_path(input_dir, 'directory'))
     return True
 
@@ -152,8 +152,9 @@ def get_save_part(ub_paths):
         common_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
 
 
-def main(input_dir, output_file):
+def main(input_dir, output_path=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
+    output_path = output_path if output_path else os.path.join(input_dir, '{0}.uce'.format(os.path.split(os.path.abspath(input_dir))[-1]))
     if not pre_flight(input_dir):
         return
     logging.info('Building new UCE')
@@ -166,26 +167,22 @@ def main(input_dir, output_file):
     get_save_part(ub_paths)
     append_md5_to_img(ub_paths.cart_save_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_file_to_file(ub_paths.cart_tmp_file, ub_paths.cart_save_file)
-    common_utils.copyfile(ub_paths.cart_tmp_file, output_file)
-    logging.info('Built: {0}'.format(output_file))
+    common_utils.copyfile(ub_paths.cart_tmp_file, output_path)
+    logging.info('Built: {0}'.format(output_path))
     ub_paths.cleanup()
 
 
 def get_opts_parser():
     parser = OptionParser()
-    parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
-    parser.add_option('-o', '--output', dest='output_file', help=cmd_help.OUTPUT_DIR, default=os.path.join(os.getcwd(), 'output.uce'))
+    parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=None)
+    # TODO - rename this help command below
+    parser.add_option('-o', '--outputpath', dest='output_path', help=cmd_help.OUTPUT_DIR, default=None)
     return parser
-
-
-def validate_opts(parser):
-    (opts, args) = parser.parse_args()
-    return opts, args
 
 
 if __name__ == "__main__":
     parser = get_opts_parser()
-    (opts, args) = validate_opts(parser)
+    (opts, args) = parser.parse_args()
 
-    main(opts.input_dir, opts.output_file)
+    main(opts.input_dir, opts.output_path)
 
