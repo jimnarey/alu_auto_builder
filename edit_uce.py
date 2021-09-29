@@ -6,13 +6,12 @@ import logging
 from optparse import OptionParser
 
 import common_utils
+import uce_utils
 
 
 def pre_flight(input_path, replace_path, file_manager):
     valid = True
-    if not input_path or not os.path.isfile(input_path):
-        logging.error('You must provide a path to a UCE file to edit')
-        valid = False
+    valid = common_utils.validate_required_path(input_path)
     if replace_path and not os.path.isfile(replace_path):
         logging.error('The provided path to a replacement save image is not valid')
         valid = False
@@ -23,17 +22,17 @@ def pre_flight(input_path, replace_path, file_manager):
     # TODO Check file_manager is a valid executable or select from those available
 
 
-def split_uce(input_path):
-    logging.info('Splitting UCE file {0} into main section and save partition'.format(input_path))
-    data = common_utils.get_file_content(input_path, 'rb')
-    squashfs_etc = data[:-4194304]
-    save_data = data[-4194304:]
-    return squashfs_etc, save_data
+# def split_uce(input_path):
+#     logging.info('Splitting UCE file {0} into main section and save partition'.format(input_path))
+#     data = common_utils.get_file_content(input_path, 'rb')
+#     squashfs_etc_data = data[:-4194304]
+#     save_data = data[-4194304:]
+#     return squashfs_etc_data, save_data
 
 
-def rebuild_uce(input_path, squashfs_etc, img_path):
+def rebuild_uce(input_path, squashfs_etc_data, img_path):
     save_data = common_utils.get_file_content(img_path, 'rb')
-    common_utils.write_file(input_path, squashfs_etc + save_data, 'wb')
+    common_utils.write_file(input_path, squashfs_etc_data + save_data, 'wb')
 
 
 def open_file_manager(path, file_manager):
@@ -126,8 +125,8 @@ def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, retro_
     edit_contents(save_part_contents_path, retro_ini_path, file_manager)
     input('Press enter when ready')
     common_utils.delete_file(img_path)
-    common_utils.create_blank_file(img_path)
-    common_utils.make_save_part_from_dir(save_part_contents_path, img_path)
+    uce_utils.create_blank_file(img_path)
+    uce_utils.make_save_part_from_dir(save_part_contents_path, img_path)
     return True
 
 
@@ -138,36 +137,36 @@ def edit_save_part(temp_dir, img_path, save_part_contents_path, retro_ini_path, 
         return edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, retro_ini_path, file_manager)
 
 
-def main(input_path, extract_path=None, replace_path=None, backup_uce=False, mount_method=False, retro_ini_path=None, file_manager=None):
+def main(input_path, replace_path=None, backup_uce=False, mount_method=False, retro_ini_path=None, file_manager=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    input_path = os.path.abspath(input_path)
     if not pre_flight(input_path, replace_path, file_manager):
         return False
+    input_path = os.path.abspath(input_path)
     temp_dir = common_utils.create_temp_dir(__name__)
     file_manager = file_manager if file_manager else 'thunar'
-    squashfs_etc, save_data = split_uce(input_path)
+    squashfs_etc_data, save_data = uce_utils.split_uce(input_path)
     img_path = os.path.join(temp_dir, 'save.img')
     common_utils.write_file(img_path, save_data, 'wb')
-    if extract_path:
-        common_utils.copyfile(img_path, extract_path)
-        return True
+    # if extract_path:
+    #     common_utils.copyfile(img_path, extract_path)
+    #     return True
     if backup_uce:
         backup_path = input_path + '.bak'
         common_utils.copyfile(input_path, backup_path)
     if replace_path:
-        rebuild_uce(input_path, squashfs_etc, replace_path)
+        rebuild_uce(input_path, squashfs_etc_data, replace_path)
         return True
     save_part_contents_path = os.path.join(temp_dir, 'save_part_contents')
     common_utils.make_dir(save_part_contents_path)
     if edit_save_part(temp_dir, img_path, save_part_contents_path, retro_ini_path, file_manager, mount_method):
-        rebuild_uce(input_path, squashfs_etc, img_path)
+        rebuild_uce(input_path, squashfs_etc_data, img_path)
     common_utils.cleanup_temp_dir(__name__)
 
 
 def get_opts_parser():
     parser = OptionParser()
     parser.add_option('-i', '--inputpath', dest='input_path', help="The UCE file you want to edit", default=None)
-    parser.add_option('-e', '--extractpath', dest='extract_path', help="Extract the save partition to specified path and quit", default=None)
+    # parser.add_option('-e', '--extractpath', dest='extract_path', help="Extract the save partition to specified path and quit", default=None)
     parser.add_option('-B', '--backupuce', dest='backup_uce', action='store_true',
                       help="Backup the UCE before any write operations", default=False)
     parser.add_option('-r', '--replacepath', dest='replace_path', help="Replace the save partition with the specified save.img, ignore subsequent options", default=None)
@@ -180,5 +179,5 @@ def get_opts_parser():
 if __name__ == "__main__":
     parser = get_opts_parser()
     (opts, args) = parser.parse_args()
-    main(opts.input_path,  extract_path=opts.extract_path, replace_path=opts.replace_path, backup_uce=opts.backup_uce,
+    main(opts.input_path, replace_path=opts.replace_path, backup_uce=opts.backup_uce,
          mount_method=opts.mount_method, retro_ini_path=opts.retro_ini_path, file_manager=opts.file_manager)

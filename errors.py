@@ -6,9 +6,7 @@ GAMELIST_NO_OUTPUT_DIR = 'You must specify an output dir when building from a ga
 
 SCRAPE_NO_INPUT_DIR = 'You must specify an input dir when scraping'
 
-SCRAPE_NO_PLATFORM = 'You must provide a platform (i.e. emulated system) when scraping'
 
-SCRAPE_INVALID_PLATFORM = 'You must specify a valid platform (i.e. emulated system) when scraping'
 
 SCRAPE_INVALID_MODULE = 'You must provide a valid scraping module (metadata source) when scraping'
 
@@ -21,3 +19,9 @@ INVALID_OS = 'This tool requires either Linux or Windows'
 
 def invalid_path(path, path_type):
     return '{0} is not a valid {1}'.format(path, path_type)
+
+
+# Deprecated
+# The two checks for this pair were merged, re-draft:
+# SCRAPE_NO_PLATFORM = 'You must provide a platform (i.e. emulated system) when scraping'
+# SCRAPE_INVALID_PLATFORM = 'You must specify a valid platform (i.e. emulated system) when scraping'

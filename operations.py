@@ -1,5 +1,7 @@
 import configs
 
+# TODO consider changing 'required' to 'gui_required' given command line can auto generate some opts based on cwd
+
 input_path_opt = {'name': 'input_path', 'short': 'i', 'required': True}
 
 input_dir_opt = {'name': 'input_dir', 'short': 'i', 'required': True}
@@ -21,7 +23,7 @@ scrape_opts = (
     {'name': 'password', 'short': 'q', 'required': False}
 )
 
-extract_save_part_opt = {'name': 'extract_path', 'short': 'e', 'required': False}
+# extract_save_part_opt = {'name': 'extract_path', 'short': 'e', 'required': False}
 
 replace_save_part_opt = {'name': 'replace_path', 'short': 'r', 'required': False}
 
@@ -44,11 +46,12 @@ operations = {
     'build_uces_from_recipes': (input_dir_opt, output_dir_opt),
     'build_single_uce_from_recipe': (input_dir_opt, output_path_opt),
     'edit_uce_save_partition': (input_path_opt, *edit_save_part_opts),
-    'extract_uce_save_partition': (input_path_opt, extract_save_part_opt),
+    'extract_uce_save_partition': (input_path_opt, output_path_opt),
     'replace_uce_save_partition': (input_path_opt, replace_save_part_opt)
 }
 
-cmd_line_edit_uce_opts = (input_path_opt, extract_save_part_opt, replace_save_part_opt, *edit_save_part_opts)
+
+# cmd_line_edit_uce_opts = (input_path_opt, extract_save_part_opt, replace_save_part_opt, *edit_save_part_opts)
 
 # TODO:
 # edit_uce

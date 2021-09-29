@@ -5,14 +5,13 @@ from optparse import OptionParser
 
 import build_uce_tool
 import common_utils
+import errors
 
 
 def validate_args(input_dir, output_dir):
     valid = True
-    for dir_ in (input_dir, output_dir):
-        if not os.path.isdir(dir_):
-            logging.error('Directory {0} is not a valid dir'.format(dir_))
-            valid = False
+    valid = common_utils.validate_required_dir(input_dir)
+    valid = common_utils.validate_optional_dir(output_dir)
     return valid
 
 
@@ -23,7 +22,7 @@ def validate_recipe_subdirs(dir_):
         if not os.path.isdir(subdir_path):
             logging.warning('Directory {0} does not contain {1} subdir'.format(dir_, subdir))
             valid = False
-        if not os.listdir(subdir_path):
+        elif not os.listdir(subdir_path):
             logging.warning('Directory {0} in {1} is empty'.format(subdir, dir_))
             valid = False
     return valid
@@ -57,11 +56,11 @@ def make_recipes(recipe_dirs, output_dir):
 
 def main(input_dir, output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    input_dir = input_dir if input_dir else os.getcwd()
-    output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(input_dir, 'UCE')
-    common_utils.make_dir(output_dir)
+    input_dir = os.path.abspath(input_dir) if input_dir else os.getcwd()
     if not validate_args(input_dir, output_dir):
         return False
+    output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(input_dir, 'UCE')
+    common_utils.make_dir(output_dir)
     recipe_dirs = get_recipe_dirs(input_dir)
     make_recipes(recipe_dirs, output_dir)
 

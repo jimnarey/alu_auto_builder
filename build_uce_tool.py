@@ -9,6 +9,7 @@ import logging
 
 import cmd_help
 import common_utils
+import uce_utils
 import errors
 
 
@@ -31,12 +32,12 @@ PLATFORM = common_utils.get_platform()
 
 
 def pre_flight(input_dir):
+    valid = True
     if PLATFORM not in ('linux', 'win32'):
         logging.error(errors.INVALID_OS)
-        return False
-    if not input_dir or not os.path.isdir(input_dir):
-        logging.error(errors.invalid_path(input_dir, 'directory'))
-    return True
+        valid = False
+    valid = common_utils.validate_required_dir(input_dir)
+    return valid
 
 
 def relink_boxart(data_dir):
@@ -145,18 +146,20 @@ def get_save_part(ub_paths):
             extract_and_copy_save_zip(ub_paths)
         else:
             logging.info('Creating save partition from contents of save dir')
-            common_utils.create_blank_file(ub_paths.cart_save_file)
-            common_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
+            uce_utils.create_blank_file(ub_paths.cart_save_file)
+            uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
     else:
-        common_utils.make_ext4_part(ub_paths.cart_save_file)
-        common_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
+        uce_utils.make_ext4_part(ub_paths.cart_save_file)
+        uce_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
 
 
 def main(input_dir, output_path=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    output_path = output_path if output_path else os.path.join(input_dir, '{0}.uce'.format(os.path.split(os.path.abspath(input_dir))[-1]))
+    input_dir = input_dir if input_dir else os.getcwd()
     if not pre_flight(input_dir):
         return
+    if not output_path:
+        output_path = os.path.join(input_dir, '{0}.uce'.format(os.path.split(os.path.abspath(input_dir))[-1]))
     logging.info('Building new UCE')
     app_root = common_utils.get_app_root()
     ub_paths = UCEBuildPaths()

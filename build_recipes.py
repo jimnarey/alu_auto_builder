@@ -13,15 +13,12 @@ import errors
 
 
 def validate_args(input_path, core_path, bios_dir, output_dir):
-    if not input_path or not core_path:
-        logging.error('You must specify at least a path to a gamelist.xml and a path to a core')
-        return False
+    valid = True
+    for file_path in (input_path, core_path):
+        valid = common_utils.validate_required_path(file_path)
     for dir_path in (bios_dir, output_dir):
-        if dir_path:
-            if not os.path.isdir(dir_path):
-                logging.error(errors.invalid_path(dir_path, 'dir'))
-                return False
-    return True
+        valid = common_utils.validate_optional_dir(dir_path)
+    return valid
 
 
 def read_gamelist(input_path):
@@ -96,10 +93,10 @@ def setup_uce_source(core_path, bios_dir, game_data, game_dir):
 
 def main(input_path, core_path, bios_dir=None, output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
-    common_utils.make_dir(output_dir)
     if not validate_args(input_path, core_path, bios_dir, output_dir):
         return
+    output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
+    common_utils.make_dir(output_dir)
     logging.info('Starting new recipes build run\n\n\n')
     common_utils.make_dir(output_dir)
     gamelist = read_gamelist(input_path)

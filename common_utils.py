@@ -7,9 +7,9 @@ import logging
 import tempfile
 import stat
 import time
-import errno
-import pprint
 from subprocess import Popen, PIPE
+
+# TODO - what can go wrong/should catch with os.getcwd() ?
 
 active_temp_dirs = {}
 
@@ -165,75 +165,31 @@ def get_platform_bin(windows_bin, linux_bin, linux_script=False):
     return bin_
 
 
-def write_cmd_file(temp_dir, contents):
-    cmd_file_path = os.path.join(temp_dir, 'debug_fs_cmd.txt-{0}'.format(time.time_ns()))
-    write_file(cmd_file_path, '\n'.join(contents) + '\n', 'w')
-    return cmd_file_path
-
-
-def create_debugfs_mkdir_cmd_file(temp_dir, items, source_path=None):
-    cmd_file_contents = []
-    for item in items:
-        target = item.replace('{0}/'.format(source_path), '') if source_path else item
-        cmd_file_contents.append('{0} "/{1}"'.format('mkdir', target))
-    return write_cmd_file(temp_dir, cmd_file_contents)
-
-
-def run_debugfs_cmd_file(cmd_file, img_path, return_dir=os.getcwd()):
-    bin_ = get_platform_bin('debugfs.exe', 'debugfs')
-    cmd = [
-        bin_,
-        '-w',
-        '-f',
-        cmd_file,
-        img_path
-    ]
-    execute_with_output(cmd)
-
-
-def create_save_part_base_dirs(temp_dir, img_path):
-    cmd_file = create_debugfs_mkdir_cmd_file(temp_dir, ['work', 'upper'])
-    run_debugfs_cmd_file(cmd_file, img_path)
-
-
-def create_blank_file(file_path, size=4194304):
-    bin_ = get_platform_bin('truncate.exe', 'truncate')
-    cmd = [
-        bin_,
-        '-s',
-        str(size),
-        file_path
-    ]
-    execute_with_output(cmd)
-
-
-def make_ext4_part(cart_save_file):
-    create_blank_file(cart_save_file)
-    bin_ = get_platform_bin('mke2fs.exe', 'mke2fs')
-    cmd = [
-        bin_,
-        '-t',
-        'ext4',
-        cart_save_file
-    ]
-    execute_with_output(cmd)
-
-
-def make_save_part_from_dir(root_dir_path, img_path):
-    bin_ = get_platform_bin('mke2fs.exe', 'mke2fs')
-    cmd = [
-        bin_,
-        '-d',
-        root_dir_path,
-        '-t',
-        'ext4',
-        img_path
-    ]
-    execute_with_output(cmd)
-
-
 def set_755(file_path):
     os.chmod(file_path, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+
+
+def validate_required_path(file_path, option_name=''):
+    if not file_path or not os.path.isfile(file_path):
+        logging.error('You must specify a valid path for {0}'.format(option_name))
+        return False
+    return True
+
+
+def validate_optional_dir(dir_path, option_name=''):
+    if dir_path and not os.path.isfile(dir_path):
+        logging.error('You must specify a valid path for {0}'.format(option_name))
+        return False
+    return True
+
+
+def validate_required_dir(dir_path, option_name=''):
+    if not dir_path or not os.path.isdir(dir_path):
+        logging.error('You must specify a valid path for {0}'.format(option_name))
+        return False
+    return True
+
+
 
 # Deprecated
 
