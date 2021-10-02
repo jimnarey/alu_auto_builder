@@ -9,15 +9,18 @@ import logging
 import common_utils
 import configs
 import cmd_help
-import errors
+import operations
 
 
 def validate_args(input_path, core_path, bios_dir, output_dir):
     valid = True
-    for file_path in (input_path, core_path):
-        valid = common_utils.validate_required_path(file_path)
-    for dir_path in (bios_dir, output_dir):
-        valid = common_utils.validate_optional_dir(dir_path)
+    for path in (input_path, core_path):
+        if not common_utils.validate_required_path(path):
+            valid = False
+    if not common_utils.validate_parent_dir(output_dir):
+        valid = False
+    if not common_utils.validate_optional_dir(bios_dir):
+        valid = False
     return valid
 
 
@@ -95,6 +98,7 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     if not validate_args(input_path, core_path, bios_dir, output_dir):
         return
+    print(input_path, core_path, bios_dir, output_dir)
     output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
     common_utils.make_dir(output_dir)
     logging.info('Starting new recipes build run\n\n\n')
@@ -107,19 +111,10 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
             setup_uce_source(core_path, bios_dir, game_data, game_dir)
 
 
-def get_opts_parser():
-    parser = OptionParser()
-    parser.add_option('-i', '--inputpath', dest='input_path', help=cmd_help.GAME_LIST, default=None)
-    parser.add_option('-c', '--corepath', dest='core_path', help=cmd_help.CORE, default=None)
-    parser.add_option('-o', '--outputdir', dest='output_dir', help=cmd_help.OUTPUT_DIR, default=None)
-    parser.add_option('-b', '--biosdir', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
-    return parser
-
-
 if __name__ == "__main__":
-    parser = get_opts_parser()
-    (opts, args) = parser.parse_args()
+    parser = common_utils.get_cmd_line_args(operations.operations['build_recipes_from_gamelist'])
+    args = vars(parser.parse_args())
+    main(args['input_path'], args['core_path'], args['bios_dir'], args['output_dir'])
 
-    main(opts.input_path, opts.core_path, opts.bios_dir, opts.output_dir)
 
 

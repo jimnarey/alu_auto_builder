@@ -7,6 +7,7 @@ import logging
 import tempfile
 import stat
 import time
+import argparse
 from subprocess import Popen, PIPE
 
 # TODO - what can go wrong/should catch with os.getcwd() ?
@@ -183,13 +184,38 @@ def validate_optional_dir(dir_path, option_name=''):
     return True
 
 
-def validate_required_dir(dir_path, option_name=''):
+def validate_existing_dir(dir_path, option_name=''):
     if not dir_path or not os.path.isdir(dir_path):
         logging.error('You must specify a valid path for {0}'.format(option_name))
         return False
     return True
 
 
+def validate_parent_dir(dir_path, option_name=''):
+    if dir_path and not validate_existing_dir(os.path.split(dir_path)[0], option_name=option_name):
+        return False
+    return True
+
+
+def get_arg_params(opt_short_name):
+    if opt_short_name.islower():
+        action = 'store'
+        default = None
+    else:
+        action = 'store_true'
+        default = False
+    return action, default
+
+
+# TODO Remove the 'optional arguments' message from --help
+def get_cmd_line_args(opt_set):
+    parser = argparse.ArgumentParser(prog='replace_save_part')
+    for opt in opt_set:
+        long_opt = '--{0}'.format(opt['name']).replace('_', '')
+        short_opt = '-{0}'.format(opt['short'])
+        action, default = get_arg_params(opt['short'])
+        parser.add_argument(long_opt, short_opt, dest=opt['name'], default=default, action=action)
+    return parser
 
 # Deprecated
 

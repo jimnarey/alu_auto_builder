@@ -6,12 +6,15 @@ from optparse import OptionParser
 import build_uce_tool
 import common_utils
 import errors
+import operations
 
 
 def validate_args(input_dir, output_dir):
     valid = True
-    valid = common_utils.validate_required_dir(input_dir)
-    valid = common_utils.validate_optional_dir(output_dir)
+    if not common_utils.validate_existing_dir(input_dir):
+        valid = False
+    if not common_utils.validate_parent_dir(output_dir):
+        valid = False
     return valid
 
 
@@ -45,7 +48,9 @@ def validate_recipe_dir(dir_):
 
 
 def get_recipe_dirs(input_dir):
-    return [item for item in os.listdir(input_dir) if os.path.isdir(item) and validate_recipe_dir(item)]
+    sub_dirs = [os.path.join(input_dir, item) for item in os.listdir(input_dir)]
+    recipe_dirs = [dir_ for dir_ in sub_dirs if validate_recipe_dir(dir_)]
+    return recipe_dirs
 
 
 def make_recipes(recipe_dirs, output_dir):
@@ -65,20 +70,7 @@ def main(input_dir, output_dir=None):
     make_recipes(recipe_dirs, output_dir)
 
 
-def get_opts_parser():
-    parser = OptionParser()
-    parser.add_option('-i', '--inputdir', dest='input_dir', help="Dir containing recipe dirs", default=None)
-    parser.add_option('-o', '--outputdir', dest='output_dir', help="Dir to save UCE files", default=None)
-    return parser
-
-
-def validate_opts(parser):
-    (opts, args) = parser.parse_args()
-    return opts, args
-
-
 if __name__ == "__main__":
-    parser = get_opts_parser()
-    (opts, args) = validate_opts(parser)
-
-    main(opts.input_dir, opts.output_dir)
+    parser = common_utils.get_cmd_line_args(operations.operations['build_uces_from_recipes'])
+    args = vars(parser.parse_args())
+    main(args['input_dir'], output_dir=args['output_dir'])

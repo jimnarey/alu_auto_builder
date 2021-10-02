@@ -4,13 +4,12 @@ import math
 import os
 import hashlib
 from zipfile import ZipFile, BadZipfile
-from optparse import OptionParser
 import logging
 
-import cmd_help
 import common_utils
 import uce_utils
 import errors
+import operations
 
 
 class UCEBuildPaths:
@@ -36,7 +35,8 @@ def pre_flight(input_dir):
     if PLATFORM not in ('linux', 'win32'):
         logging.error(errors.INVALID_OS)
         valid = False
-    valid = common_utils.validate_required_dir(input_dir)
+    if not common_utils.validate_existing_dir(input_dir):
+        valid = False
     return valid
 
 
@@ -175,17 +175,8 @@ def main(input_dir, output_path=None):
     ub_paths.cleanup()
 
 
-def get_opts_parser():
-    parser = OptionParser()
-    parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=None)
-    # TODO - rename this help command below
-    parser.add_option('-o', '--outputpath', dest='output_path', help=cmd_help.OUTPUT_DIR, default=None)
-    return parser
-
-
 if __name__ == "__main__":
-    parser = get_opts_parser()
-    (opts, args) = parser.parse_args()
-
-    main(opts.input_dir, opts.output_path)
+    parser = common_utils.get_cmd_line_args(operations.operations['build_single_uce_from_recipe'])
+    args = vars(parser.parse_args())
+    main(args['input_dir'], output_path=args['output_path'])
 

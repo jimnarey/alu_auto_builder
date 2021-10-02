@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 import os
-from optparse import OptionParser
 from pathlib import Path
 import logging
 
 import configs
 import common_utils
-import cmd_help
 import errors
+import operations
+
 
 PLATFORM = common_utils.get_platform()
 
@@ -23,8 +23,10 @@ def validate_args(platform, scrape_module, input_dir, output_dir):
     if scrape_module not in configs.SCRAPING_MODULES:
         logging.error(errors.SCRAPE_INVALID_MODULE)
         valid = False
-    valid = common_utils.validate_required_dir(input_dir)
-    valid = common_utils.validate_optional_dir(output_dir)
+    if not common_utils.validate_existing_dir(input_dir):
+        valid = False
+    if not common_utils.validate_parent_dir(output_dir):
+        valid = False
     return valid
 
 
@@ -82,7 +84,6 @@ def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_p
 def main(platform, input_dir, scrape_module=None, user_name=None, password=None, output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     logging.info('Starting gamelist builder\n\n\n')
-    # skyscraper_bin = get_skyscraper_bin()
     scrape_module = scrape_module if scrape_module else 'screenscraper'
     input_dir = os.path.abspath(input_dir) if input_dir else os.getcwd()
     if not validate_args(platform, scrape_module, input_dir, output_dir):
@@ -99,22 +100,10 @@ def main(platform, input_dir, scrape_module=None, user_name=None, password=None,
     common_utils.cleanup_temp_dir(__name__)
 
 
-def get_opts_parser():
-    parser = OptionParser()
-    parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM, default=None)
-    parser.add_option('-s', '--scrape_module', dest='scrape_module', help=cmd_help.SCRAPE_MODULE, default=None)
-    parser.add_option('-u', '--username', dest='user_name', help=cmd_help.USER_NAME, default=None)
-    parser.add_option('-q', '--password', dest='password', help=cmd_help.PASSWORD, default=None)
-    parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
-    parser.add_option('-o', '--outputdir', dest='output_dir', help=cmd_help.GAME_LIST_TARGET_DIR, default=None)
-    return parser
-
-
 if __name__ == "__main__":
-    parser = get_opts_parser()
-    (opts, args) = parser.parse_args()
-    main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module, user_name=opts.user_name,
-         password=opts.password,
-         output_dir=opts.output_dir)
+    parser = common_utils.get_cmd_line_args(operations.operations['scrape_and_make_gamelist'])
+    args = vars(parser.parse_args())
+    main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'], user_name=['user_name'],
+         password=args['password'], output_dir=args['output_dir'])
 
 # TODO - Allow user manipulation of scraping/gamelist flags

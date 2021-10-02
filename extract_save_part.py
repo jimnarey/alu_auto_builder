@@ -2,7 +2,7 @@
 
 import os
 import logging
-import argparse
+# import argparse
 
 import common_utils
 import uce_utils
@@ -23,11 +23,6 @@ def main(input_path, output_path=None):
 
 
 if __name__ == "__main__":
-    opts_set = operations.operations['extract_uce_save_partition']
-    parser = argparse.ArgumentParser(prog='extract_save_part')
-    for opt in opts_set:
-        long_opt = '--{0}'.format(opt['name']).replace('_', '')
-        short_opt = '-{0}'.format(opt['short'])
-        parser.add_argument(long_opt, short_opt, dest=opt['name'], default=None)
+    parser = common_utils.get_cmd_line_args(operations.operations['extract_uce_save_partition'])
     args = vars(parser.parse_args())
-    main(args['input_path'], args['output_path'])
+    main(args['input_path'], output_path=args['output_path'])
