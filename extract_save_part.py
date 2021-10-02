@@ -17,8 +17,8 @@ def main(input_path, output_path=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     if not validate_args(input_path):
         return False
-    output_path = os.path.abspath(output_path) if output_path else os.path.join(input_path, 'save.img')
-    squashfs_etc, save_data = uce_utils.split_uce(input_path)
+    output_path = os.path.abspath(output_path) if output_path else os.path.join(os.getcwd(), 'save.img')
+    _, save_data = uce_utils.split_uce(input_path)
     common_utils.write_file(output_path, save_data, 'wb')
 
 

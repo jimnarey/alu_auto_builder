@@ -15,6 +15,11 @@ def split_uce(input_path):
     return squashfs_etc_data, save_data
 
 
+def rebuild_uce(input_path, squashfs_etc_data, img_path):
+    save_data = common_utils.get_file_content(img_path, 'rb')
+    common_utils.write_file(input_path, squashfs_etc_data + save_data, 'wb')
+
+
 def write_cmd_file(temp_dir, contents):
     cmd_file_path = os.path.join(temp_dir, 'debug_fs_cmd.txt-{0}'.format(time.time_ns()))
     common_utils.write_file(cmd_file_path, '\n'.join(contents) + '\n', 'w')

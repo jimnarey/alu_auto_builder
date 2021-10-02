@@ -30,9 +30,9 @@ def pre_flight(input_path, replace_path, file_manager):
 #     return squashfs_etc_data, save_data
 
 
-def rebuild_uce(input_path, squashfs_etc_data, img_path):
-    save_data = common_utils.get_file_content(img_path, 'rb')
-    common_utils.write_file(input_path, squashfs_etc_data + save_data, 'wb')
+# def rebuild_uce(input_path, squashfs_etc_data, img_path):
+#     save_data = common_utils.get_file_content(img_path, 'rb')
+#     common_utils.write_file(input_path, squashfs_etc_data + save_data, 'wb')
 
 
 def open_file_manager(path, file_manager):
@@ -153,13 +153,13 @@ def main(input_path, replace_path=None, backup_uce=False, mount_method=False, re
     if backup_uce:
         backup_path = input_path + '.bak'
         common_utils.copyfile(input_path, backup_path)
-    if replace_path:
-        rebuild_uce(input_path, squashfs_etc_data, replace_path)
-        return True
+    # if replace_path:
+    #     rebuild_uce(input_path, squashfs_etc_data, replace_path)
+    #     return True
     save_part_contents_path = os.path.join(temp_dir, 'save_part_contents')
     common_utils.make_dir(save_part_contents_path)
     if edit_save_part(temp_dir, img_path, save_part_contents_path, retro_ini_path, file_manager, mount_method):
-        rebuild_uce(input_path, squashfs_etc_data, img_path)
+        uce_utils.rebuild_uce(input_path, squashfs_etc_data, img_path)
     common_utils.cleanup_temp_dir(__name__)
 
 
@@ -169,7 +169,7 @@ def get_opts_parser():
     # parser.add_option('-e', '--extractpath', dest='extract_path', help="Extract the save partition to specified path and quit", default=None)
     parser.add_option('-B', '--backupuce', dest='backup_uce', action='store_true',
                       help="Backup the UCE before any write operations", default=False)
-    parser.add_option('-r', '--replacepath', dest='replace_path', help="Replace the save partition with the specified save.img, ignore subsequent options", default=None)
+    # parser.add_option('-r', '--replacepath', dest='replace_path', help="Replace the save partition with the specified save.img, ignore subsequent options", default=None)
     parser.add_option('-M', '--mountmethod', dest='mount_method', action='store_true', help="Use mount method of editing UCE, Linux only", default=False)
     parser.add_option('-n', '--retroinipath', dest='retro_ini_path', help="The UCE file you want to edit", default=None)
     parser.add_option('-f', '--filemanager', dest='file_manager', help="Specify a particular file manager on Linux", default=None)
@@ -179,5 +179,5 @@ def get_opts_parser():
 if __name__ == "__main__":
     parser = get_opts_parser()
     (opts, args) = parser.parse_args()
-    main(opts.input_path, replace_path=opts.replace_path, backup_uce=opts.backup_uce,
-         mount_method=opts.mount_method, retro_ini_path=opts.retro_ini_path, file_manager=opts.file_manager)
+    main(opts.input_path, backup_uce=opts.backup_uce, mount_method=opts.mount_method,
+         retro_ini_path=opts.retro_ini_path, file_manager=opts.file_manager)
