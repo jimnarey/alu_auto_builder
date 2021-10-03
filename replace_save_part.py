@@ -26,7 +26,11 @@ def main(input_path, part_path, backup_uce=False):
     uce_utils.rebuild_uce(input_path, squashfs_etc_data, part_path)
 
 
+def run_with_args(args):
+    main(args['input_path'], args['part_path'], backup_uce=args['backup_uce'])
+
+
 if __name__ == "__main__":
     parser = common_utils.get_cmd_line_args(operations.operations['replace_uce_save_partition'])
     args = vars(parser.parse_args())
-    main(args['input_path'], args['part_path'], backup_uce=args['backup_uce'])
+    run_with_args(args)

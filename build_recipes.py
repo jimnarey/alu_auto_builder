@@ -3,12 +3,10 @@
 import os
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import ParseError
-from optparse import OptionParser
 import logging
 
 import common_utils
 import configs
-import cmd_help
 import operations
 
 
@@ -111,10 +109,14 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
             setup_uce_source(core_path, bios_dir, game_data, game_dir)
 
 
+def run_with_args(args):
+    main(args['input_path'], args['core_path'], args['bios_dir'], args['output_dir'])
+
+
 if __name__ == "__main__":
     parser = common_utils.get_cmd_line_args(operations.operations['build_recipes_from_gamelist'])
     args = vars(parser.parse_args())
-    main(args['input_path'], args['core_path'], args['bios_dir'], args['output_dir'])
+    run_with_args(args)
 
 
 

@@ -100,10 +100,14 @@ def main(platform, input_dir, scrape_module=None, user_name=None, password=None,
     common_utils.cleanup_temp_dir(__name__)
 
 
+def run_with_args(args):
+    main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'], user_name=['user_name'],
+         password=args['password'], output_dir=args['output_dir'])
+
+
 if __name__ == "__main__":
     parser = common_utils.get_cmd_line_args(operations.operations['scrape_and_make_gamelist'])
     args = vars(parser.parse_args())
-    main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'], user_name=['user_name'],
-         password=args['password'], output_dir=args['output_dir'])
+    run_with_args(args)
 
 # TODO - Allow user manipulation of scraping/gamelist flags

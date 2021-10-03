@@ -207,14 +207,18 @@ def get_arg_params(opt_short_name):
     return action, default
 
 
-# TODO Remove the 'optional arguments' message from --help
-def get_cmd_line_args(opt_set):
-    parser = argparse.ArgumentParser(prog='replace_save_part')
+def add_arguments_to_parser(parser, opt_set):
     for opt in opt_set:
         long_opt = '--{0}'.format(opt['name']).replace('_', '')
         short_opt = '-{0}'.format(opt['short'])
         action, default = get_arg_params(opt['short'])
         parser.add_argument(long_opt, short_opt, dest=opt['name'], default=default, action=action)
+
+
+# TODO Remove the 'optional arguments' message from --help
+def get_cmd_line_args(opt_set):
+    parser = argparse.ArgumentParser(prog='replace_save_part')
+    add_arguments_to_parser(parser, opt_set)
     return parser
 
 # Deprecated

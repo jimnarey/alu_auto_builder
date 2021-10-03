@@ -4,65 +4,80 @@ import os
 import argparse
 import logging
 
+import common_utils
 import operations
-import cmd_help
+import build_from_recipes
+import build_uce_tool
 import create_gamelist
 import build_recipes
-import common_utils
-import errors
+import edit_uce
+import extract_save_part
+import replace_save_part
 
+
+def scrape_and_build_uces(args):
+    pass
+
+
+def scrape_and_make_recipes(args):
+    pass
+
+
+def scrape_and_make_gamelist(args):
+    create_gamelist.run_with_args(args)
+
+
+def build_uces_from_gamelist(args):
+    pass
+
+
+def build_recipes_from_gamelist(args):
+    build_recipes.run_with_args(args)
+
+
+def build_uces_from_recipes(args):
+    build_from_recipes.run_with_args(args)
+
+
+def build_single_uce_from_recipe(args):
+    build_uce_tool.run_with_args(args)
+
+
+def edit_uce_save_partition(args):
+    edit_uce.run_with_args(args)
+
+
+def extract_uce_save_partition(args):
+    extract_save_part.run_with_args(args)
+
+
+def replace_uce_save_partition(args):
+    replace_save_part.run_with_args(args)
+
+
+subcommands = {
+    'scrape_and_build_uces': scrape_and_build_uces,
+    'scrape_and_make_recipes': scrape_and_make_recipes,
+    'scrape_and_make_gamelist': scrape_and_make_gamelist,
+    'build_uces_from_gamelist': build_uces_from_gamelist,
+    'build_recipes_from_gamelist': build_recipes_from_gamelist,
+    'build_uces_from_recipes': build_uces_from_recipes,
+    'build_single_uce_from_recipe': build_single_uce_from_recipe,
+    'edit_uce_save_partition': edit_uce_save_partition,
+    'extract_uce_save_partition': extract_uce_save_partition,
+    'replace_uce_save_partition': replace_uce_save_partition
+}
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     parser = argparse.ArgumentParser(prog='ALU UCE Auto Builder')
+    sub_parsers = parser.add_subparsers(help='sub-command help', dest='subcommand')
+    for operation in operations.operations:
+        subcommand_parser = sub_parsers.add_parser(operation.replace('_', '-'))
+        common_utils.add_arguments_to_parser(subcommand_parser, operations.operations[operation])
+    args = vars(parser.parse_args())
+    if args['subcommand']:
+        subcommand = args['subcommand'].replace('-', '_')
+        subcommands[args['subcommand'].replace('-', '_')](args)
 
-
-#
-# def main(opts):
-#     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-#     temp_dir = common_utils.create_temp_dir(__name__)
-#     temp_gamelist_path = os.path.join(temp_dir, 'gamelist.xml')
-#     if opts.gamelist_path:
-#         common_utils.copyfile(opts.gamelist_path, temp_gamelist_path)
-#     else:
-#         create_gamelist.main(opts.platform, opts.input_dir, scrape_module=opts.scrape_module,
-#                              user_creds=opts.user_creds, output_dir=temp_dir)
-#     build_recipes.main(temp_gamelist_path, opts.core_path, bios_dir=opts.bios_dir, output_dir=temp_dir)
-#     common_utils.cleanup_temp_dir(__name__)
-#
-#
-# # TODO - Allow keeping of rom attributes, region, rom-code, none, etc
-# def get_opts_parser():
-#     parser = OptionParser()
-#     parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM, default=None)
-#     parser.add_option('-s', '--scraper', dest='scrape_module', help=cmd_help.SCRAPE_MODULE, default=None)
-#     parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS, default=None)
-#     parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
-#     parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR,
-#                       default=os.path.join(os.getcwd(), 'output'))
-#     parser.add_option('-c', '--core', dest='core_path', help=cmd_help.CORE, default=None)
-#     parser.add_option('-b', '--bios', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
-#     parser.add_option('-g', '--gamelist', dest='gamelist_path', help=cmd_help.GAME_LIST, default=None)
-#     return parser
-#
-#
-# # TODO - Remove this
-# def validate_opts(parser):
-#     (opts, args) = parser.parse_args()
-#     valid = True
-#     if opts.core_path is None:
-#         print(errors.NO_CORE_FILE)
-#         valid = False
-#     if opts.platform is None and opts.gamelist_path is None:
-#         print(errors.NO_GAMELIST_OR_PLATFORM)
-#         valid = False
-#     if valid is False:
-#         parser.print_help()
-#         exit(0)
-#     return opts, args
-#
-#
-# if __name__ == "__main__":
-#     parser = get_opts_parser()
-#     (opts, args) = validate_opts(parser)
-#     main(opts)
 
