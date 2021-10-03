@@ -1,4 +1,5 @@
 import configs
+import runners
 
 # TODO consider changing 'required' to 'gui_required' given command line can auto generate some opts based on cwd
 
@@ -36,15 +37,16 @@ scrape_and_build_opts = (input_dir_opt, output_dir_opt, *extra_build_opts, *scra
 
 build_from_game_list_opts = (input_path_opt, output_dir_opt, *extra_build_opts)
 
+
 operations = {
-    'scrape_and_build_uces': scrape_and_build_opts,
-    'scrape_and_make_recipes': scrape_and_build_opts,
-    'scrape_and_make_gamelist': (input_dir_opt, output_dir_opt, *scrape_opts),
-    'build_uces_from_gamelist': build_from_game_list_opts,
-    'build_recipes_from_gamelist': build_from_game_list_opts,
-    'build_uces_from_recipes': (input_dir_opt, output_dir_opt),
-    'build_single_uce_from_recipe': (input_dir_opt, output_path_opt),
-    'edit_uce_save_partition': (input_path_opt, *edit_save_part_opts, backup_save_part_opt),
-    'extract_uce_save_partition': (input_path_opt, output_path_opt),
-    'replace_uce_save_partition': (input_path_opt, replace_save_part_opt, backup_save_part_opt)
+    'scrape_and_build_uces': {'options': scrape_and_build_opts, 'runner': runners.scrape_and_build_uces},
+    'scrape_and_make_recipes': {'options': scrape_and_build_opts, 'runner': runners.scrape_and_make_recipes},
+    'scrape_and_make_gamelist': {'options': (input_dir_opt, output_dir_opt, *scrape_opts), 'runner': runners.scrape_and_make_gamelist},
+    'build_uces_from_gamelist': {'options': build_from_game_list_opts, 'runner': runners.build_uces_from_gamelist},
+    'build_recipes_from_gamelist': {'options': build_from_game_list_opts, 'runner': runners.build_recipes_from_gamelist},
+    'build_uces_from_recipes': {'options': (input_dir_opt, output_dir_opt), 'runner': runners.build_uces_from_recipes},
+    'build_single_uce_from_recipe': {'options': (input_dir_opt, output_path_opt), 'runner': runners.build_single_uce_from_recipe},
+    'edit_uce_save_partition': {'options': (input_path_opt, *edit_save_part_opts, backup_save_part_opt), 'runner': runners.edit_uce_save_partition},
+    'extract_uce_save_partition': {'options': (input_path_opt, output_path_opt), 'runner': runners.extract_uce_save_partition},
+    'replace_uce_save_partition': {'options': (input_path_opt, replace_save_part_opt, backup_save_part_opt), 'runner': runners.replace_uce_save_partition}
 }
