@@ -4,10 +4,7 @@ import os
 from pathlib import Path
 import logging
 
-import configs
-import common_utils
-import error_messages
-import info_messages
+from shared import configs, common_utils, error_messages, info_messages
 import operations
 
 

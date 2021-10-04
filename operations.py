@@ -1,4 +1,4 @@
-import configs
+from shared import configs
 import runners
 
 # TODO consider changing 'required' to 'gui_required' given command line can auto generate some opts based on cwd

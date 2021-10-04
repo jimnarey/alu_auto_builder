@@ -5,18 +5,15 @@ import sys
 import functools
 from pathlib import Path
 import logging
-import pprint
 
 from PyQt5.QtCore import QDir
-from PyQt5.QtGui import QFontMetrics, QFont, QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, \
-    QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QFormLayout, QDialogButtonBox
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
+    QPushButton, QWidget, QFileDialog, QComboBox, QDialog
 
 import common_utils
 # import configs
-import aluautobuild
-import error_messages
-import operations
+from shared import operations
 
 
 def get_opt_type(name):
@@ -191,7 +188,7 @@ class Controller:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'common', 'title.png')))
+    app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'data', 'title.png')))
     option_set = OptionSet()
     controller = Controller(option_set, operations.operations)
     controller.show_main_window()

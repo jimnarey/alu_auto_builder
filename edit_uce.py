@@ -4,11 +4,8 @@ import os
 import logging
 import shutil
 
-import common_utils
-import info_messages
-import uce_utils
+from shared import common_utils, info_messages, uce_utils, error_messages
 import operations
-import error_messages
 
 
 def validate_file_manager(file_manager):

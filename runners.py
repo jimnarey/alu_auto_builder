@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import common_utils
-import operations
 import build_from_recipes
 import build_uce_tool
 import create_gamelist

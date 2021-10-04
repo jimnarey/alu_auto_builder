@@ -5,10 +5,7 @@ from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import ParseError
 import logging
 
-import common_utils
-import configs
-import error_messages
-import info_messages
+from shared import common_utils, configs, error_messages, info_messages
 import operations
 
 

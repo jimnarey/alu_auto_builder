@@ -3,9 +3,7 @@ import os
 import logging
 
 import build_uce_tool
-import common_utils
-import error_messages
-import info_messages
+from shared import common_utils, error_messages, info_messages
 import operations
 
 

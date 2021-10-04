@@ -9,10 +9,9 @@ import stat
 import argparse
 from subprocess import Popen, PIPE
 
-import error_messages
+from shared import error_messages, info_messages
 
 # TODO - what can go wrong/should catch with os.getcwd() ?
-import info_messages
 
 active_temp_dirs = {}
 

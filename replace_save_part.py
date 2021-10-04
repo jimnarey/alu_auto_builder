@@ -2,8 +2,7 @@
 
 import logging
 
-import common_utils
-import uce_utils
+from shared import common_utils, uce_utils
 import operations
 
 

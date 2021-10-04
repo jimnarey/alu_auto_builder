@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-import os
 import argparse
 import logging
 
-import common_utils
+from shared import common_utils
 from operations import operations
 
 

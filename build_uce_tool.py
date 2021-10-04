@@ -6,10 +6,7 @@ import hashlib
 from zipfile import ZipFile, BadZipfile
 import logging
 
-import common_utils
-import info_messages
-import uce_utils
-import error_messages
+from shared import common_utils, info_messages, uce_utils, error_messages
 import operations
 
 

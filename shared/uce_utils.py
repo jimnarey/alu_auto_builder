@@ -4,7 +4,7 @@ import os
 import logging
 import time
 
-import common_utils
+from shared import common_utils
 
 
 def split_uce(input_path):
