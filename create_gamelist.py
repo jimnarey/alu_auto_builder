@@ -11,11 +11,6 @@ import info_messages
 import operations
 
 
-PLATFORM = common_utils.get_platform()
-
-APP_ROOT = common_utils.get_app_root()
-
-
 def validate_args(platform, scrape_module, input_dir, output_dir):
     valid = True
     if not platform or platform not in configs.PLATFORMS:
@@ -49,8 +44,8 @@ def get_user_creds_arg(user_name, password):
 
 
 def get_skyscraper_bin():
-    if PLATFORM == 'win32':
-        local_skyscraper_dir = os.path.join(APP_ROOT, 'windows', 'skyscraper')
+    if common_utils.get_platform() == 'win32':
+        local_skyscraper_dir = os.path.join(common_utils.get_app_root(), 'windows', 'skyscraper')
         if os.path.isdir(local_skyscraper_dir):
             logging.info(info_messages.USING_PACKAGED_SKYSCRPAER_WIN)
             setup_windows_skyscraper(local_skyscraper_dir)
@@ -107,7 +102,7 @@ def run_with_args(args):
 
 
 if __name__ == "__main__":
-    parser = common_utils.get_cmd_line_args(operations.operations['scrape_and_make_gamelist'])
+    parser = common_utils.get_cmd_line_args(operations.operations['scrape_and_make_gamelist']['options'])
     args = vars(parser.parse_args())
     run_with_args(args)
 

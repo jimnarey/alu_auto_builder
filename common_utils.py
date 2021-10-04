@@ -6,7 +6,6 @@ import shutil
 import logging
 import tempfile
 import stat
-import time
 import argparse
 from subprocess import Popen, PIPE
 
@@ -210,29 +209,7 @@ def add_arguments_to_parser(parser, opt_set):
 
 # TODO Remove the 'optional arguments' message from --help
 def get_cmd_line_args(opt_set):
-    parser = argparse.ArgumentParser(prog='replace_save_part')
+    parser = argparse.ArgumentParser(prog='')
     add_arguments_to_parser(parser, opt_set)
     return parser
 
-# Deprecated
-
-# def create_debugfs_write_cmd_file(temp_dir, items, source_path=None):
-#     cmd_file_contents = []
-#     for item in items:
-#         target = item.replace('{0}/'.format(source_path), '') if source_path else item
-#         cmd_file_contents.append('{0} "{1}" "/{2}"'.format('write', item, target))
-#     return write_cmd_file(temp_dir, cmd_file_contents)
-
-# def make_ext4_part(cart_save_file):
-#     bin_ = get_platform_bin('make_ext4_part.bat', 'make_ext4_part.sh', linux_script=True)
-#     cmd = [bin_, cart_save_file]
-#     execute_with_output(cmd)
-
-# def simple_execute(cmd):
-#     try:
-#         cmd_out = os.popen(' '.join(cmd)).read()
-#     except OSError as e:
-#         logging.error('Last command does not appear to have completed successfully: {0}'.format(e))
-#         return False
-#     logging.info('Successfully ran command: {0}'.format(' '.join(cmd)))
-#     return True

@@ -96,10 +96,7 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     if not validate_args(input_path, core_path, bios_dir, output_dir):
         return
-    print(input_path, core_path, bios_dir, output_dir)
     output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
-    common_utils.make_dir(output_dir)
-    logging.info()
     common_utils.make_dir(output_dir)
     gamelist = read_gamelist(input_path)
     if gamelist:
@@ -114,7 +111,7 @@ def run_with_args(args):
 
 
 if __name__ == "__main__":
-    parser = common_utils.get_cmd_line_args(operations.operations['build_recipes_from_gamelist'])
+    parser = common_utils.get_cmd_line_args(operations.operations['build_recipes_from_gamelist']['options'])
     args = vars(parser.parse_args())
     run_with_args(args)
 

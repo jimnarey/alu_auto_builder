@@ -28,14 +28,15 @@ class UCEBuildPaths:
         common_utils.cleanup_temp_dir(__name__)
 
 
-PLATFORM = common_utils.get_platform()
-
-
-def pre_flight(input_dir):
-    valid = True
-    if PLATFORM not in ('linux', 'win32'):
+def check_os():
+    if common_utils.get_platform() not in ('linux', 'win32'):
         logging.error(error_messages.INVALID_OS)
-        valid = False
+        return False
+    return True
+
+
+def validate_args(input_dir):
+    valid = True
     if not common_utils.validate_existing_dir(input_dir, 'Input dir'):
         valid = False
     return valid
@@ -70,7 +71,7 @@ def call_mksquashfs(input_dir, target_file, app_root):
         '-root-owned',
         '-nopad'
     ]
-    if PLATFORM == 'win32':
+    if common_utils.get_platform() == 'win32':
         cmd = [os.path.join(app_root, 'windows', 'mksquashfs.exe')]
     else:
         cmd = ['mksquashfs']
@@ -157,7 +158,7 @@ def get_save_part(ub_paths):
 def main(input_dir, output_path=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     input_dir = input_dir if input_dir else os.getcwd()
-    if not pre_flight(input_dir):
+    if not check_os() or validate_args(input_dir):
         return
     if not output_path:
         output_path = os.path.join(input_dir, '{0}.uce'.format(os.path.split(os.path.abspath(input_dir))[-1]))
@@ -181,7 +182,7 @@ def run_with_args(args):
 
 
 if __name__ == "__main__":
-    parser = common_utils.get_cmd_line_args(operations.operations['build_single_uce_from_recipe'])
+    parser = common_utils.get_cmd_line_args(operations.operations['build_single_uce_from_recipe']['options'])
     args = vars(parser.parse_args())
     run_with_args(args)
 

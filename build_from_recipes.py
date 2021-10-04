@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import logging
-from optparse import OptionParser
 
 import build_uce_tool
 import common_utils
@@ -76,6 +75,6 @@ def run_with_args(args):
 
 
 if __name__ == "__main__":
-    parser = common_utils.get_cmd_line_args(operations.operations['build_uces_from_recipes'])
+    parser = common_utils.get_cmd_line_args(operations.operations['build_uces_from_recipes']['options'])
     args = vars(parser.parse_args())
     run_with_args(args)

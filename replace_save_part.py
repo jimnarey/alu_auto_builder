@@ -5,7 +5,6 @@ import logging
 import common_utils
 import uce_utils
 import operations
-import error_messages
 
 
 def validate_args(input_path, part_path):
@@ -32,6 +31,6 @@ def run_with_args(args):
 
 
 if __name__ == "__main__":
-    parser = common_utils.get_cmd_line_args(operations.operations['replace_uce_save_partition'])
+    parser = common_utils.get_cmd_line_args(operations.operations['replace_uce_save_partition']['options'])
     args = vars(parser.parse_args())
     run_with_args(args)

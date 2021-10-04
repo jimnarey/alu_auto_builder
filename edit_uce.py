@@ -2,6 +2,7 @@
 
 import os
 import logging
+import shutil
 
 import common_utils
 import info_messages
@@ -10,12 +11,34 @@ import operations
 import error_messages
 
 
-def pre_flight(input_path, file_manager):
+def validate_file_manager(file_manager):
+    valid = True
+    if file_manager:
+        if common_utils.get_platform() != 'linux':
+            logging.error(error_messages.FILEMAN_NOT_LINUX)
+            valid = False
+        else:
+            if not shutil.which(file_manager):
+                logging.error(error_messages.INVALID_FILEMAN)
+                valid = False
+    return valid
+
+
+def validate_args(input_path, file_manager):
     valid = True
     if not common_utils.validate_required_path(input_path, 'Input path'):
         valid = False
+    if not validate_file_manager(file_manager):
+        valid = False
     return valid
-    # TODO Check file_manager is a valid executable or select from those available
+
+
+def select_linux_file_manager():
+    for file_manager in ('thunar', 'dolphin', 'pcmanfm', 'nautilus', 'nemo', 'konqueror'):
+        if shutil.which(file_manager):
+            return file_manager
+    logging.error(error_messages.NO_FILE_MAN_FOUND)
+    return False
 
 
 def open_file_manager(path, file_manager):
@@ -121,7 +144,10 @@ def edit_save_part(temp_dir, img_path, save_part_contents_path, file_manager, mo
 
 def main(input_path, backup_uce=False, mount_method=False, file_manager=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    if not pre_flight(input_path, file_manager):
+    if not validate_args(input_path, file_manager):
+        return False
+    file_manager = file_manager if file_manager else select_linux_file_manager()
+    if not file_manager:
         return False
     input_path = os.path.abspath(input_path)
     temp_dir = common_utils.create_temp_dir(__name__)
@@ -145,6 +171,6 @@ def run_with_args(args):
 
 
 if __name__ == "__main__":
-    parser = common_utils.get_cmd_line_args(operations.operations['edit_uce_save_partition'])
+    parser = common_utils.get_cmd_line_args(operations.operations['edit_uce_save_partition']['options'])
     args = vars(parser.parse_args())
     run_with_args(args)
