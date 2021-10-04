@@ -9,13 +9,13 @@ import logging
 from PyQt5.QtCore import QDir, pyqtRemoveInputHook
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
-    QPushButton, QWidget, QFileDialog, QComboBox, QDialog
+    QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox
 
 from shared import common_utils, error_messages
 import operations
 
 
-def get_opt_type(name):
+def get_combo_opt_type(name):
     name_parts = name.split('_')
     try:
         suffix = name_parts[-1]
@@ -64,10 +64,10 @@ class OperationDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(title_from_name(name))
         self.dialog_layout = QVBoxLayout()
-        self.combo_selects= {}
+        self.check_boxes = {}
+        self.combo_selects = {}
         self.select_buttons = {}
-        for opt in opts:
-            self._create_select_widget(opt)
+        self._create_opt_inputs(opts)
         self.ok_button = QPushButton('OK')
         self.close_button = QPushButton('Close')
         self._create_user_input_widget(self.ok_button, self.close_button)
@@ -81,6 +81,13 @@ class OperationDialog(QDialog):
             layout.addWidget(arg)
         self.dialog_layout.addWidget(widget)
 
+    def _create_opt_inputs(self, opts):
+        for opt in opts:
+            if opt['short'].isupper():
+                self._create_checkbox_widget(opt)
+            else:
+                self._create_select_widget(opt)
+
     def _create_title_label(self, label_text):
         title_label = QLabel()
         title_label.setFixedWidth(100)
@@ -93,16 +100,23 @@ class OperationDialog(QDialog):
         self.select_buttons[name] = button
         return button
 
-    def _create_select_widget(self, opts):
-        widgets = [self._create_title_label(title_from_name(opts['name']))]
-        field = QComboBox()
-        field.addItems(opts.get('selections', []))
-        field.setFixedWidth(200)
-        field.setEditable(True)
-        self.combo_selects[opts['name']] = field
-        widgets.append(field)
-        if get_opt_type(opts['name']) in ('dir', 'path'):
-            widgets.append(self._create_select_button(opts['name']))
+    def _create_checkbox_widget(self, opt):
+        widgets = [self._create_title_label(title_from_name(opt['name']))]
+        checkbox = QCheckBox()
+        self.check_boxes[opt['name']] = checkbox
+        widgets.append(checkbox)
+        self._create_user_input_widget(*widgets)
+
+    def _create_select_widget(self, opt):
+        widgets = [self._create_title_label(title_from_name(opt['name']))]
+        combo = QComboBox()
+        combo.addItems(opt.get('selections', []))
+        combo.setFixedWidth(200)
+        combo.setEditable(True)
+        self.combo_selects[opt['name']] = combo
+        widgets.append(combo)
+        if get_combo_opt_type(opt['name']) in ('dir', 'path'):
+            widgets.append(self._create_select_button(opt['name']))
         self._create_user_input_widget(*widgets)
 
 
@@ -125,15 +139,17 @@ class Controller:
 
     def _connect_dialog_signals(self, view):
         for name, button in view.select_buttons.items():
-            if get_opt_type(name) == 'dir':
+            if get_combo_opt_type(name) == 'dir':
                 button.clicked.connect(functools.partial(self._choose_dir, view, name))
-            elif get_opt_type(name) == 'path':
+            elif get_combo_opt_type(name) == 'path':
                 button.clicked.connect(functools.partial(self._choose_file, view, name))
         view.ok_button.clicked.connect(self._run)
         view.close_button.clicked.connect(self.show_main_window)
         for name, combo in view.combo_selects.items():
             combo.currentTextChanged.connect(functools.partial(self._change_combo_content, view, name))
             combo.currentIndexChanged.connect(functools.partial(self._change_combo_content, view, name))
+        for name, checkbox in view.check_boxes.items():
+            checkbox.toggled.connect(functools.partial(self._change_checkbox_value, view, name))
 
     def _show_dialog(self, name):
         self.args = {}
@@ -170,6 +186,9 @@ class Controller:
 
     def _change_combo_content(self, view, name):
         self.args[name] = view.combo_selects[name].currentText()
+
+    def _change_checkbox_value(self, view, name):
+        self.args[name] = view.check_boxes[name].isChecked()
         print(self.args)
 
     def _validate_args(self):

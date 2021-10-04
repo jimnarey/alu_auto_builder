@@ -3,7 +3,7 @@
 # GUI
 
 def required_option_not_set(option_name):
-    readable_name = option_name.replace('_', ' ').upper()
+    readable_name = option_name.replace('_', ' ').title()
     return 'Option {0} is required but not set'.format(readable_name)
 
 # Scraping
