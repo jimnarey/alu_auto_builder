@@ -203,7 +203,7 @@ def add_arguments_to_parser(parser, opt_set):
         long_opt = '--{0}'.format(opt['name']).replace('_', '')
         short_opt = '-{0}'.format(opt['short'])
         action, default = get_arg_params(opt['short'])
-        parser.add_argument(long_opt, short_opt, dest=opt['name'], default=default, action=action)
+        parser.add_argument(long_opt, short_opt, dest=opt['name'], default=default, action=action, help=opt['help'])
 
 
 # TODO Remove the 'optional arguments' message from --help
