@@ -162,12 +162,8 @@ def main(input_path, backup_uce=False, mount_method=False, file_manager=None):
     common_utils.cleanup_temp_dir(__name__)
 
 
-def run_with_args(args):
-    main(args['input_path'], backup_uce=args['backup_uce'], mount_method=args['mount_method'],
-         file_manager=args['file_manager'])
-
-
 if __name__ == "__main__":
     parser = common_utils.get_cmd_line_args(operations.operations['edit_uce_save_partition']['options'])
     args = vars(parser.parse_args())
-    run_with_args(args)
+    main(args['input_path'], backup_uce=args['backup_uce'], mount_method=args['mount_method'],
+         file_manager=args['file_manager'])

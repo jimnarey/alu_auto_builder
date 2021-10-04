@@ -175,12 +175,7 @@ def main(input_dir, output_path=None):
     ub_paths.cleanup()
 
 
-def run_with_args(args):
-    main(args['input_dir'], output_path=args['output_path'])
-
-
 if __name__ == "__main__":
     parser = common_utils.get_cmd_line_args(operations.operations['build_single_uce_from_recipe']['options'])
     args = vars(parser.parse_args())
-    run_with_args(args)
-
+    main(args['input_dir'], output_path=args['output_path'])

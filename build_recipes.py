@@ -11,9 +11,10 @@ import operations
 
 def validate_args(input_path, core_path, bios_dir, output_dir):
     valid = True
-    for path in (input_path, core_path):
-        if not common_utils.validate_required_path(path, 'Specified gamelist'):
-            valid = False
+    if not common_utils.validate_required_path(input_path, 'Specified gamelist'):
+        valid = False
+    if not common_utils.validate_required_path(core_path, 'Specified core'):
+        valid = False
     if not common_utils.validate_parent_dir(output_dir, 'Output dir'):
         valid = False
     if not common_utils.validate_optional_dir(bios_dir, 'Bios dir'):
@@ -103,14 +104,10 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
             setup_uce_source(core_path, bios_dir, game_data, game_dir)
 
 
-def run_with_args(args):
-    main(args['input_path'], args['core_path'], args['bios_dir'], args['output_dir'])
-
-
 if __name__ == "__main__":
     parser = common_utils.get_cmd_line_args(operations.operations['build_recipes_from_gamelist']['options'])
     args = vars(parser.parse_args())
-    run_with_args(args)
+    main(args['input_path'], args['core_path'], bios_dir=args['bios_dir'], output_dir=args['output_dir'])
 
 
 

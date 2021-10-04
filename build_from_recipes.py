@@ -68,11 +68,7 @@ def main(input_dir, output_dir=None):
     make_recipes(recipe_dirs, output_dir)
 
 
-def run_with_args(args):
-    main(args['input_dir'], output_dir=args['output_dir'])
-
-
 if __name__ == "__main__":
     parser = common_utils.get_cmd_line_args(operations.operations['build_uces_from_recipes']['options'])
     args = vars(parser.parse_args())
-    run_with_args(args)
+    main(args['input_dir'], output_dir=args['output_dir'])

@@ -23,11 +23,7 @@ def main(input_path, output_path=None):
     common_utils.write_file(output_path, save_data, 'wb')
 
 
-def run_with_args(args):
-    main(args['input_path'], output_path=args['output_path'])
-
-
 if __name__ == "__main__":
     parser = common_utils.get_cmd_line_args(operations.operations['extract_uce_save_partition']['options'])
     args = vars(parser.parse_args())
-    run_with_args(args)
+    main(args['input_path'], output_path=args['output_path'])
