@@ -10,7 +10,8 @@ from operations import operations
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     parser = argparse.ArgumentParser(prog='ALU UCE Auto Builder')
-    sub_parsers = parser.add_subparsers(dest='subcommand')
+    sub_parsers = parser.add_subparsers(dest='subcommand', title='Subcommands')
+    sub_parsers.metavar = 'subcommand-name'
     for operation, spec in operations.items():
         subcommand_parser = sub_parsers.add_parser(operation.replace('_', '-'), help=spec['help'])
         common_utils.add_arguments_to_parser(subcommand_parser, operations[operation]['options'])
