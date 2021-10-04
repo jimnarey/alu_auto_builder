@@ -45,6 +45,6 @@ PLATFORMS = ['', '3do', '3ds', 'amiga', 'amigacd32', 'amstradcpc', 'apple2', 'ar
                  'zx81', 'zxspectrum']
 
 
-SCRAPING_MODULES = ['screenscraper', 'arcadedb', 'igdb', 'mobygames', 'openretro', 'thegamesdb',
+SCRAPING_MODULES = ['', 'screenscraper', 'arcadedb', 'igdb', 'mobygames', 'openretro', 'thegamesdb',
                     'worldofspectrum']
 

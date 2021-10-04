@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+# GUI
+
+def required_option_not_set(option_name):
+    readable_name = option_name.replace('_', ' ').upper()
+    return 'Option {0} is required but not set'.format(readable_name)
+
 # Scraping
 
 SCRAPE_INVALID_PLATFORM = 'You must provide a valid platform (emulated system) to enable scraping'

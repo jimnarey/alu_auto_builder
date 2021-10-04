@@ -6,12 +6,12 @@ import functools
 from pathlib import Path
 import logging
 
-from PyQt5.QtCore import QDir
+from PyQt5.QtCore import QDir, pyqtRemoveInputHook
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
     QPushButton, QWidget, QFileDialog, QComboBox, QDialog
 
-from shared import common_utils
+from shared import common_utils, error_messages
 import operations
 
 
@@ -28,12 +28,6 @@ def get_opt_type(name):
 
 def title_from_name(name):
     return name.replace('_', ' ').title()
-
-
-class OptionSet:
-
-    def __init__(self):
-        pass
 
 
 class MainWindow(QMainWindow):
@@ -70,7 +64,7 @@ class OperationDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(title_from_name(name))
         self.dialog_layout = QVBoxLayout()
-        self.fields = {}
+        self.combo_selects= {}
         self.select_buttons = {}
         for opt in opts:
             self._create_select_widget(opt)
@@ -105,7 +99,7 @@ class OperationDialog(QDialog):
         field.addItems(opts.get('selections', []))
         field.setFixedWidth(200)
         field.setEditable(True)
-        self.fields[opts['name']] = field
+        self.combo_selects[opts['name']] = field
         widgets.append(field)
         if get_opt_type(opts['name']) in ('dir', 'path'):
             widgets.append(self._create_select_button(opts['name']))
@@ -114,11 +108,12 @@ class OperationDialog(QDialog):
 
 class Controller:
 
-    def __init__(self, option_set, operations):
+    def __init__(self, operations):
         self.dialog_dir = str(Path.home())
-        self.option_set = option_set
         self.current_view = None
+        self.args = {}
         self.operations = operations
+        self.current_operation_name = None
 
     def _close_current_view(self):
         if self.current_view:
@@ -136,9 +131,14 @@ class Controller:
                 button.clicked.connect(functools.partial(self._choose_file, view, name))
         view.ok_button.clicked.connect(self._run)
         view.close_button.clicked.connect(self.show_main_window)
+        for name, combo in view.combo_selects.items():
+            combo.currentTextChanged.connect(functools.partial(self._change_combo_content, view, name))
+            combo.currentIndexChanged.connect(functools.partial(self._change_combo_content, view, name))
 
     def _show_dialog(self, name):
+        self.args = {}
         self._close_current_view()
+        self.current_operation_name = name
         view = OperationDialog(name, operations.operations[name]['options'])
         self._connect_dialog_signals(view)
         self._show_view(view)
@@ -151,14 +151,13 @@ class Controller:
         view.exit_button.clicked.connect(sys.exit)
         self._show_view(view)
 
-
     # TODO - choose dir in combo box if valid
     def _choose_dir(self, view, name):
         dir_name = QFileDialog.getExistingDirectory(view, 'Select Directory', self.dialog_dir)
         if dir_name:
             dir_name = QDir.toNativeSeparators(dir_name)
         if os.path.isdir(dir_name):
-            view.fields[name].setCurrentText(dir_name)
+            view.combo_selects[name].setCurrentText(dir_name)
             self.dialog_dir = dir_name
 
     def _choose_file(self, view, name):
@@ -166,30 +165,37 @@ class Controller:
         if file_name:
             file_name = QDir.toNativeSeparators(file_name)
         if os.path.isfile(file_name):
-            view.fields[name].setCurrentText(file_name)
+            view.combo_selects[name].setCurrentText(file_name)
             self.dialog_dir = os.path.split(file_name)[0]
 
-    def _run(self):
-        pass
+    def _change_combo_content(self, view, name):
+        self.args[name] = view.combo_selects[name].currentText()
+        print(self.args)
 
-    # def _combo_select(self, name):
-    #     setattr(self._opts, name, self._view.combos[name].currentText())
-    #
-    # def _text_field_edit(self, name):
-    #     setattr(self._opts, name, self._view.fields[name].text())
-    #
-    # def _run(self):
-    #     if self._opts.validate_opts():
-    #         self._opts.set_derived_opts()
-    #         aluautobuild.main(self._opts)
+    def _validate_args(self):
+        valid = True
+        for option in self.operations[self.current_operation_name]['options']:
+            if option['gui_required']:
+                if option['name'] not in self.args:
+                    logging.error(error_messages.required_option_not_set(option['name']))
+                    valid = False
+            else:
+                if option['name'] not in self.args:
+                    self.args[option['name']] = None
+        return valid
+
+    def _run(self):
+        if not self._validate_args():
+            return False
+        self.operations[self.current_operation_name]['runner'](self.args)
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
+    pyqtRemoveInputHook()
     app = QApplication(sys.argv)
     print(common_utils.get_app_root())
     app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'data', 'title.png')))
-    option_set = OptionSet()
-    controller = Controller(option_set, operations.operations)
+    controller = Controller(operations.operations)
     controller.show_main_window()
     sys.exit(app.exec_())
