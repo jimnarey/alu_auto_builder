@@ -6,7 +6,8 @@ import logging
 
 import configs
 import common_utils
-import errors
+import error_messages
+import info_messages
 import operations
 
 
@@ -18,14 +19,14 @@ APP_ROOT = common_utils.get_app_root()
 def validate_args(platform, scrape_module, input_dir, output_dir):
     valid = True
     if not platform or platform not in configs.PLATFORMS:
-        logging.error('You must provide a valid platform')
+        logging.error(error_messages.SCRAPE_INVALID_PLATFORM)
         valid = False
     if scrape_module not in configs.SCRAPING_MODULES:
-        logging.error(errors.SCRAPE_INVALID_MODULE)
+        logging.error(error_messages.SCRAPE_INVALID_MODULE)
         valid = False
-    if not common_utils.validate_existing_dir(input_dir):
+    if not common_utils.validate_existing_dir(input_dir, 'Input dir'):
         valid = False
-    if not common_utils.validate_parent_dir(output_dir):
+    if not common_utils.validate_parent_dir(output_dir, 'Output dir'):
         valid = False
     return valid
 
@@ -36,7 +37,7 @@ def setup_windows_skyscraper(local_skyscraper_dir):
     retro_pie_target = os.path.join(home_dir, 'RetroPie')
     for dir_ in (skyscraper_target, retro_pie_target):
         if not os.path.isdir(dir_):
-            logging.info('Attempting to copy required .skyscraper and RetroPie dirs to user home dir')
+            logging.info(info_messages.ATTEMPTING_WIN_SKYSCRAPER_SETUP)
             common_utils.copytree(os.path.join(local_skyscraper_dir, 'deploy', '.skyscraper'), skyscraper_target)
             common_utils.copytree(os.path.join(local_skyscraper_dir, 'deploy', 'RetroPie'), retro_pie_target)
 
@@ -51,10 +52,10 @@ def get_skyscraper_bin():
     if PLATFORM == 'win32':
         local_skyscraper_dir = os.path.join(APP_ROOT, 'windows', 'skyscraper')
         if os.path.isdir(local_skyscraper_dir):
-            logging.info('Using packaged copy of Skyscraper for Windows')
+            logging.info(info_messages.USING_PACKAGED_SKYSCRPAER_WIN)
             setup_windows_skyscraper(local_skyscraper_dir)
             return os.path.join(local_skyscraper_dir, 'Skyscraper.exe')
-    logging.info('Attempting to use external copy of Skyscraper')
+    logging.info(info_messages.USING_EXTERNAL_SKYSCRPAER)
     return 'Skyscraper'
 
 
@@ -110,4 +111,3 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
     run_with_args(args)
 
-# TODO - Allow user manipulation of scraping/gamelist flags

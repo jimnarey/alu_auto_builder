@@ -4,11 +4,11 @@ import os
 from optparse import OptionParser
 import logging
 
-import cmd_help
+import help_messages
 import create_gamelist
 import build_recipes
 import common_utils
-import errors
+import error_messages
 
 
 def main(opts):
@@ -27,15 +27,15 @@ def main(opts):
 # TODO - Allow keeping of rom attributes, region, rom-code, none, etc
 def get_opts_parser():
     parser = OptionParser()
-    parser.add_option('-p', '--platform', dest='platform', help=cmd_help.PLATFORM, default=None)
-    parser.add_option('-s', '--scraper', dest='scrape_module', help=cmd_help.SCRAPE_MODULE, default=None)
-    parser.add_option('-u', '--usercreds', dest='user_creds', help=cmd_help.USER_CREDS, default=None)
-    parser.add_option('-i', '--inputdir', dest='input_dir', help=cmd_help.INPUT_DIR, default=os.getcwd())
-    parser.add_option('-o', '--output', dest='output_dir', help=cmd_help.OUTPUT_DIR,
+    parser.add_option('-p', '--platform', dest='platform', help=help_messages.PLATFORM, default=None)
+    parser.add_option('-s', '--scraper', dest='scrape_module', help=help_messages.SCRAPE_MODULE, default=None)
+    parser.add_option('-u', '--usercreds', dest='user_creds', help=help_messages.USER_CREDS, default=None)
+    parser.add_option('-i', '--inputdir', dest='input_dir', help=help_messages.INPUT_DIR, default=os.getcwd())
+    parser.add_option('-o', '--output', dest='output_dir', help=help_messages.OUTPUT_DIR,
                       default=os.path.join(os.getcwd(), 'output'))
-    parser.add_option('-c', '--core', dest='core_path', help=cmd_help.CORE, default=None)
-    parser.add_option('-b', '--bios', dest='bios_dir', help=cmd_help.BIOS_DIR, default=None)
-    parser.add_option('-g', '--gamelist', dest='gamelist_path', help=cmd_help.GAME_LIST, default=None)
+    parser.add_option('-c', '--core', dest='core_path', help=help_messages.CORE, default=None)
+    parser.add_option('-b', '--bios', dest='bios_dir', help=help_messages.BIOS_DIR, default=None)
+    parser.add_option('-g', '--gamelist', dest='gamelist_path', help=help_messages.GAME_LIST, default=None)
     return parser
 
 
@@ -44,10 +44,10 @@ def validate_opts(parser):
     (opts, args) = parser.parse_args()
     valid = True
     if opts.core_path is None:
-        print(errors.NO_CORE_FILE)
+        print(error_messages.NO_CORE_FILE)
         valid = False
     if opts.platform is None and opts.gamelist_path is None:
-        print(errors.NO_GAMELIST_OR_PLATFORM)
+        print(error_messages.NO_GAMELIST_OR_PLATFORM)
         valid = False
     if valid is False:
         parser.print_help()

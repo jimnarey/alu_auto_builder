@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLineEdit, Q
 import common_utils
 # import configs
 import aluautobuild
-import errors
+import error_messages
 import operations
 
 

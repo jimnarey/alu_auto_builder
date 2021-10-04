@@ -4,12 +4,16 @@ import os
 import logging
 
 import common_utils
+import info_messages
 import uce_utils
 import operations
+import error_messages
 
 
 def pre_flight(input_path, file_manager):
-    valid = common_utils.validate_required_path(input_path)
+    valid = True
+    if not common_utils.validate_required_path(input_path, 'Input path'):
+        valid = False
     return valid
     # TODO Check file_manager is a valid executable or select from those available
 
@@ -93,7 +97,7 @@ def edit_save_part_with_mount(img_path, save_part_contents_path, file_manager):
         common_utils.remove_dir(save_part_contents_path)
         return True
     else:
-        logging.error('Mount option is only available under Linux and when running as root')
+        logging.error(error_messages.INVALID_MOUNT_CONFIG)
         return False
 
 
@@ -101,7 +105,7 @@ def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, file_m
     extract_img_contents(temp_dir)
     set_all_755(save_part_contents_path)
     edit_contents(save_part_contents_path, file_manager)
-    input('Press enter when ready')
+    input(info_messages.WAIT_FOR_USER_INPUT)
     common_utils.delete_file(img_path)
     uce_utils.create_blank_file(img_path)
     uce_utils.make_save_part_from_dir(save_part_contents_path, img_path)

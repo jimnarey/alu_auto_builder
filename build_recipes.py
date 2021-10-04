@@ -7,17 +7,19 @@ import logging
 
 import common_utils
 import configs
+import error_messages
+import info_messages
 import operations
 
 
 def validate_args(input_path, core_path, bios_dir, output_dir):
     valid = True
     for path in (input_path, core_path):
-        if not common_utils.validate_required_path(path):
+        if not common_utils.validate_required_path(path, 'Specified gamelist'):
             valid = False
-    if not common_utils.validate_parent_dir(output_dir):
+    if not common_utils.validate_parent_dir(output_dir, 'Output dir'):
         valid = False
-    if not common_utils.validate_optional_dir(bios_dir):
+    if not common_utils.validate_optional_dir(bios_dir, 'Bios dir'):
         valid = False
     return valid
 
@@ -26,7 +28,7 @@ def read_gamelist(input_path):
     try:
         tree = ET.parse(input_path)
     except ParseError:
-        logging.error('{0} does not appear to be a valid XML file'.format(input_path))
+        logging.error(error_messages.invalid_path('Specified gamelist', input_path, 'XML file'))
         return False
     return tree.getroot()
 
@@ -47,7 +49,6 @@ def make_uce_sub_dirs(game_dir):
 
 
 def write_cart_xml(game_dir, game_name, game_desc):
-    logging.info('Creating cartridge.xml file for {0}'.format(game_name))
     cart_xml = ''.join(configs.CARTRIDGE_XML)\
         .replace('GAME_TITLE', game_name)\
         .replace('GAME_DESCRIPTION', game_desc if game_desc else '')
@@ -55,7 +56,6 @@ def write_cart_xml(game_dir, game_name, game_desc):
 
 
 def write_exec_sh(game_dir, core_file_name, game_file_name):
-    logging.info('Creating exec.sh for {0}'.format(game_file_name))
     exec_sh = ''.join(configs.EXEC_SH) \
         .replace('CORE_FILE_NAME', core_file_name) \
         .replace('GAME_FILE_NAME', game_file_name)
@@ -77,7 +77,7 @@ def copy_source_files(core_path, bios_dir, game_data, game_dir):
     try:
         common_utils.copyfile(game_data['boxart_path'], box_art_target_path)
     except TypeError:
-        logging.info('No boxart file found, using default')
+        logging.info(info_messages.NO_BOXART_FOUND)
         common_utils.copyfile(os.path.join(app_root, 'common', 'title.png'), box_art_target_path)
     if bios_dir:
         copy_dir_contents(bios_dir, os.path.join(game_dir, 'roms'))
@@ -99,7 +99,7 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
     print(input_path, core_path, bios_dir, output_dir)
     output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
     common_utils.make_dir(output_dir)
-    logging.info('Starting new recipes build run\n\n\n')
+    logging.info()
     common_utils.make_dir(output_dir)
     gamelist = read_gamelist(input_path)
     if gamelist:

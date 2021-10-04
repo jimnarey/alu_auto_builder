@@ -6,10 +6,14 @@ import logging
 import common_utils
 import uce_utils
 import operations
+import error_messages
 
 
 def validate_args(input_path):
-    return common_utils.validate_required_path(input_path)
+    valid = True
+    if not common_utils.validate_required_path(input_path, 'Input path'):
+        valid = False
+    return valid
 
 
 def main(input_path, output_path=None):

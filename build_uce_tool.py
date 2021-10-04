@@ -7,8 +7,9 @@ from zipfile import ZipFile, BadZipfile
 import logging
 
 import common_utils
+import info_messages
 import uce_utils
-import errors
+import error_messages
 import operations
 
 
@@ -33,9 +34,9 @@ PLATFORM = common_utils.get_platform()
 def pre_flight(input_dir):
     valid = True
     if PLATFORM not in ('linux', 'win32'):
-        logging.error(errors.INVALID_OS)
+        logging.error(error_messages.INVALID_OS)
         valid = False
-    if not common_utils.validate_existing_dir(input_dir):
+    if not common_utils.validate_existing_dir(input_dir, 'Input dir'):
         valid = False
     return valid
 
@@ -48,7 +49,7 @@ def relink_boxart(data_dir):
 
 def prepare_save_files(ub_paths):
     if os.path.isdir(ub_paths.save_dir):
-        logging.info('Custom save data found')
+        logging.info(info_messages.SAVE_DATA_FOUND)
         common_utils.copytree(ub_paths.save_dir, ub_paths.save_workdir)
         common_utils.remove_dir(ub_paths.save_dir)
     common_utils.make_dir(ub_paths.save_dir)
@@ -128,24 +129,24 @@ def extract_and_copy_save_zip(ub_paths):
             zfile.extract('save.img', ub_paths.save_workdir)
             common_utils.copyfile(os.path.join(ub_paths.save_workdir, 'save.img'), ub_paths.cart_save_file)
     except BadZipfile:
-        logging.error('save.zip is not a valid zipfile')
+        logging.error(error_messages.SAVE_NOT_VALID_ZIP)
     except KeyError:
-        logging.error('save.zip does not contain a file named save.img')
+        logging.error(error_messages.ZIP_HAS_NO_SAVE_IMG)
     except OSError as e:
-        logging.error('Unable to extract and copy save.img file from zip: {0}'.format(e))
+        logging.error(error_messages.zip_extract_failed(e))
 
 
 def get_save_part(ub_paths):
     if os.listdir(ub_paths.save_workdir):
         save_img_path = os.path.join(ub_paths.save_workdir, 'save.img')
         if os.path.isfile(save_img_path):
-            logging.info('Processing save.img as new save partition, ignoring any other contents of save dir')
+            logging.info(info_messages.processing_save_file('save.img'))
             common_utils.copyfile(save_img_path, ub_paths.cart_save_file)
         elif os.path.isfile(os.path.join(ub_paths.save_workdir, 'save.zip')):
-            logging.info('Processing save.zip as new save partition, ignoring any other contents of save dir')
+            logging.info(info_messages.processing_save_file('save.zip'))
             extract_and_copy_save_zip(ub_paths)
         else:
-            logging.info('Creating save partition from contents of save dir')
+            logging.info(info_messages.processing_save_file('all save dir contents'))
             uce_utils.create_blank_file(ub_paths.cart_save_file)
             uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
     else:
