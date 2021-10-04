@@ -153,9 +153,10 @@ def get_save_part(ub_paths):
 
 
 def main(input_dir, output_path=None):
+    print(input_dir, output_path)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     input_dir = input_dir if input_dir else os.getcwd()
-    if not check_os() or validate_args(input_dir):
+    if not check_os() or not validate_args(input_dir):
         return
     if not output_path:
         output_path = os.path.join(input_dir, '{0}.uce'.format(os.path.split(os.path.abspath(input_dir))[-1]))

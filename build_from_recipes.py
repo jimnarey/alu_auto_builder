@@ -62,9 +62,9 @@ def main(input_dir, output_dir=None):
     input_dir = os.path.abspath(input_dir) if input_dir else os.getcwd()
     if not validate_args(input_dir, output_dir):
         return False
+    recipe_dirs = get_recipe_dirs(input_dir)
     output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(input_dir, 'UCE')
     common_utils.make_dir(output_dir)
-    recipe_dirs = get_recipe_dirs(input_dir)
     make_recipes(recipe_dirs, output_dir)
 
 
