@@ -146,7 +146,7 @@ def get_platform():
 def get_app_root():
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
-    return os.path.split(os.path.realpath(__file__))[0]
+    return os.path.realpath(os.path.split(os.path.dirname(__file__))[0])
 
 
 def get_platform_bin(windows_bin, linux_bin, linux_script=False):

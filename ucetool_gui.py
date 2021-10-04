@@ -12,7 +12,6 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QPushButton, QWidget, QFileDialog, QComboBox, QDialog
 
 from shared import common_utils
-# import configs
 import operations
 
 
@@ -140,7 +139,7 @@ class Controller:
 
     def _show_dialog(self, name):
         self._close_current_view()
-        view = OperationDialog(name, operations.operations[name])
+        view = OperationDialog(name, operations.operations[name]['options'])
         self._connect_dialog_signals(view)
         self._show_view(view)
 
@@ -188,6 +187,7 @@ class Controller:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     app = QApplication(sys.argv)
+    print(common_utils.get_app_root())
     app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'data', 'title.png')))
     option_set = OptionSet()
     controller = Controller(option_set, operations.operations)
