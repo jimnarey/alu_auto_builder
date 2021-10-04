@@ -189,7 +189,6 @@ class Controller:
 
     def _change_checkbox_value(self, view, name):
         self.args[name] = view.check_boxes[name].isChecked()
-        print(self.args)
 
     def _validate_args(self):
         valid = True
