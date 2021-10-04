@@ -11,9 +11,9 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
     QPushButton, QWidget, QFileDialog, QComboBox, QDialog
 
-import common_utils
+from shared import common_utils
 # import configs
-from shared import operations
+import operations
 
 
 def get_opt_type(name):

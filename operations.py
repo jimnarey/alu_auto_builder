@@ -1,37 +1,36 @@
 from shared import configs
 import runners
 
-# TODO consider changing 'required' to 'gui_required' given command line can auto generate some opts based on cwd
 
-input_path_opt = {'name': 'input_path', 'short': 'i', 'required': True}
+input_path_opt = {'name': 'input_path', 'short': 'i', 'gui_required': True}
 
-input_dir_opt = {'name': 'input_dir', 'short': 'i', 'required': True}
+input_dir_opt = {'name': 'input_dir', 'short': 'i', 'gui_required': True}
 
-output_path_opt = {'name': 'output_path', 'short': 'o', 'required': False}
+output_path_opt = {'name': 'output_path', 'short': 'o', 'gui_required': False}
 
-output_dir_opt = {'name': 'output_dir', 'short': 'o', 'required': False}
+output_dir_opt = {'name': 'output_dir', 'short': 'o', 'gui_required': False}
 
 
 extra_build_opts = (
-    {'name': 'core_path', 'short': 'c', 'required': True},
-    {'name': 'bios_dir', 'short': 'b', 'required': False}
+    {'name': 'core_path', 'short': 'c', 'gui_required': True},
+    {'name': 'bios_dir', 'short': 'b', 'gui_required': False}
 )
 
 scrape_opts = (
-    {'name': 'platform', 'short': 'p', 'required': True, 'selections': configs.PLATFORMS},
-    {'name': 'scrape_module', 'short': 's', 'required': False, 'selections': configs.SCRAPING_MODULES},
-    {'name': 'user_name', 'short': 'u', 'required': False},
-    {'name': 'password', 'short': 'q', 'required': False}
+    {'name': 'platform', 'short': 'p', 'gui_required': True, 'selections': configs.PLATFORMS},
+    {'name': 'scrape_module', 'short': 's', 'gui_required': False, 'selections': configs.SCRAPING_MODULES},
+    {'name': 'user_name', 'short': 'u', 'gui_required': False},
+    {'name': 'password', 'short': 'q', 'gui_required': False}
 )
 
-replace_save_part_opt = {'name': 'part_path', 'short': 'p', 'required': True}
+replace_save_part_opt = {'name': 'part_path', 'short': 'p', 'gui_required': True}
 
 edit_save_part_opts = (
-    {'name': 'mount_method', 'short': 'M', 'required': False},
-    {'name': 'file_manager', 'short': 'f', 'required': False}
+    {'name': 'mount_method', 'short': 'M', 'gui_required': False},
+    {'name': 'file_manager', 'short': 'f', 'gui_required': False}
 )
 
-backup_save_part_opt = {'name': 'backup_uce', 'short': 'B', 'required': False}
+backup_save_part_opt = {'name': 'backup_uce', 'short': 'B', 'gui_required': False}
 
 scrape_and_build_opts = (input_dir_opt, output_dir_opt, *extra_build_opts, *scrape_opts)
 
