@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, operations, parent=None):
         super().__init__(parent)
-        self.setWindowTitle('Auto UCE Builder')
+        self.setWindowTitle('UCE Tool')
         self.main_layout = self._create_main_layout()
         self.op_buttons = {}
         self._create_operation_buttons(operations.keys())

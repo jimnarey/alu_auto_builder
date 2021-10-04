@@ -10,14 +10,15 @@ import operations
 
 def validate_file_manager(file_manager):
     valid = True
-    if file_manager:
-        if common_utils.get_platform() != 'linux':
-            logging.error(error_messages.FILEMAN_NOT_LINUX)
-            valid = False
-        else:
-            if not shutil.which(file_manager):
-                logging.error(error_messages.INVALID_FILEMAN)
+    if common_utils.get_platform() == 'linux':
+        if file_manager:
+            if common_utils.get_platform() != 'linux':
+                logging.error(error_messages.FILEMAN_NOT_LINUX)
                 valid = False
+            else:
+                if not shutil.which(file_manager):
+                    logging.error(error_messages.INVALID_FILEMAN)
+                    valid = False
     return valid
 
 
