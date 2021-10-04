@@ -169,7 +169,7 @@ def validate_required_path(file_path, option_name=''):
 
 
 def validate_optional_dir(dir_path, option_name=''):
-    if dir_path and not os.path.isfile(dir_path):
+    if dir_path and not os.path.isdir(dir_path):
         logging.error(error_messages.invalid_path(option_name, dir_path, 'directory'))
         return False
     return True
