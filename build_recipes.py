@@ -92,7 +92,7 @@ def setup_uce_source(core_path, bios_dir, game_data, game_dir):
 
 def main(input_path, core_path, bios_dir=None, output_dir=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    if not validate_args(input_path, core_path, bios_dir, output_dir) or not common_utils.check_windows_admin():
+    if not validate_args(input_path, core_path, bios_dir, output_dir):
         return
     output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
     common_utils.make_dir(output_dir)

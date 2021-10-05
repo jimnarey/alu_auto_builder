@@ -214,12 +214,12 @@ def get_cmd_line_args(opt_set):
     return parser
 
 
-def check_windows_admin():
-    if get_platform() == 'win32':
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        except:
-            logging.error(error_messages.NO_ADMIN_WINDOWS)
-            return False
-    return True
+# def check_windows_admin():
+#     if get_platform() == 'win32':
+#         try:
+#             return ctypes.windll.shell32.IsUserAnAdmin()
+#         except:
+#             logging.error(error_messages.NO_ADMIN_WINDOWS)
+#             return False
+#     return True
 
