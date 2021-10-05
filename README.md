@@ -5,8 +5,12 @@ An automatic UCE builder for the Arcade Legends Ultimate arcade cabinet
 
 ## Important!
 
-Some of the operations performed by this tool require administrator privileges on Windows. Look in the help
-sections of the GUI for more info.
+- Some of the operations performed by this tool require administrator privileges on Windows. Look in the help
+  sections of the GUI for more info.
+- When running the GUI tool in Linux, use the included sh file if running from the Desktop (i.e not in a console window)
+  to get the logging output.
+
+## Contents
 
 - [What's New!](#what-s-new-)
 - [What it is](#what-it-is)
@@ -109,7 +113,7 @@ it is not needed if the user provides their own gamelist.xml and cover images (s
 
 #### GUI
 
-The Windows GUI release includes Skyscraper as the author only provides an (unsupported) Windows build in binary format
+The Windows release includes Skyscraper as the author only provides an (unsupported) Windows build in binary format
 so this doesn't conflict with his preferred way of distribution. The current bundled version is 3.6.12.
 
 If you already have Skyscraper installed **and** it is in your PATH then this tool will use that copy instead of the

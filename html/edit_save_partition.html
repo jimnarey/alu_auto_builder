@@ -5,13 +5,18 @@
 </head>
 <body>
 <h2>Edit Save Partition</h2>
+<p><i>Once you have made changes to the save partition in your file manager, you must hit enter in the console
+window when prompted to close the partition and complete the process.</i></p>
 <p>Allows editing of the contents of a UCE's save partition in your OS's file manager.</p>
 <h3>Inputs</h3>
 <ul>
     <li><b>Input Path:</b> <i>Required</i> The UCE file whose save partition you want to edit.</li>
     <li><b>Mount Method:</b> <i>Optional, Linux only, needs root.</i> If selected, the save partition will be mounted as with any
     other Linux filesystem rather than edited using a combination of debugfs/make2fs commands. There ought to be no
-    practical difference; the mount method is mostly a hold-over from early attempts to implement this functionality.</li>
+    practical difference; the mount method is mostly a hold-over from early attempts to implement this functionality. A
+    small advantage is that you don't have to hit enter in the console window to complete the process. A big disadvantage
+    is that you'll need another file manager window opened as root to drag/copy/paste files in and out of the save
+    partition.</li>
     <li><b>File Manager</b> <i>Optional, Linux only.</i> Specify a particular file manager application. Otherwise the tool
     works through a list of known file managers until it finds one. The list is not exhaustive so if you are using something
     niche you may need to specify it explicitly.</li>

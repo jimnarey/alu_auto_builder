@@ -188,11 +188,12 @@ class Controller:
             view.combo_selects[name].setCurrentText(dir_name)
             self.dialog_dir = dir_name
 
+    # TODO - Neaten this up. It's a last-minute fudge to choose between saving/opening. Re-add isfile() for open
     def _choose_file(self, view, name):
-        file_name = QFileDialog.getOpenFileName(view, 'Select File', self.dialog_dir)[0]
+        fd = QFileDialog.getOpenFileName if name in ('input_path', 'core_path') else QFileDialog.getSaveFileName
+        file_name = fd(view, 'Select File', self.dialog_dir)[0]
         if file_name:
             file_name = QDir.toNativeSeparators(file_name)
-        if os.path.isfile(file_name):
             view.combo_selects[name].setCurrentText(file_name)
             self.dialog_dir = os.path.split(file_name)[0]
 
