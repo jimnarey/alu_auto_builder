@@ -9,7 +9,7 @@ import logging
 from PyQt5.QtCore import QDir, pyqtRemoveInputHook
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
-    QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox
+    QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox, QMessageBox
 
 from shared import common_utils, error_messages
 import operations
@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('UCE Tool')
         self.main_layout = self._create_main_layout()
         self.op_buttons = {}
-        self._create_operation_buttons(operations.keys())
+        self._create_operation_buttons(operations)
         self.exit_button = QPushButton('Exit')
         self.main_layout.addWidget(self.exit_button)
 
@@ -48,13 +48,14 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(layout_container)
         return main_layout
 
-    def _create_operation_buttons(self, op_names):
-        for op_name in op_names:
-            self._create_button(op_name)
+    def _create_operation_buttons(self, operations):
+        for operation_name, operation_spec in operations.items():
+            self._create_button(operation_name, operation_spec)
 
-    def _create_button(self, op_name):
-        button = QPushButton(title_from_name(op_name))
-        self.op_buttons[op_name] = button
+    def _create_button(self, operation_name, operation_spec):
+        button = QPushButton(title_from_name(operation_name))
+        button.setToolTip(operation_spec['help'])
+        self.op_buttons[operation_name] = button
         self.main_layout.addWidget(button)
 
 
@@ -70,7 +71,8 @@ class OperationDialog(QDialog):
         self._create_opt_inputs(opts)
         self.ok_button = QPushButton('OK')
         self.close_button = QPushButton('Close')
-        self._create_user_input_widget(self.ok_button, self.close_button)
+        self.help_button = QPushButton('Help')
+        self._create_user_input_widget(self.ok_button, self.close_button, self.help_button)
         self.setLayout(self.dialog_layout)
 
     def _create_user_input_widget(self, *args):
@@ -88,27 +90,29 @@ class OperationDialog(QDialog):
             else:
                 self._create_select_widget(opt)
 
-    def _create_title_label(self, label_text):
+    def _create_title_label(self, opt):
+        print(opt)
         title_label = QLabel()
+        title_label.setToolTip(opt['help'])
         title_label.setFixedWidth(100)
-        title_label.setText(label_text)
+        title_label.setText(title_from_name(opt['name']))
         return title_label
 
-    def _create_select_button(self, name):
+    def _create_select_button(self, opt):
         button = QPushButton('Select')
         button.setFixedHeight(30)
-        self.select_buttons[name] = button
+        self.select_buttons[opt['name']] = button
         return button
 
     def _create_checkbox_widget(self, opt):
-        widgets = [self._create_title_label(title_from_name(opt['name']))]
+        widgets = [self._create_title_label(opt)]
         checkbox = QCheckBox()
         self.check_boxes[opt['name']] = checkbox
         widgets.append(checkbox)
         self._create_user_input_widget(*widgets)
 
     def _create_select_widget(self, opt):
-        widgets = [self._create_title_label(title_from_name(opt['name']))]
+        widgets = [self._create_title_label(opt)]
         combo = QComboBox()
         combo.addItems(opt.get('selections', []))
         combo.setFixedWidth(200)
@@ -116,7 +120,7 @@ class OperationDialog(QDialog):
         self.combo_selects[opt['name']] = combo
         widgets.append(combo)
         if get_combo_opt_type(opt['name']) in ('dir', 'path'):
-            widgets.append(self._create_select_button(opt['name']))
+            widgets.append(self._create_select_button(opt))
         self._create_user_input_widget(*widgets)
 
 
@@ -145,11 +149,20 @@ class Controller:
                 button.clicked.connect(functools.partial(self._choose_file, view, name))
         view.ok_button.clicked.connect(self._run)
         view.close_button.clicked.connect(self.show_main_window)
+        view.help_button.clicked.connect(self._show_help_dialog)
         for name, combo in view.combo_selects.items():
             combo.currentTextChanged.connect(functools.partial(self._change_combo_content, view, name))
             combo.currentIndexChanged.connect(functools.partial(self._change_combo_content, view, name))
         for name, checkbox in view.check_boxes.items():
             checkbox.toggled.connect(functools.partial(self._change_checkbox_value, view, name))
+
+    def _show_help_dialog(self):
+        dialog = QMessageBox()
+        dialog.setWindowTitle('{0}: Help'.format(title_from_name(self.current_operation_name)))
+        html_source = os.path.join(common_utils.get_app_root(), 'html', '{0}.html'.format(self.current_operation_name))
+        dialog.setText(common_utils.get_file_content(html_source, 'r'))
+        dialog.setStandardButtons(QMessageBox.Close)
+        dialog.exec_()
 
     def _show_dialog(self, name):
         self.args = {}
@@ -212,7 +225,6 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     pyqtRemoveInputHook()
     app = QApplication(sys.argv)
-    print(common_utils.get_app_root())
     app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'data', 'title.png')))
     controller = Controller(operations.operations)
     controller.show_main_window()

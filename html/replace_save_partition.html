@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<h2>Replace Save Partition</h2>
+<p>Replaces the existing save partition of a UCE file with another specified by the user.</p>
+<h3>Inputs</h3>
+<ul>
+    <li><b>Input Path:</b> <i>Required</i> The UCE file to have its save partition replaced.</li>
+    <li><b>Part Path:</b>  <i>Required</i> The raw save partition file which will replace the UCE's existing one. Typically this is a 4Mb file
+    called save.img. To work, it must have an internal ext4 filesystem. All UCEs generated with this and other tools
+    have such a partition.</li>
+    <li><b>Backup Uce:</b> <i>Optional</i> Select this option to create a backup of the UCE before any write operations happen.
+        It will be created in the same directory as the UCE with the extension '.bak'.</li>
+</ul>
+</body>
+</html>

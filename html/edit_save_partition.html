@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<h2>Edit Save Partition</h2>
+<p>Allows editing of the contents of a UCE's save partition in your OS's file manager.</p>
+<h3>Inputs</h3>
+<ul>
+    <li><b>Input Path:</b> <i>Required</i> The UCE file whose save partition you want to edit.</li>
+    <li><b>Mount Method:</b> <i>Optional, Linux only, needs root.</i> If selected, the save partition will be mounted as with any
+    other Linux filesystem rather than edited using a combination of debugfs/make2fs commands. There ought to be no
+    practical difference; the mount method is mostly a hold-over from early attempts to implement this functionality.</li>
+    <li><b>File Manager</b> <i>Optional, Linux only.</i> Specify a particular file manager application. Otherwise the tool
+    works through a list of known file managers until it finds one. The list is not exhaustive so if you are using something
+    niche you may need to specify it explicitly.</li>
+    <li><b>Backup Uce:</b> <i>Optional</i> Select this option to create a backup of the UCE before any write operations happen.
+        It will be created in the same directory as the UCE with the extension '.bak'.</li>
+</ul>
+</body>
+</html>

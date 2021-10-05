@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<h2>Scrape Metadata and Create Gamelist</h2>
+<p>Provide a directory containing roms and produce an EmulationStation compatible gamelist.xml (the sort used by RetroPie
+amongst others). Only the data required to produce UCEs (titles, descriptions, covers) will be downloaded. The tool uses
+the excellent Skyscraper under the hood to do this.</p>
+<p>This is functionality is provided because it's a step in the process from getting from a directory of roms to either
+recipes or UCEs, and it was straightforward to break it out. If you are interested in building gamelists, especially for
+uses other than building UCEs, then using either Skyscraper itself or a GUI tool like Skraper is probably a better option.
+Both provide much more control over what is downloaded and how it is formatted.</p>
+<h3>Inputs</h3>
+<ul>
+    <li><b>Input Dir:</b> <i>Required</i> A directory containing one/multiple roms for a single emulated system.</li>
+    <li><b>Output Dir:</b> <i>Optional</i> The directory in which the gamelist.xml and a 'media' directory containing
+        downloaded covers will be placed. If one isn't provided it will be created in the same directory as the roms.</li>
+    <li><b>Platform</b> <i>Required</i> The platform/system the roms belong to (e.g. for MAME2003 choose 'mame-libretro').
+    Just because a platform is listed here it doesn't mean an appropriate core exists. It's been left on the long side
+        as a modest nod to future-proofing.</li>
+    <li><b>Scrape Module</b> <i>Required</i> The online source from which to scrape metadata. Each has a website if you
+    need to know more. Some (e.g. the superb screenscraper) work a lot faster with a user account. arcadedb is excellent,
+        requires no account but as the name suggests is relevant mostly for arcade roms.</li>
+    <li><b>User Name</b> <i>Optional</i> A user name if you are using a module for which you have an account.</li>
+    <li><b>Password</b> <i>Optional</i> A password for any user account.</li>
+</ul>
+</body>
+</html>

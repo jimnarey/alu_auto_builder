@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<h2>Create UCEs from Recipes</h2>
+<p>Creates multiple UCE files from multiple 'recipe' directories. A recipe directory must contain sub-dirs called
+'emu' and 'roms' as well as properly formatted 'exec.sh' and 'cartridge.xml' files. It can optionally have 'boxart'
+and 'save' sub-dirs, as well as a 'title.png' file. 'Recipe' dirs can be generated from roms using the appropriate
+operations selected from the main menu.</p>
+<p>The tool can create custom save partitions. To do this include one of the following in the 'save' subdir of a recipe
+directory:</p>
+<ul>
+    <li>A file called save.img - a raw ext4 filesystem.</li>
+    <li>A file called save.zip - as above but zipped up.</li>
+    <li>Arbitrary files in the correct folder structure. Usually all files go in a subdir called 'upper' with an empty
+    dir called 'work' next to it.</li>
+</ul>
+<h3>Inputs</h3>
+<ul>
+    <li><b>Input Dir:</b> <i>Required</i> A directory containing multiple 'recipe' subdirs</li>
+    <li><b>Output Dir:</b> <i>Optional</i> A directory in which to place the output UCE files. If none is provided
+        one will be creared in the input directory (called 'UCE').</li>
+</ul>
+</body>
+</html>
+</body>
+</html>

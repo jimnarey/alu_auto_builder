@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 
+# Runners
+
+def start_operation(operation_name):
+    return 'Starting {} operation'.format(operation_name)
+
+
+def end_operation(operation_name):
+    return 'Operation {0} complete'.format(operation_name)
+
+
 # Create gamelist
 
 ATTEMPTING_WIN_SKYSCRAPER_SETUP = 'Attempting to copy required .skyscraper and RetroPie dirs to user home dir'
