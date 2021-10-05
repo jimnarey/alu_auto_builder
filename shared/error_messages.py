@@ -18,6 +18,8 @@ SAVE_NOT_VALID_ZIP = 'save.zip is not a valid zipfile'
 
 ZIP_HAS_NO_SAVE_IMG = 'save.zip does not contain a file named save.img'
 
+NO_ADMIN_WINDOWS = 'Recipes can only be built if you run this tool as an administrator'
+
 
 def zip_extract_failed(exception_message):
     return 'Unable to extract and copy save.img file from zip: {0}'.format(exception_message)
