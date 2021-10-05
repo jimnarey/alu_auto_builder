@@ -8,43 +8,46 @@ from shared import common_utils, info_messages, uce_utils, error_messages
 import operations
 
 
-def validate_file_manager(file_manager):
-    valid = True
-    if common_utils.get_platform() == 'linux':
-        if file_manager:
-            if common_utils.get_platform() != 'linux':
-                logging.error(error_messages.FILEMAN_NOT_LINUX)
-                valid = False
-            else:
-                if not shutil.which(file_manager):
-                    logging.error(error_messages.INVALID_FILEMAN)
-                    valid = False
-    return valid
+class EditUCEConfig:
+
+    def __init__(self, input_path, file_manager):
+        self.temp_dir = common_utils.create_temp_dir(__name__)
+        self.input_path = os.path.abspath(input_path)
+        self.img_path = os.path.join(self.temp_dir, 'save.img')
+        self.save_part_contents_path = os.path.join(self.temp_dir, 'save_part_contents')
+        self.backup_path = input_path + '.bak'
+        self.file_manager = None
+        self.set_file_manager(file_manager)
+
+    def set_file_manager(self, file_manager):
+        if common_utils.get_platform() == 'linux':
+            self.set_file_manager_linux(file_manager)
+        elif common_utils.get_platform() == 'win32':
+            if file_manager:
+                logging.info(info_messages.FILEMAN_NOT_LINUX)
+            self.file_manager = 'explorer.exe'
+
+    def set_file_manager_linux(self, file_manager):
+        for check_manager in (str(file_manager), 'thunar', 'dolphin', 'pcmanfm', 'nautilus', 'nemo', 'konqueror'):
+            if shutil.which(check_manager):
+                self.file_manager = check_manager
+                return
+            logging.info(info_messages.file_manager_not_found(check_manager))
+        logging.error(error_messages.NO_FILE_MAN_FOUND)
+
+    def cleanup(self):
+        common_utils.cleanup_temp_dir(__name__)
 
 
-def validate_args(input_path, file_manager):
+def validate_args(input_path):
     valid = True
     if not common_utils.validate_required_path(input_path, 'Input path'):
         valid = False
-    if not validate_file_manager(file_manager):
-        valid = False
     return valid
 
 
-def select_linux_file_manager():
-    for file_manager in ('thunar', 'dolphin', 'pcmanfm', 'nautilus', 'nemo', 'konqueror'):
-        if shutil.which(file_manager):
-            return file_manager
-    logging.error(error_messages.NO_FILE_MAN_FOUND)
-    return False
-
-
 def open_file_manager(path, file_manager):
-    if common_utils.get_platform() == 'win32':
-        bin_ = 'explorer.exe'
-    else:
-        bin_ = file_manager
-    common_utils.execute_with_output([bin_, path])
+    common_utils.execute_with_output([file_manager, path])
 
 
 # Keep this in its own function in case we want to add direct folder copy later
@@ -142,25 +145,21 @@ def edit_save_part(temp_dir, img_path, save_part_contents_path, file_manager, mo
 
 def main(input_path, backup_uce=False, mount_method=False, file_manager=None):
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    if not validate_args(input_path, file_manager):
+    if not validate_args(input_path):
         return False
-    file_manager = file_manager if file_manager else select_linux_file_manager()
-    if not file_manager:
+    ec_config = EditUCEConfig(input_path, file_manager)
+    if not ec_config.file_manager:
         return False
-    input_path = os.path.abspath(input_path)
-    temp_dir = common_utils.create_temp_dir(__name__)
-    file_manager = file_manager if file_manager else 'thunar'
     squashfs_etc_data, save_data = uce_utils.split_uce(input_path)
-    img_path = os.path.join(temp_dir, 'save.img')
-    common_utils.write_file(img_path, save_data, 'wb')
+    common_utils.write_file(ec_config.img_path, save_data, 'wb')
     if backup_uce:
         backup_path = input_path + '.bak'
         common_utils.copyfile(input_path, backup_path)
-    save_part_contents_path = os.path.join(temp_dir, 'save_part_contents')
-    common_utils.make_dir(save_part_contents_path)
-    if edit_save_part(temp_dir, img_path, save_part_contents_path, file_manager, mount_method):
-        uce_utils.rebuild_uce(input_path, squashfs_etc_data, img_path)
-    common_utils.cleanup_temp_dir(__name__)
+    common_utils.make_dir(ec_config.save_part_contents_path)
+    if edit_save_part(ec_config.temp_dir, ec_config.img_path, ec_config.save_part_contents_path,
+                      ec_config.file_manager, mount_method):
+        uce_utils.rebuild_uce(ec_config.input_path, squashfs_etc_data, ec_config.img_path)
+    ec_config.cleanup()
 
 
 if __name__ == "__main__":

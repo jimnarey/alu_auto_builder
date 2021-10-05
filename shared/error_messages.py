@@ -32,10 +32,6 @@ INVALID_OS = 'This tool requires either Linux or Windows'
 
 INVALID_MOUNT_CONFIG = 'Mount option is only available under Linux and when running as root'
 
-FILEMAN_NOT_LINUX = 'File manager option can only be used on Linux'
-
-INVALID_FILEMAN = 'The specified file manager does not appear to be a valid executable'
-
 NO_FILE_MAN_FOUND = 'No filemanager was found. This tool does not have a complete list. Specify one explicitly'
 
 
