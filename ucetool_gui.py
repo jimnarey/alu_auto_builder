@@ -91,7 +91,6 @@ class OperationDialog(QDialog):
                 self._create_select_widget(opt)
 
     def _create_title_label(self, opt):
-        print(opt)
         title_label = QLabel()
         title_label.setToolTip(opt['help'])
         title_label.setFixedWidth(100)
