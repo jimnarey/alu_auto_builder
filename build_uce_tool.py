@@ -50,7 +50,9 @@ def prepare_save_files(ub_paths):
         logging.info(info_messages.SAVE_DATA_FOUND)
         common_utils.copytree(ub_paths.save_dir, ub_paths.save_workdir)
         common_utils.remove_dir(ub_paths.save_dir)
+    # Does nothing and catches errors if the dirs already exist
     common_utils.make_dir(ub_paths.save_dir)
+    common_utils.make_dir(ub_paths.save_workdir)
 
 
 def prepare_source_files(input_dir, ub_paths):
