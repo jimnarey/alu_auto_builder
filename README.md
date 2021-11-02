@@ -132,6 +132,10 @@ so on Windows has no external dependencies.
 
 ### Linux
 
+You will need QT installed. On Ubuntu:
+
+`sudo apt install qt5-default`
+
 Please follow the instructions on the Skyscraper page for installing it on Linux. It's quick and straightforward but
 since the author doesn't provide a binary release for Linux, neither have I.
 
