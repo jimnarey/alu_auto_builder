@@ -15,17 +15,6 @@ from shared import common_utils, error_messages
 import operations
 
 
-def get_combo_opt_type(name):
-    name_parts = name.split('_')
-    try:
-        suffix = name_parts[-1]
-        if suffix in ('dir', 'path'):
-            return suffix
-    except IndexError:
-        pass
-    return 'text'
-
-
 def title_from_name(name):
     return name.replace('_', ' ').title()
 
@@ -67,7 +56,7 @@ class OperationDialog(QDialog):
         self.dialog_layout = QVBoxLayout()
         self.check_boxes = {}
         self.combo_selects = {}
-        self.select_buttons = {}
+        self.opt_buttons = []
         self._create_opt_inputs(opts)
         self.ok_button = QPushButton('OK')
         self.close_button = QPushButton('Close')
@@ -85,7 +74,7 @@ class OperationDialog(QDialog):
 
     def _create_opt_inputs(self, opts):
         for opt in opts:
-            if opt['short'].isupper():
+            if opt['type'] == 'bool':
                 self._create_checkbox_widget(opt)
             else:
                 self._create_select_widget(opt)
@@ -97,10 +86,16 @@ class OperationDialog(QDialog):
         title_label.setText(title_from_name(opt['name']))
         return title_label
 
-    def _create_select_button(self, opt):
-        button = QPushButton('Select')
+    def _create_opt_button(self, opt, button_text):
+        button = QPushButton(button_text)
         button.setFixedHeight(30)
-        self.select_buttons[opt['name']] = button
+        # Consider storing the combo/other target here rather than matching name strings
+        # in controller (_open_file etc). Would reduce flexibility of this method.
+        self.opt_buttons.append({
+            'name': opt['name'],
+            'type': opt['type'],
+            'button': button
+        })
         return button
 
     def _create_checkbox_widget(self, opt):
@@ -118,8 +113,8 @@ class OperationDialog(QDialog):
         combo.setEditable(True)
         self.combo_selects[opt['name']] = combo
         widgets.append(combo)
-        if get_combo_opt_type(opt['name']) in ('dir', 'path'):
-            widgets.append(self._create_select_button(opt))
+        if opt['type'] in ('dir', 'file_open', 'file_save'):
+            widgets.append(self._create_opt_button(opt, 'Select'))
         self._create_user_input_widget(*widgets)
 
 
@@ -140,20 +135,34 @@ class Controller:
         self.current_view = view
         view.show()
 
-    def _connect_dialog_signals(self, view):
-        for name, button in view.select_buttons.items():
-            if get_combo_opt_type(name) == 'dir':
-                button.clicked.connect(functools.partial(self._choose_dir, view, name))
-            elif get_combo_opt_type(name) == 'path':
-                button.clicked.connect(functools.partial(self._choose_file, view, name))
+    def connect_dialog_opt_button_signals(self, view):
+        for button in view.opt_buttons:
+            if button['type'] == 'dir':
+                button['button'].clicked.connect(functools.partial(self._choose_dir, view, button['name']))
+            elif button['type'] == 'file_open':
+                button['button'].clicked.connect(functools.partial(self._open_file, view, button['name']))
+            elif button['type'] == 'file_save':
+                button['button'].clicked.connect(functools.partial(self._save_file, view, button['name']))
+
+    def connect_dialog_main_button_signals(self, view):
         view.ok_button.clicked.connect(self._run)
         view.close_button.clicked.connect(self.show_main_window)
         view.help_button.clicked.connect(self._show_help_dialog)
+
+    def _connect_dialog_combo_signals(self, view):
         for name, combo in view.combo_selects.items():
             combo.currentTextChanged.connect(functools.partial(self._change_combo_content, view, name))
             combo.currentIndexChanged.connect(functools.partial(self._change_combo_content, view, name))
+
+    def _connect_dialog_checkbox_signals(self, view):
         for name, checkbox in view.check_boxes.items():
             checkbox.toggled.connect(functools.partial(self._change_checkbox_value, view, name))
+
+    def _connect_dialog_signals(self, view):
+        self.connect_dialog_opt_button_signals(view)
+        self.connect_dialog_main_button_signals(view)
+        self._connect_dialog_combo_signals(view)
+        self._connect_dialog_checkbox_signals(view)
 
     def _show_help_dialog(self):
         dialog = QMessageBox()
@@ -189,9 +198,16 @@ class Controller:
             self.dialog_dir = dir_name
 
     # TODO - Neaten this up. It's a last-minute fudge to choose between saving/opening. Re-add isfile() for open
-    def _choose_file(self, view, name):
-        fd = QFileDialog.getOpenFileName if name in ('input_path', 'core_path') else QFileDialog.getSaveFileName
-        file_name = fd(view, 'Select File', self.dialog_dir)[0]
+    def _open_file(self, view, name):
+        file_name = QFileDialog.getOpenFileName(view, 'Open File', self.dialog_dir)[0]
+        if file_name:
+            file_name = QDir.toNativeSeparators(file_name)
+        if os.path.isfile(file_name):
+            view.combo_selects[name].setCurrentText(file_name)
+            self.dialog_dir = os.path.split(file_name)[0]
+
+    def _save_file(self, view, name):
+        file_name = QFileDialog.getSaveFileName(view, 'Save File', self.dialog_dir)[0]
         if file_name:
             file_name = QDir.toNativeSeparators(file_name)
             view.combo_selects[name].setCurrentText(file_name)
