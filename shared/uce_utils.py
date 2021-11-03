@@ -6,9 +6,11 @@ import time
 
 from shared import common_utils
 
+logger = logging.getLogger(__name__)
+
 
 def split_uce(input_path):
-    logging.info('Splitting UCE file {0} into main section and save partition'.format(input_path))
+    logger.info('Splitting UCE file {0} into main section and save partition'.format(input_path))
     data = common_utils.get_file_content(input_path, 'rb')
     squashfs_etc_data = data[:-4194304]
     save_data = data[-4194304:]

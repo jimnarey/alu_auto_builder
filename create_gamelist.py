@@ -7,14 +7,16 @@ import logging
 from shared import configs, common_utils, error_messages, info_messages
 import operations
 
+logger = logging.getLogger(__name__)
+
 
 def validate_args(platform, scrape_module, input_dir, output_dir):
     valid = True
     if not platform or platform not in configs.PLATFORMS:
-        logging.error(error_messages.SCRAPE_INVALID_PLATFORM)
+        logger.error(error_messages.SCRAPE_INVALID_PLATFORM)
         valid = False
     if scrape_module not in configs.SCRAPING_MODULES:
-        logging.error(error_messages.SCRAPE_INVALID_MODULE)
+        logger.error(error_messages.SCRAPE_INVALID_MODULE)
         valid = False
     if not common_utils.validate_existing_dir(input_dir, 'Input dir'):
         valid = False
@@ -29,7 +31,7 @@ def setup_windows_skyscraper(local_skyscraper_dir):
     retro_pie_target = os.path.join(home_dir, 'RetroPie')
     for dir_ in (skyscraper_target, retro_pie_target):
         if not os.path.isdir(dir_):
-            logging.info(info_messages.ATTEMPTING_WIN_SKYSCRAPER_SETUP)
+            logger.info(info_messages.ATTEMPTING_WIN_SKYSCRAPER_SETUP)
             common_utils.copytree(os.path.join(local_skyscraper_dir, 'deploy', '.skyscraper'), skyscraper_target)
             common_utils.copytree(os.path.join(local_skyscraper_dir, 'deploy', 'RetroPie'), retro_pie_target)
 
@@ -44,10 +46,10 @@ def get_skyscraper_bin():
     if common_utils.get_platform() == 'win32':
         local_skyscraper_dir = os.path.join(common_utils.get_app_root(), 'windows', 'skyscraper')
         if os.path.isdir(local_skyscraper_dir):
-            logging.info(info_messages.USING_PACKAGED_SKYSCRPAER_WIN)
+            logger.info(info_messages.USING_PACKAGED_SKYSCRPAER_WIN)
             setup_windows_skyscraper(local_skyscraper_dir)
             return os.path.join(local_skyscraper_dir, 'Skyscraper.exe')
-    logging.info(info_messages.USING_EXTERNAL_SKYSCRPAER)
+    logger.info(info_messages.USING_EXTERNAL_SKYSCRPAER)
     return 'Skyscraper'
 
 
@@ -75,8 +77,8 @@ def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_p
 
 
 def main(platform, input_dir, scrape_module=None, user_name=None, password=None, output_dir=None):
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
-    logging.info('Starting gamelist builder\n\n\n')
+    # logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s", datefmt="%H:%M:%S")
+    logger.info('Starting gamelist builder\n\n\n')
     scrape_module = scrape_module if scrape_module else 'screenscraper'
     input_dir = os.path.abspath(input_dir) if input_dir else os.getcwd()
     if not validate_args(platform, scrape_module, input_dir, output_dir):
@@ -94,6 +96,7 @@ def main(platform, input_dir, scrape_module=None, user_name=None, password=None,
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s", datefmt="%H:%M:%S")
     parser = common_utils.get_cmd_line_args(operations.operations['scrape_and_make_gamelist']['options'])
     args = vars(parser.parse_args())
     main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'], user_name=args['user_name'],

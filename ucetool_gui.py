@@ -14,6 +14,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
 from shared import common_utils, error_messages
 import operations
 
+logger = logging.getLogger(__name__)
+
 
 def title_from_name(name):
     return name.replace('_', ' ').title()
@@ -238,7 +240,7 @@ class Controller:
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s", datefmt="%H:%M:%S")
     pyqtRemoveInputHook()
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'data', 'title.png')))

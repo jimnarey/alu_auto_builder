@@ -4,7 +4,7 @@ import os
 from shared import common_utils
 import logging
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s", datefmt="%H:%M:%S")
 
 source_dir = common_utils.get_app_root()
 logging.info('Source dir: {0}'.format(source_dir))

@@ -7,6 +7,8 @@ import shutil
 from shared import common_utils, info_messages, uce_utils, error_messages
 import operations
 
+logger = logging.getLogger(__name__)
+
 
 class EditUCEConfig:
 
@@ -24,7 +26,7 @@ class EditUCEConfig:
             self.set_file_manager_linux(file_manager)
         elif common_utils.get_platform() == 'win32':
             if file_manager:
-                logging.info(info_messages.FILEMAN_NOT_LINUX)
+                logger.info(info_messages.FILEMAN_NOT_LINUX)
             self.file_manager = 'explorer.exe'
 
     def set_file_manager_linux(self, file_manager):
@@ -32,8 +34,8 @@ class EditUCEConfig:
             if shutil.which(check_manager):
                 self.file_manager = check_manager
                 return
-            logging.info(info_messages.file_manager_not_found(check_manager))
-        logging.error(error_messages.NO_FILE_MAN_FOUND)
+            logger.info(info_messages.file_manager_not_found(check_manager))
+        logger.error(error_messages.NO_FILE_MAN_FOUND)
 
     def cleanup(self):
         common_utils.cleanup_temp_dir(__name__)
@@ -121,7 +123,7 @@ def edit_save_part_with_mount(img_path, save_part_contents_path, file_manager):
         common_utils.remove_dir(save_part_contents_path)
         return True
     else:
-        logging.error(error_messages.INVALID_MOUNT_CONFIG)
+        logger.error(error_messages.INVALID_MOUNT_CONFIG)
         return False
 
 
@@ -144,7 +146,6 @@ def edit_save_part(temp_dir, img_path, save_part_contents_path, file_manager, mo
 
 
 def main(input_path, backup_uce=False, mount_method=False, file_manager=None):
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     if not validate_args(input_path):
         return False
     ec_config = EditUCEConfig(input_path, file_manager)
@@ -163,6 +164,8 @@ def main(input_path, backup_uce=False, mount_method=False, file_manager=None):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
+                        datefmt="%H:%M:%S")
     parser = common_utils.get_cmd_line_args(operations.operations['edit_uce_save_partition']['options'])
     args = vars(parser.parse_args())
     main(args['input_path'], backup_uce=args['backup_uce'], mount_method=args['mount_method'],

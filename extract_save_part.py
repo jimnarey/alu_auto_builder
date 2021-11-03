@@ -6,6 +6,8 @@ import logging
 from shared import common_utils, uce_utils
 import operations
 
+logger = logging.getLogger(__name__)
+
 
 def validate_args(input_path):
     valid = True
@@ -15,7 +17,6 @@ def validate_args(input_path):
 
 
 def main(input_path, output_path=None):
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     if not validate_args(input_path):
         return False
     output_path = os.path.abspath(output_path) if output_path else os.path.join(os.path.dirname(input_path), 'save.img')
@@ -24,6 +25,8 @@ def main(input_path, output_path=None):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
+                        datefmt="%H:%M:%S")
     parser = common_utils.get_cmd_line_args(operations.operations['extract_uce_save_partition']['options'])
     args = vars(parser.parse_args())
     main(args['input_path'], output_path=args['output_path'])

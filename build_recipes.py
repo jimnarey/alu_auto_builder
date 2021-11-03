@@ -8,6 +8,8 @@ import logging
 from shared import common_utils, configs, error_messages, info_messages
 import operations
 
+logger = logging.getLogger(__name__)
+
 
 def validate_args(input_path, core_path, bios_dir, output_dir):
     valid = True
@@ -26,7 +28,7 @@ def read_gamelist(input_path):
     try:
         tree = ET.parse(input_path)
     except ParseError:
-        logging.error(error_messages.invalid_path('Specified gamelist', input_path, 'XML file'))
+        logger.error(error_messages.invalid_path('Specified gamelist', input_path, 'XML file'))
         return False
     return tree.getroot()
 
@@ -75,7 +77,7 @@ def copy_source_files(core_path, bios_dir, game_data, game_dir):
     try:
         common_utils.copyfile(game_data['boxart_path'], box_art_target_path)
     except TypeError:
-        logging.info(info_messages.NO_BOXART_FOUND)
+        logger.info(info_messages.NO_BOXART_FOUND)
         common_utils.copyfile(os.path.join(app_root, 'common', 'title.png'), box_art_target_path)
     if bios_dir:
         copy_dir_contents(bios_dir, os.path.join(game_dir, 'roms'))
@@ -91,7 +93,6 @@ def setup_uce_source(core_path, bios_dir, game_data, game_dir):
 
 
 def main(input_path, core_path, bios_dir=None, output_dir=None):
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
     if not validate_args(input_path, core_path, bios_dir, output_dir):
         return
     output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
@@ -105,6 +106,8 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
+                        datefmt="%H:%M:%S")
     parser = common_utils.get_cmd_line_args(operations.operations['build_recipes_from_gamelist']['options'])
     args = vars(parser.parse_args())
     main(args['input_path'], args['core_path'], bios_dir=args['bios_dir'], output_dir=args['output_dir'])

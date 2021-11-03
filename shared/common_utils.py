@@ -14,6 +14,8 @@ from shared import error_messages, info_messages
 
 # TODO - what can go wrong/should catch with os.getcwd() ?
 
+logger = logging.getLogger(__name__)
+
 active_temp_dirs = {}
 
 
@@ -22,9 +24,9 @@ def create_temp_dir(calling_module):
     try:
         temp_dir = tempfile.mkdtemp()
     except OSError as e:
-        logging.error(error_messages.failed_to_create_temp_dir(e))
+        logger.error(error_messages.failed_to_create_temp_dir(e))
         return False
-    logging.info(info_messages.created_temp_dir(calling_module))
+    logger.info(info_messages.created_temp_dir(calling_module))
     active_temp_dirs[calling_module] = temp_dir
     return temp_dir
 
@@ -43,12 +45,12 @@ def execute_with_output(cmd, shell=False):
                 print(line, end='')
             return_code = p.wait()
         if return_code:
-            logging.error(error_messages.command_exited_non_zero(return_code, cmd))
+            logger.error(error_messages.command_exited_non_zero(return_code, cmd))
             return False
     except OSError as e:
-        logging.error(error_messages.command_failed_with_exception(cmd, e))
+        logger.error(error_messages.command_failed_with_exception(cmd, e))
         return False
-    logging.info(info_messages.ran_command(cmd))
+    logger.info(info_messages.ran_command(cmd))
     return True
 
 
@@ -57,9 +59,9 @@ def write_file(file_path, file_content, write_type):
         with open(file_path, write_type) as target_file:
             target_file.write(file_content)
     except OSError as e:
-        logging.error(error_messages.access_failure('write', file_path, e))
+        logger.error(error_messages.access_failure('write', file_path, e))
         return False
-    logging.info(info_messages.access_success('wrote', file_path))
+    logger.info(info_messages.access_success('wrote', file_path))
     return True
 
 
@@ -68,9 +70,9 @@ def get_file_content(file_path, read_type):
         with open(file_path, read_type) as read_file:
             content = read_file.read()
     except OSError as e:
-        logging.error(error_messages.access_failure('read', file_path, e))
+        logger.error(error_messages.access_failure('read', file_path, e))
         return False
-    logging.info(info_messages.access_success('read', file_path))
+    logger.info(info_messages.access_success('read', file_path))
     return content
 
 
@@ -78,11 +80,11 @@ def make_dir(dir_path):
     try:
         os.mkdir(dir_path)
     except FileExistsError:
-        logging.info(info_messages.dir_already_exists(dir_path))
+        logger.info(info_messages.dir_already_exists(dir_path))
     except OSError as e:
-        logging.error(error_messages.make_dir_failure(dir_path, e))
+        logger.error(error_messages.make_dir_failure(dir_path, e))
         return False
-    logging.info(info_messages.make_dir_success(dir_path))
+    logger.info(info_messages.make_dir_success(dir_path))
     return True
 
 
@@ -90,9 +92,9 @@ def remove_dir(dir_path):
     try:
         shutil.rmtree(dir_path)
     except OSError as e:
-        logging.error(error_messages.delete_failure('directory', dir_path, e))
+        logger.error(error_messages.delete_failure('directory', dir_path, e))
         return False
-    logging.info(info_messages.remove_success('directory', dir_path))
+    logger.info(info_messages.remove_success('directory', dir_path))
     return True
 
 
@@ -100,9 +102,9 @@ def copyfile(source, dest):
     try:
         shutil.copy(source, dest)
     except OSError as e:
-        logging.error(error_messages.copy_failure('file', source, dest, e))
+        logger.error(error_messages.copy_failure('file', source, dest, e))
         return False
-    logging.info(info_messages.copy_success('file', source, dest))
+    logger.info(info_messages.copy_success('file', source, dest))
     return True
 
 
@@ -110,9 +112,9 @@ def copytree(source, dest, symlinks=False):
     try:
         shutil.copytree(source, dest, symlinks=symlinks)
     except OSError as e:
-        logging.error(error_messages.copy_failure('directory', source, dest, e))
+        logger.error(error_messages.copy_failure('directory', source, dest, e))
         return False
-    logging.info(info_messages.copy_success('directory', source, dest))
+    logger.info(info_messages.copy_success('directory', source, dest))
     return True
 
 
@@ -120,9 +122,9 @@ def create_symlink(target, symlink):
     try:
         os.symlink(target, symlink)
     except OSError as e:
-        logging.error(error_messages.symlink_failure(symlink, target, e))
+        logger.error(error_messages.symlink_failure(symlink, target, e))
         return False
-    logging.info(info_messages.symlink_success(symlink, target))
+    logger.info(info_messages.symlink_success(symlink, target))
     return True
 
 
@@ -130,9 +132,9 @@ def delete_file(file_path):
     try:
         os.remove(file_path)
     except OSError as e:
-        logging.error(error_messages.delete_failure('file', file_path, e))
+        logger.error(error_messages.delete_failure('file', file_path, e))
         return False
-    logging.info(info_messages.remove_success('file', file_path))
+    logger.info(info_messages.remove_success('file', file_path))
     return True
 
 
@@ -164,21 +166,21 @@ def set_755(file_path):
 
 def validate_required_path(file_path, option_name=''):
     if not file_path or not os.path.isfile(file_path):
-        logging.error(error_messages.invalid_path(option_name, file_path, 'file path'))
+        logger.error(error_messages.invalid_path(option_name, file_path, 'file path'))
         return False
     return True
 
 
 def validate_optional_dir(dir_path, option_name=''):
     if dir_path and not os.path.isdir(dir_path):
-        logging.error(error_messages.invalid_path(option_name, dir_path, 'directory'))
+        logger.error(error_messages.invalid_path(option_name, dir_path, 'directory'))
         return False
     return True
 
 
 def validate_existing_dir(dir_path, option_name=''):
     if not dir_path or not os.path.isdir(dir_path):
-        logging.error(error_messages.invalid_path(option_name, dir_path, 'directory'))
+        logger.error(error_messages.invalid_path(option_name, dir_path, 'directory'))
         return False
     return True
 
@@ -219,7 +221,7 @@ def get_cmd_line_args(opt_set):
 #         try:
 #             return ctypes.windll.shell32.IsUserAnAdmin()
 #         except:
-#             logging.error(error_messages.NO_ADMIN_WINDOWS)
+#             logger.error(error_messages.NO_ADMIN_WINDOWS)
 #             return False
 #     return True
 

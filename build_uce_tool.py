@@ -9,6 +9,8 @@ import logging
 from shared import common_utils, info_messages, uce_utils, error_messages
 import operations
 
+logger = logging.getLogger(__name__)
+
 
 class UCEBuildPaths:
 
@@ -27,7 +29,7 @@ class UCEBuildPaths:
 
 def check_os():
     if common_utils.get_platform() not in ('linux', 'win32'):
-        logging.error(error_messages.INVALID_OS)
+        logger.error(error_messages.INVALID_OS)
         return False
     return True
 
@@ -47,7 +49,7 @@ def relink_boxart(data_dir):
 
 def prepare_save_files(ub_paths):
     if os.path.isdir(ub_paths.save_dir):
-        logging.info(info_messages.SAVE_DATA_FOUND)
+        logger.info(info_messages.SAVE_DATA_FOUND)
         common_utils.copytree(ub_paths.save_dir, ub_paths.save_workdir)
         common_utils.remove_dir(ub_paths.save_dir)
     # Does nothing and catches errors if the dirs already exist
@@ -90,7 +92,7 @@ def make_squashfs_img(app_root, ub_paths):
     sq_img_file_size = os.path.getsize(ub_paths.cart_tmp_file)
     real_bytes_used = get_sq_image_real_bytes_used(sq_img_file_size)
     count = int(real_bytes_used) - int(sq_img_file_size)
-    logging.info('Appending {0} bytes to {1}'.format(count, ub_paths.cart_tmp_file))
+    logger.info('Appending {0} bytes to {1}'.format(count, ub_paths.cart_tmp_file))
     append_to_file(ub_paths.cart_tmp_file, bytearray(count))
 
 
@@ -99,7 +101,7 @@ def get_md5(cart_temp_file):
     content = common_utils.get_file_content(cart_temp_file, 'rb')
     md5_hash.update(content)
     md5_hex_digest = md5_hash.hexdigest()
-    logging.info('md5 of {0} is {1}'.format(cart_temp_file, md5_hex_digest))
+    logger.info('md5 of {0} is {1}'.format(cart_temp_file, md5_hex_digest))
     return md5_hex_digest
 
 
@@ -129,24 +131,24 @@ def extract_and_copy_save_zip(ub_paths):
             zfile.extract('save.img', ub_paths.save_workdir)
             common_utils.copyfile(os.path.join(ub_paths.save_workdir, 'save.img'), ub_paths.cart_save_file)
     except BadZipfile:
-        logging.error(error_messages.SAVE_NOT_VALID_ZIP)
+        logger.error(error_messages.SAVE_NOT_VALID_ZIP)
     except KeyError:
-        logging.error(error_messages.ZIP_HAS_NO_SAVE_IMG)
+        logger.error(error_messages.ZIP_HAS_NO_SAVE_IMG)
     except OSError as e:
-        logging.error(error_messages.zip_extract_failed(e))
+        logger.error(error_messages.zip_extract_failed(e))
 
 
 def get_save_part(ub_paths):
     if os.listdir(ub_paths.save_workdir):
         save_img_path = os.path.join(ub_paths.save_workdir, 'save.img')
         if os.path.isfile(save_img_path):
-            logging.info(info_messages.processing_save_file('save.img'))
+            logger.info(info_messages.processing_save_file('save.img'))
             common_utils.copyfile(save_img_path, ub_paths.cart_save_file)
         elif os.path.isfile(os.path.join(ub_paths.save_workdir, 'save.zip')):
-            logging.info(info_messages.processing_save_file('save.zip'))
+            logger.info(info_messages.processing_save_file('save.zip'))
             extract_and_copy_save_zip(ub_paths)
         else:
-            logging.info(info_messages.processing_save_file('all save dir contents'))
+            logger.info(info_messages.processing_save_file('all save dir contents'))
             uce_utils.create_blank_file(ub_paths.cart_save_file)
             uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
     else:
@@ -154,15 +156,13 @@ def get_save_part(ub_paths):
         uce_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
 
 
-def main(input_dir, output_path=None):
-    print(input_dir, output_path)
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(message)s")
+def main(input_dir, output_path=None):    
     input_dir = input_dir if input_dir else os.getcwd()
     if not check_os() or not validate_args(input_dir):
         return
     if not output_path:
         output_path = os.path.join(input_dir, '{0}.uce'.format(os.path.split(os.path.abspath(input_dir))[-1]))
-    logging.info('Building new UCE')
+    logger.info('Building new UCE')
     app_root = common_utils.get_app_root()
     ub_paths = UCEBuildPaths()
     prepare_source_files(input_dir, ub_paths)
@@ -173,11 +173,13 @@ def main(input_dir, output_path=None):
     append_md5_to_img(ub_paths.cart_save_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_file_to_file(ub_paths.cart_tmp_file, ub_paths.cart_save_file)
     common_utils.copyfile(ub_paths.cart_tmp_file, output_path)
-    logging.info('Built: {0}'.format(output_path))
+    logger.info('Built: {0}'.format(output_path))
     ub_paths.cleanup()
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
+                        datefmt="%H:%M:%S")
     parser = common_utils.get_cmd_line_args(operations.operations['build_single_uce_from_recipe']['options'])
     args = vars(parser.parse_args())
     main(args['input_dir'], output_path=args['output_path'])
