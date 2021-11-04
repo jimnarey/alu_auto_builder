@@ -9,7 +9,7 @@ import logging
 from PyQt5.QtCore import QDir, pyqtRemoveInputHook, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
-    QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox, QMessageBox
+    QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox, QMessageBox, QPlainTextEdit
 
 from shared import common_utils, error_messages
 import operations
@@ -55,7 +55,14 @@ class OperationDialog(QDialog):
     def __init__(self, name, opts, parent=None):
         super().__init__(parent)
         self.setWindowTitle(title_from_name(name))
-        self.dialog_layout = QVBoxLayout()
+
+        self.dialog_layout = QHBoxLayout()
+        self.input_layout = QVBoxLayout()
+        self.log_box = QPlainTextEdit()
+        self.log_box.setReadOnly(True)
+        self.dialog_layout.addLayout(self.input_layout)
+        self.dialog_layout.addWidget(self.log_box)
+
         self.check_boxes = {}
         self.combo_selects = {}
         self.opt_buttons = []
@@ -72,7 +79,7 @@ class OperationDialog(QDialog):
         widget.setLayout(layout)
         for arg in args:
             layout.addWidget(arg)
-        self.dialog_layout.addWidget(widget)
+        self.input_layout.addWidget(widget)
 
     def _create_opt_inputs(self, opts):
         for opt in opts:
