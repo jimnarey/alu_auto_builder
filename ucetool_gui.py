@@ -6,7 +6,7 @@ import functools
 from pathlib import Path
 import logging
 
-from PyQt5.QtCore import QDir, pyqtRemoveInputHook
+from PyQt5.QtCore import QDir, pyqtRemoveInputHook, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
     QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox, QMessageBox
@@ -118,6 +118,18 @@ class OperationDialog(QDialog):
         if opt['type'] in ('dir', 'file_open', 'file_save'):
             widgets.append(self._create_opt_button(opt, 'Select'))
         self._create_user_input_widget(*widgets)
+
+
+class Worker(QThread):
+    # log = pyqtSignal(str)
+
+    def __init__(self, operation, args_dict, parent=None):
+        super(Worker, self).__init__(parent)
+        self.operation = operation
+        self.args_dict = args_dict
+
+    def run(self):
+        self.operation(self.args_dict)
 
 
 class Controller:
@@ -236,7 +248,9 @@ class Controller:
     def _run(self):
         if not self._validate_args():
             return False
-        self.operations[self.current_operation_name]['runner'](self.args)
+        self.worker = Worker(self.operations[self.current_operation_name]['runner'], self.args)
+        self.worker.start()
+
 
 
 if __name__ == '__main__':
