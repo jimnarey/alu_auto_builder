@@ -285,11 +285,12 @@ class Controller:
         return valid
 
     def gui_continue_check(self):
-        msgBox = QMessageBox()
-        msgBox.setText(info_messages.GUI_WAIT_FOR_USER_INPUT)
-        msgBox.setStandardButtons(QMessageBox.Close)
-        msgBox.exec_()
-        msgBox.destroy()
+        dialog = QMessageBox()
+        dialog.setWindowTitle('Edit save partition')
+        dialog.setText(info_messages.GUI_WAIT_FOR_USER_INPUT)
+        dialog.setStandardButtons(QMessageBox.Ok)
+        dialog.exec_()
+        dialog.destroy()
 
     def _run(self):
         if not self._validate_args():

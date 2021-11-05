@@ -32,7 +32,7 @@ def recipe_dir_check(dir_, result_text):
 
 # Build from recipe
 
-SAVE_DATA_FOUND = 'Custom save data found'
+SAVE_DIR_DATA_FOUND = 'Custom save data found in save dir'
 
 
 def processing_save_file(source_type):
@@ -49,7 +49,7 @@ FILEMAN_NOT_LINUX = 'File manager option can only be used on Linux, ignoring'
 
 CONSOLE_WAIT_FOR_USER_INPUT = 'Press enter when ready'
 
-GUI_WAIT_FOR_USER_INPUT = 'Press OK when ready'
+GUI_WAIT_FOR_USER_INPUT = 'Press OK when finished editing'
 
 # Common Utils
 

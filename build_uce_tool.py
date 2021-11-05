@@ -47,23 +47,6 @@ def relink_boxart(data_dir):
     common_utils.create_symlink('boxart/boxart.png', title_png)
 
 
-def prepare_save_files(ub_paths):
-    if os.path.isdir(ub_paths.save_dir):
-        logger.info(info_messages.SAVE_DATA_FOUND)
-        common_utils.copytree(ub_paths.save_dir, ub_paths.save_workdir)
-        common_utils.remove_dir(ub_paths.save_dir)
-    # Does nothing and catches errors if the dirs already exist
-    common_utils.make_dir(ub_paths.save_dir)
-    common_utils.make_dir(ub_paths.save_workdir)
-
-
-def prepare_source_files(input_dir, ub_paths):
-    common_utils.copytree(input_dir, ub_paths.data_dir, symlinks=True)
-    prepare_save_files(ub_paths)
-    common_utils.set_755(os.path.join(ub_paths.data_dir, 'exec.sh'))
-    relink_boxart(ub_paths.data_dir)
-
-
 def call_mksquashfs(input_dir, target_file, app_root):
     mksquashfs_args = [
         input_dir,
@@ -138,6 +121,23 @@ def extract_and_copy_save_zip(ub_paths):
         logger.error(error_messages.zip_extract_failed(e))
 
 
+def prepare_save_files(ub_paths):
+    if os.path.isdir(ub_paths.save_dir):
+        logger.info(info_messages.SAVE_DIR_DATA_FOUND)
+        common_utils.copytree(ub_paths.save_dir, ub_paths.save_workdir)
+        common_utils.remove_dir(ub_paths.save_dir)
+    # Does nothing and catches errors if the dirs already exist
+    common_utils.make_dir(ub_paths.save_dir)
+    common_utils.make_dir(ub_paths.save_workdir)
+
+
+def prepare_source_files(input_dir, ub_paths):
+    common_utils.copytree(input_dir, ub_paths.data_dir, symlinks=True)
+    prepare_save_files(ub_paths)
+    common_utils.set_755(os.path.join(ub_paths.data_dir, 'exec.sh'))
+    relink_boxart(ub_paths.data_dir)
+
+
 def get_save_part(ub_paths):
     if os.listdir(ub_paths.save_workdir):
         save_img_path = os.path.join(ub_paths.save_workdir, 'save.img')
@@ -166,10 +166,10 @@ def main(input_dir, output_path=None):
     app_root = common_utils.get_app_root()
     ub_paths = UCEBuildPaths()
     prepare_source_files(input_dir, ub_paths)
+    get_save_part(ub_paths)
     make_squashfs_img(app_root, ub_paths)
     append_md5_to_img(ub_paths.cart_tmp_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_to_file(ub_paths.cart_tmp_file, bytearray(32))
-    get_save_part(ub_paths)
     append_md5_to_img(ub_paths.cart_save_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_file_to_file(ub_paths.cart_tmp_file, ub_paths.cart_save_file)
     common_utils.copyfile(ub_paths.cart_tmp_file, output_path)
