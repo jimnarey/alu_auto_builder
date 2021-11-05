@@ -16,6 +16,8 @@ import operations
 
 logger = logging.getLogger(__name__)
 
+LOG_PATH = os.path.join(common_utils.get_app_root(), 'log.txt')
+
 
 def title_from_name(name):
     return name.replace('_', ' ').title()
@@ -259,9 +261,12 @@ class Controller:
         self.worker.start()
 
 
-
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s", datefmt="%H:%M:%S")
+
+    logging.basicConfig(filename=LOG_PATH,
+                        level=logging.INFO,
+                        format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
+                        datefmt="%H:%M:%S")
     pyqtRemoveInputHook()
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'data', 'title.png')))

@@ -8,6 +8,7 @@ import logging
 import tempfile
 import stat
 import argparse
+import re
 from subprocess import Popen, PIPE
 
 from shared import error_messages, info_messages
@@ -15,6 +16,8 @@ from shared import error_messages, info_messages
 # TODO - what can go wrong/should catch with os.getcwd() ?
 
 logger = logging.getLogger(__name__)
+
+ANSI_ESCAPE = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
 
 active_temp_dirs = {}
 
@@ -37,11 +40,16 @@ def cleanup_temp_dir(calling_module):
         remove_dir(active_temp_dirs[calling_module])
 
 
+def escape_ansi(line):
+    return ANSI_ESCAPE.sub('', line)
+
+
 def execute_with_output(cmd, shell=False):
     try:
         with Popen(cmd, stdout=PIPE, bufsize=1,
                    universal_newlines=True, shell=shell) as p:
             for line in p.stdout:
+                logger.info(escape_ansi(line))
                 print(line, end='')
             return_code = p.wait()
         if return_code:
