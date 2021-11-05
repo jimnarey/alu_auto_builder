@@ -159,17 +159,19 @@ def prepare_source_files(input_dir, ub_paths):
 
 
 def get_first_save_file_in_dir(dir_path):
-    save_files = [os.path.join(dir_path, file) for file in os.listdir(dir_path)
-                  if os.path.isfile(os.path.join(dir_path, file)) and os.path.splitext(file)[0] == 'save']
-    if save_files:
-        return save_files[0]
+    try:
+        save_files = [os.path.join(dir_path, file) for file in os.listdir(dir_path)
+                      if os.path.isfile(os.path.join(dir_path, file)) and os.path.splitext(file)[0] == 'save']
+        if save_files:
+            return save_files[0]
+    except FileNotFoundError:
+        pass
     return None
 
 
 def look_for_save_file(ub_paths):
-    if os.path.isdir(ub_paths.save_dir):
-        save_file = get_first_save_file_in_dir(ub_paths.save_dir)
-    else:
+    save_file = get_first_save_file_in_dir(ub_paths.save_dir)
+    if not save_file:
         save_file = get_first_save_file_in_dir(ub_paths.data_dir)
     return save_file
 
@@ -228,14 +230,10 @@ def create_save_img(ub_paths):
         logger.info(info_messages.creating_save_from_files(ub_paths.save_dir))
         prepare_files_based_save_contents(ub_paths)
         uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
-        # uce_utils.create_blank_file(ub_paths.cart_save_file)
-        # uce_utils.make_save_part_from_dir(ub_paths.save_dir, ub_paths.cart_save_file)
     if not os.path.isfile(ub_paths.cart_save_file):
         logger.info(info_messages.CREATING_BLANK_SAVE_PART)
         prepare_blank_save(ub_paths)
         uce_utils.make_save_part_from_dir(ub_paths.blank_save_workdir, ub_paths.cart_save_file)
-        # uce_utils.make_ext4_part(ub_paths.cart_save_file)
-        # uce_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
     common_utils.remove_dir(ub_paths.save_dir)
     common_utils.make_dir(ub_paths.save_dir)
 
