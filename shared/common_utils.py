@@ -2,7 +2,6 @@
 
 import os
 import sys
-import ctypes
 import shutil
 import logging
 import tempfile
@@ -49,8 +48,8 @@ def execute_with_output(cmd, shell=False):
         with Popen(cmd, stdout=PIPE, bufsize=1,
                    universal_newlines=True, shell=shell) as p:
             for line in p.stdout:
-                logger.info(escape_ansi(line))
-                print(line, end='')
+                logger.info(escape_ansi(line.strip()))
+                # print(line, end='')
             return_code = p.wait()
         if return_code:
             logger.error(error_messages.command_exited_non_zero(return_code, cmd))

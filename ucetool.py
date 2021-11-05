@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s", datefmt="%H:%M:%S")
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
     parser = argparse.ArgumentParser(prog='ALU UCE Auto Builder')
     sub_parsers = parser.add_subparsers(dest='subcommand', title='Subcommands')
     sub_parsers.metavar = 'subcommand-name'

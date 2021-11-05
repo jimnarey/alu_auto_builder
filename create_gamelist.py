@@ -77,7 +77,6 @@ def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_p
 
 
 def main(platform, input_dir, scrape_module=None, user_name=None, password=None, output_dir=None):
-    # logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s", datefmt="%H:%M:%S")
     logger.info('Starting gamelist builder\n\n\n')
     scrape_module = scrape_module if scrape_module else 'screenscraper'
     input_dir = os.path.abspath(input_dir) if input_dir else os.getcwd()
@@ -96,7 +95,7 @@ def main(platform, input_dir, scrape_module=None, user_name=None, password=None,
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s", datefmt="%H:%M:%S")
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
     parser = common_utils.get_cmd_line_args(operations.operations['scrape_and_make_gamelist']['options'])
     args = vars(parser.parse_args())
     main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'], user_name=args['user_name'],
