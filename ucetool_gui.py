@@ -11,12 +11,22 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
     QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox, QMessageBox, QPlainTextEdit
 
+import tailhead
+
 from shared import common_utils, error_messages
 import operations
 
 logger = logging.getLogger(__name__)
 
 LOG_PATH = os.path.join(common_utils.get_app_root(), 'log.txt')
+
+
+def reset_logging():
+    logging.basicConfig(filename=LOG_PATH,
+                        filemode='w',
+                        level=logging.INFO,
+                        format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
+                        datefmt="%H:%M:%S")
 
 
 def title_from_name(name):
@@ -61,6 +71,9 @@ class OperationDialog(QDialog):
         self.dialog_layout = QHBoxLayout()
         self.input_layout = QVBoxLayout()
         self.log_box = QPlainTextEdit()
+        self.log_box.setFixedWidth(600)
+        # self.log_box.scrollContentsBy()
+        # self.log_box.setHorizontalScrollBar()
         self.log_box.setReadOnly(True)
         self.dialog_layout.addLayout(self.input_layout)
         self.dialog_layout.addWidget(self.log_box)
@@ -74,6 +87,8 @@ class OperationDialog(QDialog):
         self.help_button = QPushButton('Help')
         self._create_user_input_widget(self.ok_button, self.close_button, self.help_button)
         self.setLayout(self.dialog_layout)
+        # Must be last line to avoid slowdowns
+        self.log_box.setLineWrapMode(QPlainTextEdit.NoWrap)
 
     def _create_user_input_widget(self, *args):
         layout = QHBoxLayout()
@@ -139,6 +154,23 @@ class Worker(QThread):
 
     def run(self):
         self.operation(self.args_dict)
+
+
+class LogWatcher(QThread):
+    newLine = pyqtSignal(str)
+
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+
+    def run(self):
+        for line in tailhead.follow_path(self.path):
+            if line is not None:
+                # new line found, emit a signal with its contents
+                self.newLine.emit(line)
+            else:
+                # no new lines, let's sleep a bit to avoid unnecessary requests
+                self.msleep(10)
 
 
 class Controller:
@@ -257,16 +289,18 @@ class Controller:
     def _run(self):
         if not self._validate_args():
             return False
+        # reset_logging()
+        self.current_view.log_box.clear()
         self.worker = Worker(self.operations[self.current_operation_name]['runner'], self.args)
+        self.log_watcher = LogWatcher(LOG_PATH)
+        self.log_watcher.newLine.connect(self.current_view.log_box.appendPlainText)
+        self.log_watcher.start()
         self.worker.start()
 
 
 if __name__ == '__main__':
 
-    logging.basicConfig(filename=LOG_PATH,
-                        level=logging.INFO,
-                        format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
-                        datefmt="%H:%M:%S")
+    reset_logging()
     pyqtRemoveInputHook()
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(common_utils.get_app_root(), 'data', 'title.png')))
