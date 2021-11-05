@@ -106,9 +106,8 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
-                        datefmt="%H:%M:%S")
-    parser = common_utils.get_cmd_line_args(operations.operations['build_recipes_from_gamelist']['options'])
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
+    parser = common_utils.get_cmd_line_args(operations.operations['gamelist_to_recipes']['options'])
     args = vars(parser.parse_args())
     main(args['input_path'], args['core_path'], bios_dir=args['bios_dir'], output_dir=args['output_dir'])
 

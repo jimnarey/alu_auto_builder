@@ -70,8 +70,7 @@ def main(input_dir, output_dir=None):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
-                        datefmt="%H:%M:%S")
-    parser = common_utils.get_cmd_line_args(operations.operations['build_uces_from_recipes']['options'])
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
+    parser = common_utils.get_cmd_line_args(operations.operations['recipes_to_uces']['options'])
     args = vars(parser.parse_args())
     main(args['input_dir'], output_dir=args['output_dir'])

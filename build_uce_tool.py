@@ -178,8 +178,7 @@ def main(input_dir, output_path=None):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
-                        datefmt="%H:%M:%S")
-    parser = common_utils.get_cmd_line_args(operations.operations['build_single_uce_from_recipe']['options'])
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
+    parser = common_utils.get_cmd_line_args(operations.operations['recipe_to_uce']['options'])
     args = vars(parser.parse_args())
     main(args['input_dir'], output_path=args['output_path'])

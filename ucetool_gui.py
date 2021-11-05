@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
 
 import tailhead
 
-from shared import common_utils, error_messages
+from shared import common_utils, error_messages, info_messages
 import operations
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ def reset_logging():
     logging.basicConfig(filename=LOG_PATH,
                         filemode='w',
                         level=logging.INFO,
-                        format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
+                        format="%(levelname)s : %(asctime)s : %(message)s",
                         datefmt="%H:%M:%S")
 
 
@@ -243,7 +243,6 @@ class Controller:
         view.exit_button.clicked.connect(sys.exit)
         self._show_view(view)
 
-    # TODO - choose dir in combo box if valid
     def _choose_dir(self, view, name):
         dir_name = QFileDialog.getExistingDirectory(view, 'Select Directory', self.dialog_dir)
         if dir_name:
@@ -252,7 +251,6 @@ class Controller:
             view.combo_selects[name].setCurrentText(dir_name)
             self.dialog_dir = dir_name
 
-    # TODO - Neaten this up. It's a last-minute fudge to choose between saving/opening. Re-add isfile() for open
     def _open_file(self, view, name):
         file_name = QFileDialog.getOpenFileName(view, 'Open File', self.dialog_dir)[0]
         if file_name:
@@ -286,16 +284,26 @@ class Controller:
                     self.args[option['name']] = None
         return valid
 
+    def gui_continue_check(self):
+        msgBox = QMessageBox()
+        msgBox.setText(info_messages.GUI_WAIT_FOR_USER_INPUT)
+        msgBox.setStandardButtons(QMessageBox.Close)
+        msgBox.exec_()
+        msgBox.destroy()
+
     def _run(self):
         if not self._validate_args():
             return False
-        # reset_logging()
         self.current_view.log_box.clear()
-        self.worker = Worker(self.operations[self.current_operation_name]['runner'], self.args)
         self.log_watcher = LogWatcher(LOG_PATH)
         self.log_watcher.newLine.connect(self.current_view.log_box.appendPlainText)
         self.log_watcher.start()
-        self.worker.start()
+        if self.operations[self.current_operation_name]['gui_user_continue_check']:
+            self.args['continue_check'] = self.gui_continue_check
+            self.operations[self.current_operation_name]['runner'](self.args)
+        else:
+            self.worker = Worker(self.operations[self.current_operation_name]['runner'], self.args)
+            self.worker.start()
 
 
 if __name__ == '__main__':

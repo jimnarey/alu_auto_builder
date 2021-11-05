@@ -79,7 +79,7 @@ def build_single_uce_from_recipe(args):
 def edit_uce_save_partition(args):
     logger.info(info_messages.start_operation("'edit save partition'"))
     edit_uce.main(args['input_path'], backup_uce=args['backup_uce'], mount_method=args['mount_method'],
-                  file_manager=args['file_manager'])
+                  file_manager=args['file_manager'], continue_check=args['continue_check'])
     logger.info(info_messages.end_operation("'edit save partition'"))
 
 

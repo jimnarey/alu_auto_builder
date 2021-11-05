@@ -96,7 +96,7 @@ def main(platform, input_dir, scrape_module=None, user_name=None, password=None,
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
-    parser = common_utils.get_cmd_line_args(operations.operations['scrape_and_make_gamelist']['options'])
+    parser = common_utils.get_cmd_line_args(operations.operations['scrape_to_gamelist']['options'])
     args = vars(parser.parse_args())
     main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'], user_name=args['user_name'],
          password=args['password'], output_dir=args['output_dir'])

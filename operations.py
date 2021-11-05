@@ -124,60 +124,60 @@ operations = {
         'options': scrape_and_build_opts,
         'runner': runners.scrape_and_build_uces,
         'help': help_messages.SCRAPE_TO_UCES,
-        'gui_same_thread': False
+        'gui_user_continue_check': False
     },
     'scrape_to_recipes': {
         'options': scrape_and_build_opts,
         'runner': runners.scrape_and_make_recipes,
         'help': help_messages.SCRAPE_TO_RECIPES,
-        'gui_same_thread': False
+        'gui_user_continue_check': False
     },
     'scrape_to_gamelist': {
         'options': (input_dir_opt, output_dir_opt, *scrape_opts),
         'runner': runners.scrape_and_make_gamelist,
         'help': help_messages.SCRAPE_TO_GAMELIST,
-        'gui_same_thread': False
+        'gui_user_continue_check': False
     },
     'gamelist_to_uces': {
         'options': build_from_game_list_opts,
         'runner': runners.build_uces_from_gamelist,
         'help': help_messages.GAMELIST_TO_UCES,
-        'gui_same_thread': False
+        'gui_user_continue_check': False
     },
     'gamelist_to_recipes': {
         'options': build_from_game_list_opts,
         'runner': runners.build_recipes_from_gamelist,
         'help': help_messages.GAMELIST_TO_RECIPES,
-        'gui_same_thread': False
+        'gui_user_continue_check': False
     },
     'recipes_to_uces': {
         'options': (input_dir_opt, output_dir_opt),
         'runner': runners.build_uces_from_recipes,
         'help': help_messages.RECIPES_TO_UCES,
-        'gui_same_thread': False
+        'gui_user_continue_check': False
     },
     'recipe_to_uce': {
         'options': (input_dir_opt, output_path_opt),
         'runner': runners.build_single_uce_from_recipe,
         'help': help_messages.RECIPE_TO_UCE,
-        'gui_same_thread': False
+        'gui_user_continue_check': False
     },
     'edit_save_partition': {
         'options': (input_path_opt, *edit_save_part_opts, backup_save_part_opt),
         'runner': runners.edit_uce_save_partition,
         'help': help_messages.EDIT_SAVE_PARTITION,
-        'gui_same_thread': True
+        'gui_user_continue_check': True
     },
     'extract_save_partition': {
         'options': (input_path_opt, output_path_opt),
         'runner': runners.extract_uce_save_partition,
         'help': help_messages.EXTRACT_SAVE_PARTITION,
-        'gui_same_thread': False
+        'gui_user_continue_check': False
     },
     'replace_save_partition': {
         'options': (input_path_opt, replace_save_part_opt, backup_save_part_opt),
         'runner': runners.replace_uce_save_partition,
         'help': help_messages.REPLACE_SAVE_PARTITION,
-        'gui_same_thread': False
+        'gui_user_continue_check': False
     }
 }

@@ -47,8 +47,9 @@ def file_manager_not_found(file_manager):
 
 FILEMAN_NOT_LINUX = 'File manager option can only be used on Linux, ignoring'
 
-WAIT_FOR_USER_INPUT = 'Press enter when ready'
+CONSOLE_WAIT_FOR_USER_INPUT = 'Press enter when ready'
 
+GUI_WAIT_FOR_USER_INPUT = 'Press OK when ready'
 
 # Common Utils
 

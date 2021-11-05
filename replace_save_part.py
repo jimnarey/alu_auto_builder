@@ -27,8 +27,7 @@ def main(input_path, part_path, backup_uce=False):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
-                        datefmt="%H:%M:%S")
-    parser = common_utils.get_cmd_line_args(operations.operations['replace_uce_save_partition']['options'])
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
+    parser = common_utils.get_cmd_line_args(operations.operations['replace_save_partition']['options'])
     args = vars(parser.parse_args())
     main(args['input_path'], args['part_path'], backup_uce=args['backup_uce'])

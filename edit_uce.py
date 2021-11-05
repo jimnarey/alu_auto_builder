@@ -127,30 +127,36 @@ def edit_save_part_with_mount(img_path, save_part_contents_path, file_manager):
         return False
 
 
-def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, file_manager):
+def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, file_manager, continue_check):
     extract_img_contents(temp_dir)
     set_all_755(save_part_contents_path)
     edit_contents(save_part_contents_path, file_manager)
-    input(info_messages.WAIT_FOR_USER_INPUT)
+    # input(info_messages.WAIT_FOR_USER_INPUT)
+    continue_check()
     common_utils.delete_file(img_path)
     uce_utils.create_blank_file(img_path)
     uce_utils.make_save_part_from_dir(save_part_contents_path, img_path)
     return True
 
 
-def edit_save_part(temp_dir, img_path, save_part_contents_path, file_manager, mount_method):
+def edit_save_part(temp_dir, img_path, save_part_contents_path, file_manager, mount_method, continue_check):
     if mount_method:
         return edit_save_part_with_mount(img_path, save_part_contents_path, file_manager)
     else:
-        return edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, file_manager)
+        return edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, file_manager, continue_check)
 
 
-def main(input_path, backup_uce=False, mount_method=False, file_manager=None):
+def console_continue_check():
+    input(info_messages.CONSOLE_WAIT_FOR_USER_INPUT)
+
+
+def main(input_path, backup_uce=False, mount_method=False, file_manager=None, continue_check=None):
     if not validate_args(input_path):
         return False
     ec_config = EditUCEConfig(input_path, file_manager)
     if not ec_config.file_manager:
         return False
+    continue_check = continue_check if continue_check else console_continue_check
     squashfs_etc_data, save_data = uce_utils.split_uce(input_path)
     common_utils.write_file(ec_config.img_path, save_data, 'wb')
     if backup_uce:
@@ -158,15 +164,14 @@ def main(input_path, backup_uce=False, mount_method=False, file_manager=None):
         common_utils.copyfile(input_path, backup_path)
     common_utils.make_dir(ec_config.save_part_contents_path)
     if edit_save_part(ec_config.temp_dir, ec_config.img_path, ec_config.save_part_contents_path,
-                      ec_config.file_manager, mount_method):
+                      ec_config.file_manager, mount_method, continue_check):
         uce_utils.rebuild_uce(ec_config.input_path, squashfs_etc_data, ec_config.img_path)
     ec_config.cleanup()
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s : %(name)s : %(levelname)s : %(message)s",
-                        datefmt="%H:%M:%S")
-    parser = common_utils.get_cmd_line_args(operations.operations['edit_uce_save_partition']['options'])
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
+    parser = common_utils.get_cmd_line_args(operations.operations['edit_save_partition']['options'])
     args = vars(parser.parse_args())
     main(args['input_path'], backup_uce=args['backup_uce'], mount_method=args['mount_method'],
          file_manager=args['file_manager'])
