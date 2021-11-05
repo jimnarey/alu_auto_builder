@@ -34,9 +34,19 @@ def recipe_dir_check(dir_, result_text):
 
 SAVE_DIR_DATA_FOUND = 'Custom save data found in save dir'
 
+CREATING_BLANK_SAVE_PART = 'Creating blank save partition'
+
 
 def processing_save_file(source_type):
     return 'Processing {0} as new save partition'.format(source_type)
+
+
+def copying_extracted_save_file(save_file, save_zip):
+    return 'Copying save file {0} extracted from {1}'.format(save_file, save_zip)
+
+
+def creating_save_from_files(dir_path):
+    return 'Creating save partition from contents of {0}'.format(dir_path)
 
 
 # Edit UCE
@@ -50,6 +60,7 @@ FILEMAN_NOT_LINUX = 'File manager option can only be used on Linux, ignoring'
 CONSOLE_WAIT_FOR_USER_INPUT = 'Press enter when ready'
 
 GUI_WAIT_FOR_USER_INPUT = 'Press OK when finished editing'
+
 
 # Common Utils
 

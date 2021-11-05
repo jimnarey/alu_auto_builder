@@ -3,7 +3,7 @@
 import math
 import os
 import hashlib
-from zipfile import ZipFile, BadZipfile
+import zipfile
 import logging
 
 from shared import common_utils, info_messages, uce_utils, error_messages
@@ -22,6 +22,8 @@ class UCEBuildPaths:
         self.data_dir = os.path.join(self.temp_dir, 'data')
         self.save_dir = os.path.join(self.temp_dir, 'data', 'save')
         self.save_workdir = os.path.join(self.temp_dir, 'save_workdir')
+        self.blank_save_workdir = os.path.join(self.temp_dir, 'blank_save_workdir')
+        self.zip_workdir = os.path.join(self.temp_dir, 'zip_workdir')
 
     def cleanup(self):
         common_utils.cleanup_temp_dir(__name__)
@@ -108,52 +110,134 @@ def append_md5_to_img(md5_source, md5_file, append_target):
     append_file_to_file(append_target, md5_file)
 
 
-def extract_and_copy_save_zip(ub_paths):
+def prepare_source_files(input_dir, ub_paths):
+    common_utils.copytree(input_dir, ub_paths.data_dir, symlinks=True)
+    common_utils.set_755(os.path.join(ub_paths.data_dir, 'exec.sh'))
+    relink_boxart(ub_paths.data_dir)
+
+
+# def extract_and_copy_save_zip(ub_paths):
+#     try:
+#         with ZipFile(os.path.join(ub_paths.save_workdir, 'save.zip'), 'r') as zfile:
+#             zfile.extract('save.img', ub_paths.save_workdir)
+#             common_utils.copyfile(os.path.join(ub_paths.save_workdir, 'save.img'), ub_paths.cart_save_file)
+#     except BadZipfile:
+#         logger.error(error_messages.SAVE_NOT_VALID_ZIP)
+#     except KeyError:
+#         logger.error(error_messages.ZIP_HAS_NO_SAVE_IMG)
+#     except OSError as e:
+#         logger.error(error_messages.zip_extract_failed(e))
+
+
+# def prepare_save_files(ub_paths):
+#     if os.path.isdir(ub_paths.save_dir):
+#         if os.listdir(ub_paths.save_dir):
+#             logger.info(info_messages.SAVE_DIR_DATA_FOUND)
+#             common_utils.copytree(ub_paths.save_dir, ub_paths.save_workdir)
+#             common_utils.remove_dir(ub_paths.save_dir)
+#     # Does nothing and catches errors if the dirs already exist
+#     common_utils.make_dir(ub_paths.save_dir)
+#     common_utils.make_dir(ub_paths.save_workdir)
+
+
+# def get_save_part(ub_paths):
+#     if os.listdir(ub_paths.save_workdir):
+#         save_img_path = os.path.join(ub_paths.save_workdir, 'save.img')
+#         if os.path.isfile(save_img_path):
+#             logger.info(info_messages.processing_save_file('save.img'))
+#             common_utils.copyfile(save_img_path, ub_paths.cart_save_file)
+#         elif os.path.isfile(os.path.join(ub_paths.save_workdir, 'save.zip')):
+#             logger.info(info_messages.processing_save_file('save.zip'))
+#             extract_and_copy_save_zip(ub_paths)
+#         else:
+#             logger.info(info_messages.processing_save_file('all save dir contents'))
+#             uce_utils.create_blank_file(ub_paths.cart_save_file)
+#             uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
+#     else:
+#         uce_utils.make_ext4_part(ub_paths.cart_save_file)
+#         uce_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
+
+
+def get_first_save_file_in_dir(dir_path):
+    save_files = [os.path.join(dir_path, file) for file in os.listdir(dir_path)
+                  if os.path.isfile(os.path.join(dir_path, file)) and os.path.splitext(file)[0] == 'save']
+    if save_files:
+        return save_files[0]
+    return None
+
+
+def look_for_save_file(ub_paths):
+    if os.path.isdir(ub_paths.save_dir):
+        save_file = get_first_save_file_in_dir(ub_paths.save_dir)
+    else:
+        save_file = get_first_save_file_in_dir(ub_paths.data_dir)
+    return save_file
+
+
+def extract_save_from_zip(save_zip, ub_paths):
     try:
-        with ZipFile(os.path.join(ub_paths.save_workdir, 'save.zip'), 'r') as zfile:
-            zfile.extract('save.img', ub_paths.save_workdir)
-            common_utils.copyfile(os.path.join(ub_paths.save_workdir, 'save.img'), ub_paths.cart_save_file)
-    except BadZipfile:
+        with zipfile.ZipFile(save_zip, 'r') as zfile:
+            zfile.extractall(path=ub_paths.zip_workdir)
+            return get_first_save_file_in_dir(ub_paths.zip_workdir)
+    except zipfile.BadZipfile:
         logger.error(error_messages.SAVE_NOT_VALID_ZIP)
     except KeyError:
         logger.error(error_messages.ZIP_HAS_NO_SAVE_IMG)
     except OSError as e:
         logger.error(error_messages.zip_extract_failed(e))
+    return None
 
 
-def prepare_save_files(ub_paths):
-    if os.path.isdir(ub_paths.save_dir):
-        logger.info(info_messages.SAVE_DIR_DATA_FOUND)
-        common_utils.copytree(ub_paths.save_dir, ub_paths.save_workdir)
-        common_utils.remove_dir(ub_paths.save_dir)
-    # Does nothing and catches errors if the dirs already exist
-    common_utils.make_dir(ub_paths.save_dir)
-    common_utils.make_dir(ub_paths.save_workdir)
-
-
-def prepare_source_files(input_dir, ub_paths):
-    common_utils.copytree(input_dir, ub_paths.data_dir, symlinks=True)
-    prepare_save_files(ub_paths)
-    common_utils.set_755(os.path.join(ub_paths.data_dir, 'exec.sh'))
-    relink_boxart(ub_paths.data_dir)
-
-
-def get_save_part(ub_paths):
-    if os.listdir(ub_paths.save_workdir):
-        save_img_path = os.path.join(ub_paths.save_workdir, 'save.img')
-        if os.path.isfile(save_img_path):
-            logger.info(info_messages.processing_save_file('save.img'))
-            common_utils.copyfile(save_img_path, ub_paths.cart_save_file)
-        elif os.path.isfile(os.path.join(ub_paths.save_workdir, 'save.zip')):
-            logger.info(info_messages.processing_save_file('save.zip'))
-            extract_and_copy_save_zip(ub_paths)
-        else:
-            logger.info(info_messages.processing_save_file('all save dir contents'))
-            uce_utils.create_blank_file(ub_paths.cart_save_file)
-            uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
+def save_img_from_save_file(save_file, ub_paths):
+    if zipfile.is_zipfile(save_file):
+        extr_save_file = extract_save_from_zip(save_file, ub_paths)
+        if extr_save_file:
+            logger.info(info_messages.copying_extracted_save_file(extr_save_file, save_file))
+            common_utils.copyfile(os.path.join(extr_save_file), ub_paths.cart_save_file)
     else:
-        uce_utils.make_ext4_part(ub_paths.cart_save_file)
-        uce_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
+        common_utils.copyfile(save_file, ub_paths.cart_save_file)
+
+
+def prepare_files_based_save_contents(ub_paths):
+    common_utils.make_dir(ub_paths.save_workdir)
+    save_dir_upper = os.path.join(ub_paths.save_dir, 'upper')
+    save_workdir_upper = os.path.join(ub_paths.save_workdir, 'upper')
+    hiscore_dat_path = os.path.join(ub_paths.save_workdir, 'upper', 'hiscore.dat')
+    if os.path.isdir(save_dir_upper):
+        common_utils.copytree(save_dir_upper, save_workdir_upper)
+    else:
+        common_utils.copytree(ub_paths.save_dir, save_workdir_upper)
+    if not os.path.isfile(hiscore_dat_path):
+        common_utils.write_file(hiscore_dat_path, '', 'w')
+    common_utils.make_dir(os.path.join(ub_paths.save_workdir, 'work'))
+
+
+def prepare_blank_save(ub_paths):
+    common_utils.make_dir(ub_paths.blank_save_workdir)
+    common_utils.make_dir(os.path.join(ub_paths.blank_save_workdir, 'upper'))
+    common_utils.make_dir(os.path.join(ub_paths.blank_save_workdir, 'work'))
+    common_utils.write_file(os.path.join(ub_paths.blank_save_workdir, 'upper', 'hiscore.dat'), '', 'w')
+
+
+def create_save_img(ub_paths):
+    save_file = look_for_save_file(ub_paths)
+    if save_file:
+        logger.info(info_messages.processing_save_file(save_file))
+        save_img_from_save_file(save_file, ub_paths)
+    elif os.path.isdir(ub_paths.save_dir) and os.listdir(ub_paths.save_dir):
+        logger.info(info_messages.creating_save_from_files(ub_paths.save_dir))
+        prepare_files_based_save_contents(ub_paths)
+        uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
+        # uce_utils.create_blank_file(ub_paths.cart_save_file)
+        # uce_utils.make_save_part_from_dir(ub_paths.save_dir, ub_paths.cart_save_file)
+    if not os.path.isfile(ub_paths.cart_save_file):
+        logger.info(info_messages.CREATING_BLANK_SAVE_PART)
+        prepare_blank_save(ub_paths)
+        uce_utils.make_save_part_from_dir(ub_paths.blank_save_workdir, ub_paths.cart_save_file)
+        # uce_utils.make_ext4_part(ub_paths.cart_save_file)
+        # uce_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
+    common_utils.remove_dir(ub_paths.save_dir)
+    common_utils.make_dir(ub_paths.save_dir)
 
 
 def main(input_dir, output_path=None):    
@@ -165,8 +249,10 @@ def main(input_dir, output_path=None):
     logger.info('Building new UCE')
     app_root = common_utils.get_app_root()
     ub_paths = UCEBuildPaths()
+
     prepare_source_files(input_dir, ub_paths)
-    get_save_part(ub_paths)
+    create_save_img(ub_paths)
+
     make_squashfs_img(app_root, ub_paths)
     append_md5_to_img(ub_paths.cart_tmp_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_to_file(ub_paths.cart_tmp_file, bytearray(32))

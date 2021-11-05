@@ -134,7 +134,7 @@ def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, file_m
     # input(info_messages.WAIT_FOR_USER_INPUT)
     continue_check()
     common_utils.delete_file(img_path)
-    uce_utils.create_blank_file(img_path)
+    # uce_utils.create_blank_file(img_path)
     uce_utils.make_save_part_from_dir(save_part_contents_path, img_path)
     return True
 
