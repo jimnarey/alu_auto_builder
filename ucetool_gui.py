@@ -146,6 +146,7 @@ class OperationDialog(QDialog):
 
 class Worker(QThread):
     # log = pyqtSignal(str)
+    finished = pyqtSignal()
 
     def __init__(self, operation, args_dict, parent=None):
         super(Worker, self).__init__(parent)
@@ -154,6 +155,7 @@ class Worker(QThread):
 
     def run(self):
         self.operation(self.args_dict)
+        # self.finished.emit()
 
 
 class LogWatcher(QThread):
@@ -162,6 +164,7 @@ class LogWatcher(QThread):
     def __init__(self, path):
         super().__init__()
         self.path = path
+        print('Log watcher created')
 
     def run(self):
         for line in tailhead.follow_path(self.path):
@@ -181,6 +184,9 @@ class Controller:
         self.args = {}
         self.operations = operations
         self.current_operation_name = None
+        self.log_watcher = LogWatcher(LOG_PATH)
+        self.log_watcher.newLine.connect(self._update_text_box)
+        self.log_watcher.start()
 
     def _close_current_view(self):
         if self.current_view:
@@ -292,19 +298,27 @@ class Controller:
         dialog.exec_()
         dialog.destroy()
 
+    def _update_text_box(self, str_):
+        if self.current_view.log_box:
+            self.current_view.log_box.appendPlainText(str_)
+
     def _run(self):
         if not self._validate_args():
             return False
+        # reset_logging()
         self.current_view.log_box.clear()
-        self.log_watcher = LogWatcher(LOG_PATH)
-        self.log_watcher.newLine.connect(self.current_view.log_box.appendPlainText)
-        self.log_watcher.start()
+        # self.log_watcher = LogWatcher(LOG_PATH)
+        # self.log_watcher.newLine.connect(self.current_view.log_box.appendPlainText)
+        # self.log_watcher.start()
         if self.operations[self.current_operation_name]['gui_user_continue_check']:
             self.args['continue_check'] = self.gui_continue_check
             self.operations[self.current_operation_name]['runner'](self.args)
         else:
             self.worker = Worker(self.operations[self.current_operation_name]['runner'], self.args)
+            # self.worker.finished.connect(self.log_watcher.quit)
             self.worker.start()
+        # self.log_watcher.newLine.disconnect()
+        # self.log_watcher.exit()
 
 
 if __name__ == '__main__':
