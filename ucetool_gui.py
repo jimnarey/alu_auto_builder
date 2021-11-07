@@ -7,9 +7,9 @@ from pathlib import Path
 import logging
 
 from PyQt5.QtCore import QDir, pyqtRemoveInputHook, pyqtSignal, QThread
-from PyQt5.QtGui import QIcon, QTextCursor
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
-    QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox, QMessageBox, QPlainTextEdit
+    QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox, QMessageBox, QPlainTextEdit, QSizePolicy
 
 import tailhead
 
@@ -67,27 +67,37 @@ class OperationDialog(QDialog):
     def __init__(self, name, opts, parent=None):
         super().__init__(parent)
         self.setWindowTitle(title_from_name(name))
-
+        # Setup layouts
         self.dialog_layout = QHBoxLayout()
         self.input_layout = QVBoxLayout()
+        self.input_layout_container = QWidget()
+        self.input_layout_container.setLayout(self.input_layout)
+        self.input_layout_container.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.log_box = QPlainTextEdit()
-        self.log_box.setFixedWidth(600)
-        self.log_box.setFixedHeight(500)
-        self.log_box.setReadOnly(True)
-        self.dialog_layout.addLayout(self.input_layout)
+        self.dialog_layout.addWidget(self.input_layout_container)
         self.dialog_layout.addWidget(self.log_box)
-
+        self.setLayout(self.dialog_layout)
+        # Control containers parsed by Controller
         self.check_boxes = {}
         self.combo_selects = {}
         self.opt_buttons = []
+        # Create controls and populate input_layout
         self._create_opt_inputs(opts)
+        self.input_layout.addStretch()
         self.ok_button = QPushButton('OK')
         self.close_button = QPushButton('Close')
         self.help_button = QPushButton('Help')
         self._create_user_input_widget(self.ok_button, self.close_button, self.help_button)
-        self.setLayout(self.dialog_layout)
         # Must be last line to avoid slowdowns
+        self._setup_log_box()
+
+    def _setup_log_box(self):
+        self.log_box.setMinimumWidth(600)
+        self.log_box.setMinimumHeight(500)
+        self.log_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.log_box.setReadOnly(True)
         self.log_box.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.log_box.setStyleSheet("background-color: black; color: white")
 
     def _create_user_input_widget(self, *args):
         layout = QHBoxLayout()
@@ -95,6 +105,8 @@ class OperationDialog(QDialog):
         widget.setLayout(layout)
         for arg in args:
             layout.addWidget(arg)
+
+        layout.addStretch()
         self.input_layout.addWidget(widget)
 
     def _create_opt_inputs(self, opts):
@@ -114,8 +126,6 @@ class OperationDialog(QDialog):
     def _create_opt_button(self, opt, button_text):
         button = QPushButton(button_text)
         button.setFixedHeight(30)
-        # Consider storing the combo/other target here rather than matching name strings
-        # in controller (_open_file etc). Would reduce flexibility of this method.
         self.opt_buttons.append({
             'name': opt['name'],
             'type': opt['type'],
@@ -295,7 +305,6 @@ class Controller:
     def _update_text_box(self, str_):
         if self.current_view.log_box:
             self.current_view.log_box.appendPlainText(str_)
-            # self.current_view.log_box.moveCursor(QTextCursor.End)
             self.current_view.log_box.verticalScrollBar().setValue(self.current_view.log_box.verticalScrollBar().maximum())
 
     def _run(self):
