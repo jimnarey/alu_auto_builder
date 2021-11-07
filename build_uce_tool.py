@@ -116,48 +116,6 @@ def prepare_source_files(input_dir, ub_paths):
     relink_boxart(ub_paths.data_dir)
 
 
-# def extract_and_copy_save_zip(ub_paths):
-#     try:
-#         with ZipFile(os.path.join(ub_paths.save_workdir, 'save.zip'), 'r') as zfile:
-#             zfile.extract('save.img', ub_paths.save_workdir)
-#             common_utils.copyfile(os.path.join(ub_paths.save_workdir, 'save.img'), ub_paths.cart_save_file)
-#     except BadZipfile:
-#         logger.error(error_messages.SAVE_NOT_VALID_ZIP)
-#     except KeyError:
-#         logger.error(error_messages.ZIP_HAS_NO_SAVE_IMG)
-#     except OSError as e:
-#         logger.error(error_messages.zip_extract_failed(e))
-
-
-# def prepare_save_files(ub_paths):
-#     if os.path.isdir(ub_paths.save_dir):
-#         if os.listdir(ub_paths.save_dir):
-#             logger.info(info_messages.SAVE_DIR_DATA_FOUND)
-#             common_utils.copytree(ub_paths.save_dir, ub_paths.save_workdir)
-#             common_utils.remove_dir(ub_paths.save_dir)
-#     # Does nothing and catches errors if the dirs already exist
-#     common_utils.make_dir(ub_paths.save_dir)
-#     common_utils.make_dir(ub_paths.save_workdir)
-
-
-# def get_save_part(ub_paths):
-#     if os.listdir(ub_paths.save_workdir):
-#         save_img_path = os.path.join(ub_paths.save_workdir, 'save.img')
-#         if os.path.isfile(save_img_path):
-#             logger.info(info_messages.processing_save_file('save.img'))
-#             common_utils.copyfile(save_img_path, ub_paths.cart_save_file)
-#         elif os.path.isfile(os.path.join(ub_paths.save_workdir, 'save.zip')):
-#             logger.info(info_messages.processing_save_file('save.zip'))
-#             extract_and_copy_save_zip(ub_paths)
-#         else:
-#             logger.info(info_messages.processing_save_file('all save dir contents'))
-#             uce_utils.create_blank_file(ub_paths.cart_save_file)
-#             uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
-#     else:
-#         uce_utils.make_ext4_part(ub_paths.cart_save_file)
-#         uce_utils.create_save_part_base_dirs(ub_paths.temp_dir, ub_paths.cart_save_file)
-
-
 def get_first_save_file_in_dir(dir_path):
     try:
         save_files = [os.path.join(dir_path, file) for file in os.listdir(dir_path)
@@ -247,10 +205,8 @@ def main(input_dir, output_path=None):
     logger.info('Building new UCE')
     app_root = common_utils.get_app_root()
     ub_paths = UCEBuildPaths()
-
     prepare_source_files(input_dir, ub_paths)
     create_save_img(ub_paths)
-
     make_squashfs_img(app_root, ub_paths)
     append_md5_to_img(ub_paths.cart_tmp_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_to_file(ub_paths.cart_tmp_file, bytearray(32))

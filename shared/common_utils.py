@@ -48,7 +48,9 @@ def execute_with_output(cmd, shell=False):
         with Popen(cmd, stdout=PIPE, bufsize=1,
                    universal_newlines=True, shell=shell) as p:
             for line in p.stdout:
-                logger.info(escape_ansi(line.strip()))
+                log_text = escape_ansi(line.strip())
+                if log_text:
+                    logger.info(log_text)
             return_code = p.wait()
         if return_code:
             logger.error(error_messages.command_exited_non_zero(return_code, cmd))
@@ -221,13 +223,4 @@ def get_cmd_line_args(opt_set):
     add_arguments_to_parser(parser, opt_set)
     return parser
 
-
-# def check_windows_admin():
-#     if get_platform() == 'win32':
-#         try:
-#             return ctypes.windll.shell32.IsUserAnAdmin()
-#         except:
-#             logger.error(error_messages.NO_ADMIN_WINDOWS)
-#             return False
-#     return True
 

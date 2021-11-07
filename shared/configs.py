@@ -1,4 +1,3 @@
-import os
 
 CONFIG = [
     '[main]\n',

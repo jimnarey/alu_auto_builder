@@ -6,8 +6,8 @@ import functools
 from pathlib import Path
 import logging
 
-from PyQt5.QtCore import QDir, pyqtRemoveInputHook, QObject, pyqtSignal, QThread
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QDir, pyqtRemoveInputHook, pyqtSignal, QThread
+from PyQt5.QtGui import QIcon, QTextCursor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
     QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox, QMessageBox, QPlainTextEdit
 
@@ -72,8 +72,7 @@ class OperationDialog(QDialog):
         self.input_layout = QVBoxLayout()
         self.log_box = QPlainTextEdit()
         self.log_box.setFixedWidth(600)
-        # self.log_box.scrollContentsBy()
-        # self.log_box.setHorizontalScrollBar()
+        self.log_box.setFixedHeight(500)
         self.log_box.setReadOnly(True)
         self.dialog_layout.addLayout(self.input_layout)
         self.dialog_layout.addWidget(self.log_box)
@@ -145,7 +144,6 @@ class OperationDialog(QDialog):
 
 
 class Worker(QThread):
-    # log = pyqtSignal(str)
     finished = pyqtSignal()
 
     def __init__(self, operation, args_dict, parent=None):
@@ -155,7 +153,6 @@ class Worker(QThread):
 
     def run(self):
         self.operation(self.args_dict)
-        # self.finished.emit()
 
 
 class LogWatcher(QThread):
@@ -164,15 +161,12 @@ class LogWatcher(QThread):
     def __init__(self, path):
         super().__init__()
         self.path = path
-        print('Log watcher created')
 
     def run(self):
         for line in tailhead.follow_path(self.path):
             if line is not None:
-                # new line found, emit a signal with its contents
                 self.newLine.emit(line)
             else:
-                # no new lines, let's sleep a bit to avoid unnecessary requests
                 self.msleep(10)
 
 
@@ -301,28 +295,22 @@ class Controller:
     def _update_text_box(self, str_):
         if self.current_view.log_box:
             self.current_view.log_box.appendPlainText(str_)
+            # self.current_view.log_box.moveCursor(QTextCursor.End)
+            self.current_view.log_box.verticalScrollBar().setValue(self.current_view.log_box.verticalScrollBar().maximum())
 
     def _run(self):
         if not self._validate_args():
             return False
-        # reset_logging()
         self.current_view.log_box.clear()
-        # self.log_watcher = LogWatcher(LOG_PATH)
-        # self.log_watcher.newLine.connect(self.current_view.log_box.appendPlainText)
-        # self.log_watcher.start()
         if self.operations[self.current_operation_name]['gui_user_continue_check']:
             self.args['continue_check'] = self.gui_continue_check
             self.operations[self.current_operation_name]['runner'](self.args)
         else:
             self.worker = Worker(self.operations[self.current_operation_name]['runner'], self.args)
-            # self.worker.finished.connect(self.log_watcher.quit)
             self.worker.start()
-        # self.log_watcher.newLine.disconnect()
-        # self.log_watcher.exit()
 
 
 if __name__ == '__main__':
-
     reset_logging()
     pyqtRemoveInputHook()
     app = QApplication(sys.argv)
