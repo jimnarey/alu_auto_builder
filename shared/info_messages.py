@@ -73,7 +73,8 @@ def ran_command(cmd):
 
 
 def access_success(access_type, path):
-    return 'Successfully {0} data to/from {1}'.format(access_type, path)
+    prep = 'to' if access_type == 'wrote' else 'from'
+    return 'Successfully {0} data {1} {2}'.format(access_type, prep, path)
 
 
 def dir_already_exists(dir_):
@@ -81,7 +82,7 @@ def dir_already_exists(dir_):
 
 
 def make_dir_success(dir_):
-    return 'Successfully created new dir {0}'.format(dir_)
+    return 'Dir {0} successfully created or already exists'.format(dir_)
 
 
 def remove_success(item_type, path):

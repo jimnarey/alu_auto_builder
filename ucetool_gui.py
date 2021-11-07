@@ -84,10 +84,10 @@ class OperationDialog(QDialog):
         # Create controls and populate input_layout
         self._create_opt_inputs(opts)
         self.input_layout.addStretch()
-        self.ok_button = QPushButton('OK')
+        self.run_button = QPushButton('Run')
         self.close_button = QPushButton('Close')
         self.help_button = QPushButton('Help')
-        self._create_user_input_widget(self.ok_button, self.close_button, self.help_button)
+        self._create_user_input_widget(self.run_button, self.close_button, self.help_button)
         # Must be last line to avoid slowdowns
         self._setup_log_box()
 
@@ -210,7 +210,7 @@ class Controller:
                 button['button'].clicked.connect(functools.partial(self._save_file, view, button['name']))
 
     def connect_dialog_main_button_signals(self, view):
-        view.ok_button.clicked.connect(self._run)
+        view.run_button.clicked.connect(self._run)
         view.close_button.clicked.connect(self.show_main_window)
         view.help_button.clicked.connect(self._show_help_dialog)
 
