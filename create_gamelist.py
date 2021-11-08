@@ -86,7 +86,7 @@ def main(platform, input_dir, scrape_module=None, user_name=None, password=None,
     temp_dir = common_utils.create_temp_dir(__name__)
     config_path = os.path.join(temp_dir, 'config.ini')
     art_xml_path = os.path.join(temp_dir, 'artwork.xml')
-    common_utils.write_file(config_path, ''.join(configs.CONFIG), 'w')
+    common_utils.write_file(config_path, ''.join(configs.SKYSCRAPER_CONFIG), 'w')
     common_utils.write_file(art_xml_path, ''.join(configs.ARTWORK), 'w')
     user_creds = get_user_creds_arg(user_name, password)
     scrape(platform, input_dir, configs.SCRAPE_FLAGS, config_path, scrape_module, user_creds)

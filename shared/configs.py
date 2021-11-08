@@ -1,5 +1,5 @@
 
-CONFIG = [
+SKYSCRAPER_CONFIG = [
     '[main]\n',
     'videos="false"\n',
     'unattend="true"\n',
@@ -10,6 +10,8 @@ ARTWORK = [
     '<?xml version="1.0" encoding="UTF-8"?>\n',
     '<artwork>\n',
     '\t<output type="cover" resource="cover">\n'
+    '\t</output>\n'
+    '\t<output type="marquee" resource="marquee" width="128" height="32">\n'
     '\t</output>\n'
     '</artwork>\n'
 ]
@@ -29,7 +31,9 @@ EXEC_SH = [
     '/emulator/retroplayer ./emu/CORE_FILE_NAME "./roms/GAME_FILE_NAME"\n'
 ]
 
-SCRAPE_FLAGS = ['onlymissing', 'nosubdirs', 'noscreenshots', 'nomarquees']
+# SCRAPE_FLAGS = ['onlymissing', 'nosubdirs', 'noscreenshots', 'nomarquees']
+
+SCRAPE_FLAGS = ['nosubdirs', 'noscreenshots']
 
 GAME_LIST_FLAGS = ['nobrackets', 'skipped']
 
