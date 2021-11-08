@@ -63,9 +63,12 @@ def run_skyscraper(platform, input_dir, flags, config_path, sky_args):
     common_utils.execute_with_output(cmd)
 
 
-def scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_creds):
+def scrape(platform, input_dir, scrape_flags, config_path, scrape_module, user_creds, refresh_rom_data):
     sky_args = ['-s', scrape_module]
-    sky_args += ['-u', user_creds] if user_creds else sky_args
+    if user_creds:
+        sky_args += ['-u', user_creds]
+    if refresh_rom_data:
+        sky_args.append('--refresh')
     run_skyscraper(platform, input_dir, scrape_flags, config_path, sky_args)
 
 
@@ -76,7 +79,7 @@ def create_gamelist(platform, input_dir, game_list_flags, config_path, art_xml_p
     run_skyscraper(platform, input_dir, game_list_flags, config_path, sky_args)
 
 
-def main(platform, input_dir, scrape_module=None, user_name=None, password=None, output_dir=None):
+def main(platform, input_dir, scrape_module=None, user_name=None, password=None, output_dir=None, refresh_rom_data=False):
     logger.info('Starting gamelist builder')
     scrape_module = scrape_module if scrape_module else 'screenscraper'
     input_dir = os.path.abspath(input_dir) if input_dir else os.getcwd()
@@ -89,7 +92,7 @@ def main(platform, input_dir, scrape_module=None, user_name=None, password=None,
     common_utils.write_file(config_path, ''.join(configs.SKYSCRAPER_CONFIG), 'w')
     common_utils.write_file(art_xml_path, ''.join(configs.ARTWORK), 'w')
     user_creds = get_user_creds_arg(user_name, password)
-    scrape(platform, input_dir, configs.SCRAPE_FLAGS, config_path, scrape_module, user_creds)
+    scrape(platform, input_dir, configs.SCRAPE_FLAGS, config_path, scrape_module, user_creds, refresh_rom_data)
     create_gamelist(platform, input_dir, configs.GAME_LIST_FLAGS, config_path, art_xml_path, output_dir)
     common_utils.cleanup_temp_dir(__name__)
 
@@ -99,4 +102,4 @@ if __name__ == "__main__":
     parser = common_utils.get_cmd_line_args(operations.operations['scrape_to_gamelist']['options'])
     args = vars(parser.parse_args())
     main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'], user_name=args['user_name'],
-         password=args['password'], output_dir=args['output_dir'])
+         password=args['password'], output_dir=args['output_dir'], refresh_rom_data=args['refresh_rom_data'])

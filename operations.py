@@ -80,7 +80,14 @@ scrape_opts = (
         'gui_required': False,
         'type': 'text',
         'help': help_messages.PASSWORD
-     }
+    },
+    {
+        'name': 'refresh_rom_data',
+        'short': 'R',
+        'gui_required': False,
+        'type': 'bool',
+        'help': help_messages.REFRESH_ROM_DATA
+    }
 )
 
 replace_save_part_opt = {

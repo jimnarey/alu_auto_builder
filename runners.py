@@ -20,7 +20,8 @@ def scrape_and_build_uces(args):
     temp_dir = common_utils.create_temp_dir(__name__)
     recipes_temp_dir = os.path.join(temp_dir, 'recipes')
     create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
-                         user_name=args['user_name'], password=args['password'], output_dir=temp_dir)
+                         user_name=args['user_name'], password=args['password'], output_dir=temp_dir,
+                         refresh_rom_data=args['refresh_rom_data'])
     build_recipes.main(os.path.join(temp_dir, 'gamelist.xml'), args['core_path'], bios_dir=args['bios_dir'],
                        output_dir=recipes_temp_dir)
     output_dir = args['output_dir'] if args['output_dir'] else os.path.join(args['input_dir'], 'UCE')
@@ -33,7 +34,8 @@ def scrape_and_make_recipes(args):
     logger.info(info_messages.start_operation("'scrape to recipes'"))
     temp_dir = common_utils.create_temp_dir(__name__)
     create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
-                         user_name=args['user_name'], password=args['password'], output_dir=temp_dir)
+                         user_name=args['user_name'], password=args['password'], output_dir=temp_dir,
+                         refresh_rom_data=args['refresh_rom_data'])
     output_dir = args['output_dir'] if args['output_dir'] else os.path.join(args['input_dir'], 'recipes')
     build_recipes.main(os.path.join(temp_dir, 'gamelist.xml'), args['core_path'], bios_dir=args['bios_dir'],
                        output_dir=output_dir)
@@ -44,7 +46,8 @@ def scrape_and_make_recipes(args):
 def scrape_and_make_gamelist(args):
     logger.info(info_messages.start_operation("'scrape to gamelist'"))
     create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
-                         user_name=args['user_name'], password=args['password'], output_dir=args['output_dir'])
+                         user_name=args['user_name'], password=args['password'], output_dir=args['output_dir'],
+                         refresh_rom_data=args['refresh_rom_data'])
     logger.info(info_messages.end_operation("'scrape to gamelist'"))
 
 

@@ -31,7 +31,7 @@ EXEC_SH = [
     '/emulator/retroplayer ./emu/CORE_FILE_NAME "./roms/GAME_FILE_NAME"\n'
 ]
 
-# SCRAPE_FLAGS = ['onlymissing', 'nosubdirs', 'noscreenshots', 'nomarquees']
+# SCRAPE_FLAGS = ['nosubdirs', 'noscreenshots', 'nomarquees']
 
 SCRAPE_FLAGS = ['nosubdirs', 'noscreenshots']
 

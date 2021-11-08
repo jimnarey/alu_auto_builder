@@ -24,6 +24,8 @@ USER_NAME = 'User account name for scraping module. This enables faster scraping
 
 PASSWORD = 'Password for scraping module.'
 
+REFRESH_ROM_DATA = 'Refresh metadata cache'
+
 PART_PATH = "The path to a save partition to replace the UCE's existing save partition."
 
 MOUNT_METHOD = 'Set this option to use the mount method for opening an existing save parition. Linux only.'
