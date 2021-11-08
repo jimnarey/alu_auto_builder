@@ -96,7 +96,14 @@ def copy_success(item_type, source, dest):
 def symlink_success(symlink, target):
     return 'Successfully created symlink {0} to target {1}'.format(symlink, target)
 
+
 # Shared
 
 def starting_new_process(name):
     return 'Starting new {0} build run'.format(name)
+
+
+# GUI
+
+def dialog_opened(operation_name):
+    return "Opened dialog for '{0}'".format(operation_name)

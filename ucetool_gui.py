@@ -69,27 +69,38 @@ class OperationDialog(QDialog):
         self.setWindowTitle(title_from_name(name))
         # Setup layouts
         self.dialog_layout = QHBoxLayout()
+        self.help_box = QPlainTextEdit()
         self.input_layout = QVBoxLayout()
         self.input_layout_container = QWidget()
-        self.input_layout_container.setLayout(self.input_layout)
-        self.input_layout_container.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.log_box = QPlainTextEdit()
-        self.dialog_layout.addWidget(self.input_layout_container)
-        self.dialog_layout.addWidget(self.log_box)
-        self.setLayout(self.dialog_layout)
         # Control containers parsed by Controller
         self.check_boxes = {}
         self.combo_selects = {}
         self.opt_buttons = []
         # Create controls and populate input_layout
         self._create_opt_inputs(opts)
-        self.input_layout.addStretch()
+        self._setup_input_layout()
         self.run_button = QPushButton('Run')
         self.close_button = QPushButton('Close')
-        self.help_button = QPushButton('Help')
-        self._create_user_input_widget(self.run_button, self.close_button, self.help_button)
-        # Must be last line to avoid slowdowns
+        self._create_user_input_widget(self.run_button, self.close_button)
+        self._setup_help_box()
         self._setup_log_box()
+        self._setup_dialog_layout()
+        self.setLayout(self.dialog_layout)
+
+    def _setup_help_box(self):
+        self.help_box.setReadOnly(True)
+        self.help_box.setMinimumWidth(400)
+
+    def _setup_dialog_layout(self):
+        self.dialog_layout.addWidget(self.help_box)
+        self.dialog_layout.addWidget(self.input_layout_container)
+        self.dialog_layout.addWidget(self.log_box)
+
+    def _setup_input_layout(self):
+        self.input_layout_container.setLayout(self.input_layout)
+        self.input_layout_container.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.input_layout.addStretch()
 
     def _setup_log_box(self):
         self.log_box.setMinimumWidth(600)
@@ -212,7 +223,6 @@ class Controller:
     def connect_dialog_main_button_signals(self, view):
         view.run_button.clicked.connect(self._run)
         view.close_button.clicked.connect(self.show_main_window)
-        view.help_button.clicked.connect(self._show_help_dialog)
 
     def _connect_dialog_combo_signals(self, view):
         for name, combo in view.combo_selects.items():
@@ -229,21 +239,23 @@ class Controller:
         self._connect_dialog_combo_signals(view)
         self._connect_dialog_checkbox_signals(view)
 
-    def _show_help_dialog(self):
-        dialog = QMessageBox()
-        dialog.setWindowTitle('{0}: Help'.format(title_from_name(self.current_operation_name)))
-        html_source = os.path.join(common_utils.get_app_root(), 'html', '{0}.html'.format(self.current_operation_name))
-        dialog.setText(common_utils.get_file_content(html_source, 'r'))
-        dialog.setStandardButtons(QMessageBox.Close)
-        dialog.exec_()
+    def _show_dialog_help(self, operation_name, view):
+        html_help_desc_source = os.path.join(common_utils.get_app_root(), 'html', '{0}_desc.html'.format(operation_name))
+        html_help_opts_source = os.path.join(common_utils.get_app_root(), 'html',
+                                             '{0}_opts.html'.format(operation_name))
+        view.help_box.appendHtml(common_utils.get_file_content(html_help_desc_source, 'r'))
+        view.help_box.appendHtml(common_utils.get_file_content(html_help_opts_source, 'r'))
 
     def _show_dialog(self, name):
         self.args = {}
         self._close_current_view()
         self.current_operation_name = name
         view = OperationDialog(name, operations.operations[name]['options'])
+        self._show_dialog_help(name, view)
         self._connect_dialog_signals(view)
         self._show_view(view)
+        view.help_box.verticalScrollBar().setValue(self.current_view.log_box.verticalScrollBar().minimum())
+        logger.info(info_messages.dialog_opened(self.current_operation_name))
 
     def show_main_window(self):
         self._close_current_view()
