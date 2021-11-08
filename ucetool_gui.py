@@ -6,7 +6,7 @@ import functools
 from pathlib import Path
 import logging
 
-from PyQt5.QtCore import QDir, pyqtRemoveInputHook, pyqtSignal, QThread
+from PyQt5.QtCore import QDir, pyqtRemoveInputHook, pyqtSignal, QThread, QEvent
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, \
     QPushButton, QWidget, QFileDialog, QComboBox, QDialog, QCheckBox, QMessageBox, QPlainTextEdit, QSizePolicy
@@ -38,28 +38,48 @@ class MainWindow(QMainWindow):
     def __init__(self, operations, parent=None):
         super().__init__(parent)
         self.setWindowTitle('UCE Tool')
-        self.main_layout = self._create_main_layout()
+        self.welcome_html = self._get_welcome_html()
+        self.op_buttons_layout = QVBoxLayout()
+        self.help_box = QPlainTextEdit()
+        self.help_box.setReadOnly(True)
+        self.help_box.appendHtml(self.welcome_html)
+        self.main_layout = QHBoxLayout()
+        self.main_layout_container = QWidget()
+        self.main_layout_container.setLayout(self.main_layout)
+        self.main_layout.addWidget(self.help_box)
+        self.main_layout.addLayout(self.op_buttons_layout)
         self.op_buttons = {}
+        self.op_descriptions = {}
         self._create_operation_buttons(operations)
         self.exit_button = QPushButton('Exit')
-        self.main_layout.addWidget(self.exit_button)
+        self.exit_button.installEventFilter(self)
+        self.op_buttons_layout.addWidget(self.exit_button)
+        self.setCentralWidget(self.main_layout_container)
 
-    def _create_main_layout(self):
-        main_layout = QVBoxLayout()
-        layout_container = QWidget()
-        layout_container.setLayout(main_layout)
-        self.setCentralWidget(layout_container)
-        return main_layout
+    def _get_welcome_html(self):
+        welcome_html_source = os.path.join(common_utils.get_app_root(), 'html', 'welcome.html')
+        return common_utils.get_file_content(welcome_html_source, 'r')
 
     def _create_operation_buttons(self, operations):
         for operation_name, operation_spec in operations.items():
             self._create_button(operation_name, operation_spec)
 
+    def eventFilter(self, object, event):
+        if event.type() == QEvent.HoverMove:
+            self.help_box.clear()
+            self.help_box.appendHtml(self.op_descriptions.get(object, self.welcome_html))
+            self.help_box.verticalScrollBar().setValue(self.help_box.verticalScrollBar().minimum())
+            return True
+        return False
+
     def _create_button(self, operation_name, operation_spec):
         button = QPushButton(title_from_name(operation_name))
-        button.setToolTip(operation_spec['help'])
+        button.installEventFilter(self)
         self.op_buttons[operation_name] = button
-        self.main_layout.addWidget(button)
+        html_help_desc_source = os.path.join(common_utils.get_app_root(), 'html',
+                                             '{0}_desc.html'.format(operation_name))
+        self.op_descriptions[button] = common_utils.get_file_content(html_help_desc_source, 'r')
+        self.op_buttons_layout.addWidget(button)
 
 
 class OperationDialog(QDialog):
@@ -91,6 +111,7 @@ class OperationDialog(QDialog):
     def _setup_help_box(self):
         self.help_box.setReadOnly(True)
         self.help_box.setMinimumWidth(400)
+        self.help_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
     def _setup_dialog_layout(self):
         self.dialog_layout.addWidget(self.help_box)
@@ -254,7 +275,7 @@ class Controller:
         self._show_dialog_help(name, view)
         self._connect_dialog_signals(view)
         self._show_view(view)
-        view.help_box.verticalScrollBar().setValue(self.current_view.log_box.verticalScrollBar().minimum())
+        view.help_box.verticalScrollBar().setValue(view.help_box.verticalScrollBar().minimum())
         logger.info(info_messages.dialog_opened(self.current_operation_name))
 
     def show_main_window(self):
@@ -315,7 +336,7 @@ class Controller:
         dialog.destroy()
 
     def _update_text_box(self, str_):
-        if self.current_view.log_box:
+        if hasattr(self.current_view, 'log_box'):
             self.current_view.log_box.appendPlainText(str_)
             self.current_view.log_box.verticalScrollBar().setValue(self.current_view.log_box.verticalScrollBar().maximum())
 
