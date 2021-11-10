@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def validate_args(input_path):
+    logger.info('Validating arguments for extract_save_part')
     valid = True
     if not common_utils.validate_required_path(input_path, 'Input path'):
         valid = False

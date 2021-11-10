@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def validate_args(input_path, part_path):
+    logger.info('Validating arguments for replace_save_part')
     valid = True
     for file_path in (input_path, part_path):
         if not common_utils.validate_required_path(file_path, 'Specified file'):

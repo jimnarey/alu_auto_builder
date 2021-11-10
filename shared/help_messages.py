@@ -24,7 +24,21 @@ USER_NAME = 'User account name for scraping module. This enables faster scraping
 
 PASSWORD = 'Password for scraping module.'
 
-REFRESH_ROM_DATA = 'Refresh metadata cache'
+REFRESH_ROM_DATA = 'Choose whether to refresh the metadata cache'
+#
+# EXPORT_COVERS = 'Choose whether to export cover images to a filesystem folder'
+#
+# EXPORT_LOGOS = "Choose whether to export logos ('wheels') to a filesystem folder"
+#
+# EXPORT_MARQUEES = 'Choose whether to export marquees to a filesystem folder'
+
+EXPORT_BITPIXEL_MARQUEES = 'Choose whether to export marquees, resized to fit the Bitpixel, to a filesystem folder'
+
+# EXPORT_VIDEOS = 'Choose whether to export videos to a filesystem folder'
+
+EXPORT_COX_ASSETS = 'Choose whether to export assets for use with CoinOpsX'
+
+SCRAPE_VIDEOS = 'Choose whether to scrape videos. Useful only if you choose to export these as part of a build for a frontend (COX)'
 
 PART_PATH = "The path to a save partition to replace the UCE's existing save partition."
 

@@ -10,6 +10,7 @@ import build_recipes
 import edit_uce
 import extract_save_part
 import replace_save_part
+import export_assets
 from shared import common_utils, info_messages
 
 logger = logging.getLogger(__name__)
@@ -21,11 +22,13 @@ def scrape_and_build_uces(args):
     recipes_temp_dir = os.path.join(temp_dir, 'recipes')
     create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
                          user_name=args['user_name'], password=args['password'], output_dir=temp_dir,
-                         refresh_rom_data=args['refresh_rom_data'])
-    build_recipes.main(os.path.join(temp_dir, 'gamelist.xml'), args['core_path'], bios_dir=args['bios_dir'],
+                         refresh_rom_data=args['refresh_rom_data'], scrape_videos=args['scrape_videos'])
+    gamelist_path = os.path.join(temp_dir, 'gamelist.xml')
+    build_recipes.main(gamelist_path, args['core_path'], bios_dir=args['bios_dir'],
                        output_dir=recipes_temp_dir)
     output_dir = args['output_dir'] if args['output_dir'] else os.path.join(args['input_dir'], 'UCE')
     build_from_recipes.main(recipes_temp_dir, output_dir=output_dir)
+    export_assets.main(gamelist_path, output_dir, export_cox_assets=args['export_cox_assets'], export_bitpixel_marquees=args['export_bitpixel_marquees'])
     common_utils.cleanup_temp_dir(__name__)
     logger.info(info_messages.end_operation("'scrape to uces'"))
 
@@ -35,10 +38,12 @@ def scrape_and_make_recipes(args):
     temp_dir = common_utils.create_temp_dir(__name__)
     create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
                          user_name=args['user_name'], password=args['password'], output_dir=temp_dir,
-                         refresh_rom_data=args['refresh_rom_data'])
+                         refresh_rom_data=args['refresh_rom_data'], scrape_videos=args['scrape_videos'])
     output_dir = args['output_dir'] if args['output_dir'] else os.path.join(args['input_dir'], 'recipes')
-    build_recipes.main(os.path.join(temp_dir, 'gamelist.xml'), args['core_path'], bios_dir=args['bios_dir'],
+    gamelist_path = os.path.join(temp_dir, 'gamelist.xml')
+    build_recipes.main(gamelist_path, args['core_path'], bios_dir=args['bios_dir'],
                        output_dir=output_dir)
+    export_assets.main(gamelist_path, output_dir, export_cox_assets=args['export_cox_assets'], export_bitpixel_marquees=args['export_bitpixel_marquees'])
     common_utils.cleanup_temp_dir(__name__)
     logger.info(info_messages.end_operation("'scrape to recipes'"))
 
@@ -47,7 +52,7 @@ def scrape_and_make_gamelist(args):
     logger.info(info_messages.start_operation("'scrape to gamelist'"))
     create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
                          user_name=args['user_name'], password=args['password'], output_dir=args['output_dir'],
-                         refresh_rom_data=args['refresh_rom_data'])
+                         refresh_rom_data=args['refresh_rom_data'], scrape_videos=args['scrape_videos'])
     logger.info(info_messages.end_operation("'scrape to gamelist'"))
 
 
@@ -57,6 +62,7 @@ def build_uces_from_gamelist(args):
     build_recipes.main(args['input_path'], args['core_path'], bios_dir=args['bios_dir'], output_dir=temp_dir)
     output_dir = args['output_dir'] if args['output_dir'] else os.path.join(os.path.dirname(args['input_path']), 'UCE')
     build_from_recipes.main(temp_dir, output_dir=output_dir)
+    export_assets.main(args['input_path'], output_dir, export_cox_assets=args['export_cox_assets'], export_bitpixel_marquees=args['export_bitpixel_marquees'])
     common_utils.cleanup_temp_dir(__name__)
     logger.info(info_messages.end_operation("'gamelist to uces'"))
 
@@ -64,6 +70,7 @@ def build_uces_from_gamelist(args):
 def build_recipes_from_gamelist(args):
     logger.info(info_messages.start_operation("'gamelist to recipes'"))
     build_recipes.main(args['input_path'], args['core_path'], bios_dir=args['bios_dir'], output_dir=args['output_dir'])
+    export_assets.main(args['input_path'], output_dir=args['output_dir'], export_cox_assets=args['export_cox_assets'], export_bitpixel_marquees=args['export_bitpixel_marquees'])
     logger.info(info_messages.end_operation("'gamelist to recipes'"))
 
 

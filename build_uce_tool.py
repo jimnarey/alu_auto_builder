@@ -37,6 +37,7 @@ def check_os():
 
 
 def validate_args(input_dir):
+    logger.info('Validating arguments for build_uce_tool')
     valid = True
     if not common_utils.validate_existing_dir(input_dir, 'Input dir'):
         valid = False

@@ -42,6 +42,7 @@ class EditUCEConfig:
 
 
 def validate_args(input_path):
+    logger.info('Validating arguments for edit_uce')
     valid = True
     if not common_utils.validate_required_path(input_path, 'Input path'):
         valid = False

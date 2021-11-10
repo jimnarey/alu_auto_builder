@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import os
-from xml.etree import ElementTree as ET
-from xml.etree.ElementTree import ParseError
+# from xml.etree import ElementTree as ET
+# from xml.etree.ElementTree import ParseError
 import logging
 
 from shared import common_utils, configs, error_messages, info_messages
@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def validate_args(input_path, core_path, bios_dir, output_dir):
+    logger.info('Validating arguments for build_recipes')
     valid = True
     if not common_utils.validate_required_path(input_path, 'Specified gamelist'):
         valid = False
@@ -22,25 +23,6 @@ def validate_args(input_path, core_path, bios_dir, output_dir):
     if not common_utils.validate_optional_dir(bios_dir, 'Bios dir'):
         valid = False
     return valid
-
-
-def read_gamelist(input_path):
-    try:
-        tree = ET.parse(input_path)
-    except ParseError:
-        logger.error(error_messages.invalid_path('Specified gamelist', input_path, 'XML file'))
-        return False
-    return tree.getroot()
-
-
-def parse_game_entry(game_entry):
-    return {
-        'name': game_entry.find('name').text,
-        'rom_path': game_entry.find('path').text,
-        'boxart_path': game_entry.find('thumbnail').text,
-        'marquee': game_entry.find('marquee').text,
-        'description': game_entry.find('desc').text
-    }
 
 
 def make_uce_sub_dirs(game_dir):
@@ -97,10 +79,10 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
         return
     output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
     common_utils.make_dir(output_dir)
-    gamelist = read_gamelist(input_path)
+    gamelist = common_utils.read_gamelist(input_path)
     if gamelist:
         for game_entry in gamelist:
-            game_data = parse_game_entry(game_entry)
+            game_data = common_utils.parse_game_entry(game_entry)
             game_dir = os.path.join(output_dir, os.path.splitext(os.path.basename(game_data['rom_path']))[0])
             setup_uce_source(core_path, bios_dir, game_data, game_dir)
 

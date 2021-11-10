@@ -1,7 +1,6 @@
 
 SKYSCRAPER_CONFIG = [
     '[main]\n',
-    'videos="false"\n',
     'unattend="true"\n',
     'verbosity="1"\n'
 ]
@@ -11,7 +10,9 @@ ARTWORK = [
     '<artwork>\n',
     '\t<output type="cover" resource="cover">\n'
     '\t</output>\n'
-    '\t<output type="marquee" resource="marquee" width="128" height="32">\n'
+    '\t<output type="screenshot" resource="wheel">\n'
+    '\t</output>\n'
+    '\t<output type="marquee" resource="marquee">\n'
     '\t</output>\n'
     '</artwork>\n'
 ]
@@ -31,11 +32,9 @@ EXEC_SH = [
     '/emulator/retroplayer ./emu/CORE_FILE_NAME "./roms/GAME_FILE_NAME"\n'
 ]
 
-# SCRAPE_FLAGS = ['nosubdirs', 'noscreenshots', 'nomarquees']
-
 SCRAPE_FLAGS = ['nosubdirs', 'noscreenshots']
 
-GAME_LIST_FLAGS = ['nobrackets', 'skipped']
+GAME_LIST_FLAGS = ['nobrackets', 'skipped', 'symlink', 'videos']
 
 PLATFORMS = ['', '3do', '3ds', 'amiga', 'amigacd32', 'amstradcpc', 'apple2', 'arcade', 'arcadia', 'astrocde',
                  'atari800', 'atari2600', 'atari5200', 'atari7800', 'atarijaguar', 'atarilynx', 'atarist', 'c16', 'c64',

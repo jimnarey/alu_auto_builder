@@ -8,6 +8,8 @@ import tempfile
 import stat
 import argparse
 import re
+from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import ParseError
 from subprocess import Popen, PIPE
 
 from shared import error_messages, info_messages
@@ -212,8 +214,8 @@ def get_arg_params(opt_short_name):
 def add_arguments_to_parser(parser, opt_set):
     for opt in opt_set:
         long_opt = '--{0}'.format(opt['name']).replace('_', '')
-        short_opt = '-{0}'.format(opt['short'])
-        action, default = get_arg_params(opt['short'])
+        short_opt = '-{0}'.format(opt['cli_short'])
+        action, default = get_arg_params(opt['cli_short'])
         parser.add_argument(long_opt, short_opt, dest=opt['name'], default=default, action=action, help=opt['help'])
 
 
@@ -223,4 +225,24 @@ def get_cmd_line_args(opt_set):
     add_arguments_to_parser(parser, opt_set)
     return parser
 
+
+def read_gamelist(input_path):
+    try:
+        tree = ET.parse(input_path)
+    except ParseError:
+        logger.error(error_messages.invalid_path('Specified gamelist', input_path, 'XML file'))
+        return False
+    return tree.getroot()
+
+
+def parse_game_entry(game_entry):
+    return {
+        'name': game_entry.find('name').text,
+        'rom_path': game_entry.find('path').text,
+        'boxart_path': game_entry.find('thumbnail').text,
+        'marquee_path': game_entry.find('marquee').text,
+        'logo_path': game_entry.find('image').text,
+        'video_path': game_entry.find('video').text,
+        'description': game_entry.find('desc').text,
+    }
 

@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def validate_args(input_dir, output_dir):
+    logger.info('Validating arguments for build_from_recipes')
     valid = True
     if not common_utils.validate_existing_dir(input_dir, 'Input dir'):
         valid = False

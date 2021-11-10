@@ -3,7 +3,7 @@ import runners
 
 input_path_opt = {
     'name': 'input_path',
-    'short': 'i',
+    'cli_short': 'i',
     'gui_required': True,
     'type': 'file_open',
     'help': help_messages.INPUT_PATH
@@ -11,7 +11,7 @@ input_path_opt = {
 
 input_dir_opt = {
     'name': 'input_dir',
-    'short': 'i',
+    'cli_short': 'i',
     'gui_required': True,
     'type': 'dir',
     'help': help_messages.INPUT_DIR
@@ -19,7 +19,7 @@ input_dir_opt = {
 
 output_path_opt = {
     'name': 'output_path',
-    'short': 'o',
+    'cli_short': 'o',
     'gui_required': False,
     'type': 'file_save',
     'help': help_messages.OUTPUT_PATH
@@ -27,7 +27,7 @@ output_path_opt = {
 
 output_dir_opt = {
     'name': 'output_dir',
-    'short': 'o',
+    'cli_short': 'o',
     'gui_required': False,
     'type': 'dir',
     'help': help_messages.OUTPUT_DIR
@@ -36,14 +36,14 @@ output_dir_opt = {
 extra_build_opts = (
     {
         'name': 'core_path',
-        'short': 'c',
+        'cli_short': 'c',
         'gui_required': True,
         'type': 'file_open',
         'help': help_messages.CORE_PATH
     },
     {
         'name': 'bios_dir',
-        'short': 'b',
+        'cli_short': 'b',
         'gui_required': False,
         'type': 'dir',
         'help': help_messages.BIOS_DIR
@@ -53,7 +53,7 @@ extra_build_opts = (
 scrape_opts = (
     {
         'name': 'platform',
-        'short': 'p',
+        'cli_short': 'p',
         'gui_required': True,
         'type': 'text',
         'help': help_messages.PLATFORM,
@@ -61,7 +61,7 @@ scrape_opts = (
      },
     {
         'name': 'scrape_module',
-        'short': 's',
+        'cli_short': 's',
         'gui_required': False,
         'type': 'text',
         'help': help_messages.SCRAPE_MODULE,
@@ -69,30 +69,54 @@ scrape_opts = (
      },
     {
         'name': 'user_name',
-        'short': 'u',
+        'cli_short': 'u',
         'gui_required': False,
         'type': 'text',
         'help': help_messages.USER_NAME
      },
     {
         'name': 'password',
-        'short': 'q',
+        'cli_short': 'q',
         'gui_required': False,
         'type': 'text',
         'help': help_messages.PASSWORD
     },
     {
+        'name': 'scrape_videos',
+        'cli_short': 'V',
+        'gui_required': False,
+        'type': 'bool',
+        'help': help_messages.SCRAPE_VIDEOS
+    },
+    {
         'name': 'refresh_rom_data',
-        'short': 'R',
+        'cli_short': 'R',
         'gui_required': False,
         'type': 'bool',
         'help': help_messages.REFRESH_ROM_DATA
     }
 )
 
+export_assets_opts = (
+    {
+        'name': 'export_cox_assets',
+        'cli_short': 'C',
+        'gui_required': False,
+        'type': 'bool',
+        'help': help_messages.EXPORT_COX_ASSETS
+     },
+    {
+        'name': 'export_bitpixel_marquees',
+        'cli_short': 'Q',
+        'gui_required': False,
+        'type': 'bool',
+        'help': help_messages.EXPORT_BITPIXEL_MARQUEES
+    }
+)
+
 replace_save_part_opt = {
     'name': 'part_path',
-    'short': 'p',
+    'cli_short': 'p',
     'gui_required': True,
     'type': 'file_open',
     'help': help_messages.PART_PATH
@@ -101,14 +125,14 @@ replace_save_part_opt = {
 edit_save_part_opts = (
     {
         'name': 'mount_method',
-        'short': 'M',
+        'cli_short': 'M',
         'gui_required': False,
         'type': 'bool',
         'help': help_messages.MOUNT_METHOD
     },
     {
         'name': 'file_manager',
-        'short': 'f',
+        'cli_short': 'f',
         'gui_required': False,
         'type': 'text',
         'help': help_messages.FILE_MANAGER}
@@ -116,7 +140,7 @@ edit_save_part_opts = (
 
 backup_save_part_opt = {
     'name': 'backup_uce',
-    'short': 'B',
+    'cli_short': 'B',
     'gui_required': False,
     'type': 'bool',
     'help': help_messages.BACKUP_UCE
@@ -128,13 +152,13 @@ build_from_game_list_opts = (input_path_opt, output_dir_opt, *extra_build_opts)
 
 operations = {
     'scrape_to_uces': {
-        'options': scrape_and_build_opts,
+        'options': (*scrape_and_build_opts, *export_assets_opts),
         'runner': runners.scrape_and_build_uces,
         'help': help_messages.SCRAPE_TO_UCES,
         'gui_user_continue_check': False
     },
     'scrape_to_recipes': {
-        'options': scrape_and_build_opts,
+        'options': (*scrape_and_build_opts, *export_assets_opts),
         'runner': runners.scrape_and_make_recipes,
         'help': help_messages.SCRAPE_TO_RECIPES,
         'gui_user_continue_check': False
@@ -146,13 +170,13 @@ operations = {
         'gui_user_continue_check': False
     },
     'gamelist_to_uces': {
-        'options': build_from_game_list_opts,
+        'options': (*build_from_game_list_opts, *export_assets_opts),
         'runner': runners.build_uces_from_gamelist,
         'help': help_messages.GAMELIST_TO_UCES,
         'gui_user_continue_check': False
     },
     'gamelist_to_recipes': {
-        'options': build_from_game_list_opts,
+        'options': (*build_from_game_list_opts, *export_assets_opts),
         'runner': runners.build_recipes_from_gamelist,
         'help': help_messages.GAMELIST_TO_RECIPES,
         'gui_user_continue_check': False
