@@ -235,14 +235,39 @@ def read_gamelist(input_path):
     return tree.getroot()
 
 
+def get_game_entry_val(game_entry, tag_name):
+    tag = game_entry.find(tag_name)
+    if tag is not None:
+        return tag.text
+    return ''
+
+
 def parse_game_entry(game_entry):
     return {
-        'name': game_entry.find('name').text,
-        'rom_path': game_entry.find('path').text,
-        'boxart_path': game_entry.find('thumbnail').text,
-        'marquee_path': game_entry.find('marquee').text,
-        'logo_path': game_entry.find('image').text,
-        'video_path': game_entry.find('video').text,
-        'description': game_entry.find('desc').text,
+        'name': get_game_entry_val(game_entry, 'name'),
+        'rom_path': get_game_entry_val(game_entry, 'path'),
+        'boxart_path': get_game_entry_val(game_entry, 'thumbnail'),
+        'marquee_path': get_game_entry_val(game_entry, 'marquee'),
+        'logo_path': get_game_entry_val(game_entry, 'image'),
+        'video_path': get_game_entry_val(game_entry, 'video'),
+        'description': get_game_entry_val(game_entry, 'desc'),
+        'genre': get_game_entry_val(game_entry, 'genre'),
+        'publisher': get_game_entry_val(game_entry, 'publisher'),
+        'players': get_game_entry_val(game_entry, 'players'),
     }
+
+# def parse_game_entry(game_entry):
+#     return {
+#         'name': game_entry.find('name').text,
+#         'rom_path': game_entry.find('path').text,
+#         'boxart_path': game_entry.find('thumbnail').text,
+#         'marquee_path': game_entry.find('marquee').text,
+#         'logo_path': game_entry.find('image').text,
+#         'video_path': game_entry.find('video').text,
+#         'description': game_entry.find('desc').text,
+#         'genre': game_entry.find('genre').text,
+#         'publisher': game_entry.find('publisher').text,
+#         'players': game_entry.find('players').text,
+#         'kid_game': game_entry.find('kidgame').text,
+#     }
 
