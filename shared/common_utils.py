@@ -170,8 +170,25 @@ def get_platform_bin(windows_bin, linux_bin, linux_script=False):
     return bin_
 
 
-def set_755(file_path):
-    os.chmod(file_path, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+def set_755(path):
+    os.chmod(path, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+
+
+def set_666(path):
+    os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH)
+
+
+def set_766(path):
+    os.chmod(path, stat.S_IRWXU | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH)
+
+
+def recursive_chmod_rw(root_path):
+    set_766(root_path)
+    for root, dirs, files in os.walk(root_path):
+        for dir in dirs:
+            set_766(os.path.join(root, dir))
+        for file in files:
+            set_666(os.path.join(root, file))
 
 
 def validate_required_path(file_path, option_name=''):

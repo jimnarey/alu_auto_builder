@@ -33,6 +33,7 @@ def create_blank_file(file_path, size=4194304):
 
 def make_save_part_from_dir(root_dir_path, img_path):
     create_blank_file(img_path)
+    common_utils.recursive_chmod_rw(root_dir_path)
     bin_ = common_utils.get_platform_bin('mke2fs.exe', 'mke2fs')
     cmd = [
         bin_,

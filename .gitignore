@@ -9,3 +9,4 @@ buildtemp/
 build/
 windows/skyscraper/
 log.txt
+*.json
