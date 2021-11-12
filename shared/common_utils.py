@@ -45,6 +45,12 @@ def escape_ansi(line):
     return ANSI_ESCAPE.sub('', line)
 
 
+def clean_file_name(file_name):
+    for char in '"<>:/\|?*':
+        file_name = file_name.replace(char, '-')
+    return file_name
+
+
 def execute_with_output(cmd, shell=False):
     try:
         with Popen(cmd, stdout=PIPE, bufsize=1,
