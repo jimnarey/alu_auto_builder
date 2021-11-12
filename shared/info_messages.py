@@ -97,6 +97,20 @@ def symlink_success(symlink, target):
     return 'Successfully created symlink {0} to target {1}'.format(symlink, target)
 
 
+# UCE Utils
+
+def split_uce(uce_path):
+    return 'Splitting UCE file {0} into main section and save partition'.format(uce_path)
+
+
+def rebuild_uce(uce_path):
+    return 'Rebuilding UCE file {0}'.format(uce_path)
+
+
+def modifying_save_part_perms(img_path):
+    return 'Modifying save partition permissions in {0}'.format(img_path)
+
+
 # Shared
 
 def starting_new_process(name):

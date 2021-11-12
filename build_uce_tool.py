@@ -16,6 +16,7 @@ class UCEBuildPaths:
 
     def __init__(self):
         self.temp_dir = common_utils.create_temp_dir(__name__)
+        self.debugfs_temp_dir = (os.path.join(self.temp_dir, 'debugfs'))
         self.cart_tmp_file = os.path.join(self.temp_dir, 'cart_tmp_file.img')
         self.cart_save_file = os.path.join(self.temp_dir, 'cart_save_file.img')
         self.md5_file = os.path.join(self.temp_dir, 'md5_file')
@@ -182,19 +183,23 @@ def prepare_blank_save(ub_paths):
 
 def create_save_img(ub_paths):
     save_file = look_for_save_file(ub_paths)
+    common_utils.make_dir(ub_paths.debugfs_temp_dir)
     if save_file:
         logger.info(info_messages.processing_save_file(save_file))
         save_img_from_save_file(save_file, ub_paths)
     elif os.path.isdir(ub_paths.save_dir) and os.listdir(ub_paths.save_dir):
         logger.info(info_messages.creating_save_from_files(ub_paths.save_dir))
         prepare_files_based_save_contents(ub_paths)
-        uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
+        uce_utils.make_save_part_from_dir(ub_paths.temp_dir, ub_paths.save_workdir, ub_paths.cart_save_file)
     if not os.path.isfile(ub_paths.cart_save_file):
         logger.info(info_messages.CREATING_BLANK_SAVE_PART)
         prepare_blank_save(ub_paths)
-        uce_utils.make_save_part_from_dir(ub_paths.blank_save_workdir, ub_paths.cart_save_file)
-    common_utils.remove_dir(ub_paths.save_dir)
+        uce_utils.make_save_part_from_dir(ub_paths.temp_dir, ub_paths.blank_save_workdir, ub_paths.cart_save_file)
+    if os.path.isdir(ub_paths.save_dir):
+        common_utils.remove_dir(ub_paths.save_dir)
     common_utils.make_dir(ub_paths.save_dir)
+    common_utils.make_dir(ub_paths.debugfs_temp_dir)
+    uce_utils.modify_inodes(ub_paths.debugfs_temp_dir, ub_paths.cart_save_file)
 
 
 def main(input_dir, output_path=None):    

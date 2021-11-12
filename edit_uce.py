@@ -14,6 +14,7 @@ class EditUCEConfig:
 
     def __init__(self, input_path, file_manager):
         self.temp_dir = common_utils.create_temp_dir(__name__)
+        self.debugfs_temp_dir = (os.path.join(self.temp_dir, 'debugfs'))
         self.input_path = os.path.abspath(input_path)
         self.img_path = os.path.join(self.temp_dir, 'save.img')
         self.save_part_contents_path = os.path.join(self.temp_dir, 'save_part_contents')
@@ -128,7 +129,7 @@ def edit_save_part_with_mount(img_path, save_part_contents_path, file_manager):
         return False
 
 
-def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, file_manager, continue_check):
+def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, debugfs_temp_dir, file_manager, continue_check):
     extract_img_contents(temp_dir)
     set_all_755(save_part_contents_path)
     edit_contents(save_part_contents_path, file_manager)
@@ -136,15 +137,17 @@ def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, file_m
     continue_check()
     common_utils.delete_file(img_path)
     # uce_utils.create_blank_file(img_path)
-    uce_utils.make_save_part_from_dir(save_part_contents_path, img_path)
+    uce_utils.make_save_part_from_dir(temp_dir, save_part_contents_path, img_path)
+    common_utils.make_dir(debugfs_temp_dir)
+    uce_utils.modify_inodes(debugfs_temp_dir, img_path)
     return True
 
 
-def edit_save_part(temp_dir, img_path, save_part_contents_path, file_manager, mount_method, continue_check):
+def edit_save_part(temp_dir, img_path, save_part_contents_path, debugfs_temp_dir, file_manager, mount_method, continue_check):
     if mount_method:
         return edit_save_part_with_mount(img_path, save_part_contents_path, file_manager)
     else:
-        return edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, file_manager, continue_check)
+        return edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, debugfs_temp_dir, file_manager, continue_check)
 
 
 def console_continue_check():
@@ -164,7 +167,7 @@ def main(input_path, backup_uce=False, mount_method=False, file_manager=None, co
         backup_path = input_path + '.bak'
         common_utils.copyfile(input_path, backup_path)
     common_utils.make_dir(ec_config.save_part_contents_path)
-    if edit_save_part(ec_config.temp_dir, ec_config.img_path, ec_config.save_part_contents_path,
+    if edit_save_part(ec_config.temp_dir, ec_config.img_path, ec_config.save_part_contents_path, ec_config.debugfs_temp_dir,
                       ec_config.file_manager, mount_method, continue_check):
         uce_utils.rebuild_uce(ec_config.input_path, squashfs_etc_data, ec_config.img_path)
     ec_config.cleanup()
