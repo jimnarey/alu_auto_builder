@@ -117,37 +117,35 @@ def set_all_755(save_part_contents_path):
         common_utils.set_755(dir_)
 
 
-def edit_save_part_with_mount(img_path, save_part_contents_path, file_manager):
+def edit_save_part_with_mount(ec_config):
     if common_utils.get_platform() == 'linux' and os.getuid() == 0:
-        mount_image(img_path, save_part_contents_path)
-        edit_contents(save_part_contents_path, file_manager)
-        unmount_image(save_part_contents_path)
-        common_utils.remove_dir(save_part_contents_path)
+        mount_image(ec_config.img_path, ec_config.save_part_contents_path)
+        edit_contents(ec_config.save_part_contents_path, ec_config.file_manager)
+        unmount_image(ec_config.save_part_contents_path)
+        common_utils.remove_dir(ec_config.save_part_contents_path)
         return True
     else:
         logger.error(error_messages.INVALID_MOUNT_CONFIG)
         return False
 
 
-def edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, debugfs_temp_dir, file_manager, continue_check):
-    extract_img_contents(temp_dir)
-    set_all_755(save_part_contents_path)
-    edit_contents(save_part_contents_path, file_manager)
-    # input(info_messages.WAIT_FOR_USER_INPUT)
+def edit_save_part_with_cmds(ec_config, continue_check):
+    extract_img_contents(ec_config.temp_dir)
+    set_all_755(ec_config.save_part_contents_path)
+    edit_contents(ec_config.save_part_contents_path, ec_config.file_manager)
     continue_check()
-    common_utils.delete_file(img_path)
-    # uce_utils.create_blank_file(img_path)
-    uce_utils.make_save_part_from_dir(temp_dir, save_part_contents_path, img_path)
-    common_utils.make_dir(debugfs_temp_dir)
-    uce_utils.modify_inodes(debugfs_temp_dir, img_path)
+    common_utils.delete_file(ec_config.img_path)
+    uce_utils.make_save_part_from_dir(ec_config.temp_dir, ec_config.save_part_contents_path, ec_config.img_path)
+    common_utils.make_dir(ec_config.debugfs_temp_dir)
+    uce_utils.modify_inodes(ec_config.debugfs_temp_dir, ec_config.img_path)
     return True
 
 
-def edit_save_part(temp_dir, img_path, save_part_contents_path, debugfs_temp_dir, file_manager, mount_method, continue_check):
+def edit_save_part(ec_config, mount_method, continue_check):
     if mount_method:
-        return edit_save_part_with_mount(img_path, save_part_contents_path, file_manager)
+        return edit_save_part_with_mount(ec_config)
     else:
-        return edit_save_part_with_cmds(temp_dir, img_path, save_part_contents_path, debugfs_temp_dir, file_manager, continue_check)
+        return edit_save_part_with_cmds(ec_config, continue_check)
 
 
 def console_continue_check():
@@ -167,8 +165,7 @@ def main(input_path, backup_uce=False, mount_method=False, file_manager=None, co
         backup_path = input_path + '.bak'
         common_utils.copyfile(input_path, backup_path)
     common_utils.make_dir(ec_config.save_part_contents_path)
-    if edit_save_part(ec_config.temp_dir, ec_config.img_path, ec_config.save_part_contents_path, ec_config.debugfs_temp_dir,
-                      ec_config.file_manager, mount_method, continue_check):
+    if edit_save_part(ec_config, mount_method, continue_check):
         uce_utils.rebuild_uce(ec_config.input_path, squashfs_etc_data, ec_config.img_path)
     ec_config.cleanup()
 
