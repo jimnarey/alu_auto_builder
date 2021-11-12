@@ -25,10 +25,10 @@ def get_asset_paths(output_dir):
         'assets': asset_dir,
         'bitpixel': os.path.join(asset_dir, 'bitpixel'),
         'cox': cox_dir,
-        'covers': os.path.join(cox_dir, 'covers'),
-        'marquees': os.path.join(cox_dir, 'marquees'),
-        'logos': os.path.join(cox_dir, 'logos'),
-        'videos': os.path.join(cox_dir, 'videos'),
+        'covers': os.path.join(cox_dir, 'cover'),
+        'marquees': os.path.join(cox_dir, 'marquee'),
+        'logos': os.path.join(cox_dir, 'logo'),
+        'videos': os.path.join(cox_dir, 'video'),
         'playlists': os.path.join(cox_dir, 'playlists'),
         'playlist_art': os.path.join(cox_dir, 'playlist_art')
 
