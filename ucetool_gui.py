@@ -143,7 +143,6 @@ class OperationDialog(QDialog):
         widget.setLayout(layout)
         for arg in args:
             layout.addWidget(arg)
-
         layout.addStretch()
         self.input_layout.addWidget(widget)
 
@@ -181,7 +180,9 @@ class OperationDialog(QDialog):
     def _create_select_widget(self, opt):
         widgets = [self._create_title_label(opt)]
         combo = QComboBox()
-        combo.addItems(opt.get('selections', []))
+        if opt.get('selections', False):
+            combo.addItem('')
+            combo.addItems(opt.get('selections', []))
         combo.setFixedWidth(200)
         combo.setEditable(True)
         self.combo_selects[opt['name']] = combo

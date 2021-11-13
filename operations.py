@@ -57,7 +57,7 @@ scrape_opts = (
         'gui_required': True,
         'type': 'text',
         'help': help_messages.PLATFORM,
-        'selections': configs.PLATFORMS
+        'selections': configs.PLATFORMS.keys()
      },
     {
         'name': 'scrape_module',
