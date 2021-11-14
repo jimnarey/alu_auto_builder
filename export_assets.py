@@ -147,7 +147,7 @@ def main(input_path, output_dir, export_cox_assets=False, export_bitpixel_marque
         return False
     if not validate_args(input_path, output_dir):
         return False
-    gamelist = common_utils.read_gamelist(input_path)
+    gamelist = common_utils.read_gamelist_tree(input_path).getroot()
     asset_paths = get_asset_paths(output_dir)
     make_asset_dirs(asset_paths, export_cox_assets, export_bitpixel_marquees)
     export(gamelist, asset_paths, export_cox_assets, export_bitpixel_marquees)

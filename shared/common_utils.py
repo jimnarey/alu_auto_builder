@@ -249,13 +249,13 @@ def get_cmd_line_args(opt_set):
     return parser
 
 
-def read_gamelist(input_path):
+def read_gamelist_tree(input_path):
     try:
         tree = ET.parse(input_path)
     except ParseError:
         logger.error(error_messages.invalid_path('Specified gamelist', input_path, 'XML file'))
         return False
-    return tree.getroot()
+    return tree
 
 
 def get_game_entry_val(game_entry, tag_name):

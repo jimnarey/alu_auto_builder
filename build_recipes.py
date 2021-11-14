@@ -79,7 +79,7 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
         return
     output_dir = os.path.abspath(output_dir) if output_dir else os.path.join(os.path.split(os.path.abspath(input_path))[0], 'recipes')
     common_utils.make_dir(output_dir)
-    gamelist = common_utils.read_gamelist(input_path)
+    gamelist = common_utils.read_gamelist_tree(input_path).getroot()
     if gamelist:
         for game_entry in gamelist:
             game_data = common_utils.parse_game_entry(game_entry)
