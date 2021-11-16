@@ -8,9 +8,12 @@ import tempfile
 import stat
 import argparse
 import re
+import csv
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import ParseError
 from subprocess import Popen, PIPE
+
+import requests
 
 from shared import error_messages, info_messages
 
@@ -74,6 +77,18 @@ def write_file(file_path, file_content, write_type):
     try:
         with open(file_path, write_type) as target_file:
             target_file.write(file_content)
+    except OSError as e:
+        logger.error(error_messages.access_failure('write', file_path, e))
+        return False
+    logger.info(info_messages.access_success('wrote', file_path))
+    return True
+
+
+def write_csv(file_path, rows):
+    try:
+        with open(file_path, 'w', newline='') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerows(rows)
     except OSError as e:
         logger.error(error_messages.access_failure('write', file_path, e))
         return False
@@ -152,6 +167,24 @@ def delete_file(file_path):
         return False
     logger.info(info_messages.remove_success('file', file_path))
     return True
+
+
+def download_data(url):
+    try:
+        data = requests.get(url)
+        if 400 <= data.status_code < 600:
+            logger.error('Server returned status code {0} for {1}'.format(url, data.status_code))
+            data = None
+        logger.info('Downloaded remote file {0}'.format(url))
+    except Exception as e:
+        logger.error('Failed to fetch {0}: {1}'.format(url, e))
+        data = None
+    return data
+
+
+def download_file(url, save_path, write_type='wb'):
+    data = download_data(url)
+    write_file(save_path, data.content, write_type)
 
 
 def get_platform():
@@ -260,7 +293,7 @@ def read_gamelist_tree(input_path):
 
 def get_game_entry_val(game_entry, tag_name):
     tag = game_entry.find(tag_name)
-    if tag is not None:
+    if tag is not None and tag.text is not None:
         return tag.text
     return ''
 
@@ -277,20 +310,7 @@ def parse_game_entry(game_entry):
         'genre': get_game_entry_val(game_entry, 'genre'),
         'publisher': get_game_entry_val(game_entry, 'publisher'),
         'players': get_game_entry_val(game_entry, 'players'),
+        'bezel_match': get_game_entry_val(game_entry, 'bezel_match'),
+        'bezel_path': get_game_entry_val(game_entry, 'bezel_path')
     }
-
-# def parse_game_entry(game_entry):
-#     return {
-#         'name': game_entry.find('name').text,
-#         'rom_path': game_entry.find('path').text,
-#         'boxart_path': game_entry.find('thumbnail').text,
-#         'marquee_path': game_entry.find('marquee').text,
-#         'logo_path': game_entry.find('image').text,
-#         'video_path': game_entry.find('video').text,
-#         'description': game_entry.find('desc').text,
-#         'genre': game_entry.find('genre').text,
-#         'publisher': game_entry.find('publisher').text,
-#         'players': game_entry.find('players').text,
-#         'kid_game': game_entry.find('kidgame').text,
-#     }
 

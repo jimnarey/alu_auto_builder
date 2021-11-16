@@ -56,6 +56,8 @@ def copy_source_files(core_path, bios_dir, game_data, game_dir):
     box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
     common_utils.copyfile(core_path, os.path.join(game_dir, 'emu', os.path.basename(core_path)))
     common_utils.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
+
+    # TODO - Update to reflect changes in get_game_entry_val
     try:
         common_utils.copyfile(game_data['boxart_path'], box_art_target_path)
     except TypeError:
@@ -69,6 +71,7 @@ def copy_source_files(core_path, bios_dir, game_data, game_dir):
 def setup_uce_source(core_path, bios_dir, game_data, game_dir):
     common_utils.make_dir(game_dir)
     make_uce_sub_dirs(game_dir)
+    # TODO Fix where there is no name!!!!!!!!
     write_cart_xml(game_dir, game_data['name'], game_data['description'])
     write_exec_sh(game_dir, os.path.basename(core_path), os.path.basename(game_data['rom_path']))
     copy_source_files(core_path, bios_dir, game_data, game_dir)

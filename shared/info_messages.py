@@ -111,6 +111,19 @@ def modifying_save_part_perms(img_path):
     return 'Modifying save partition permissions in {0}'.format(img_path)
 
 
+# Scrape bezels
+
+FORCE_COMPARE_FILENAME = "Forcing 'compare filename' to match names in platform's bezelproject repo"
+
+
+def reverting_to_filename_compare(game_basename):
+    return 'Reverting to filename match for {0} due to lack of scraped title'.format(game_basename)
+
+
+def bezel_local_copy_found(game_name):
+    return 'Bezel file for {0} already stored locally'.format(game_name)
+
+
 # Shared
 
 def starting_new_process(name):
@@ -121,3 +134,4 @@ def starting_new_process(name):
 
 def dialog_opened(operation_name):
     return "Opened dialog for '{0}'".format(operation_name)
+

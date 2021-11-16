@@ -85,6 +85,10 @@ def symlink_failure(symlink, target, exception_message):
     return 'Failed to create symlink {0} to target {1}: {2}'.format(symlink, target, exception_message)
 
 
+def score_not_number(value, exception_message):
+    return 'Recorded bezel match value {0} cannot be converted to int: {1}'.format(value, exception_message)
+
+
 # Shared
 
 def invalid_path(option_name, path, path_type):

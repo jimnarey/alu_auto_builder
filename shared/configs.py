@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 SKYSCRAPER_CONFIG = [
     '[main]\n',
     'unattend="true"\n',
@@ -39,7 +42,7 @@ PLATFORMS = {'3do': {'bezel_repo': 'bezelproject-3DO', 'default_bezel': 'retroar
              'amiga': {'bezel_repo': 'bezelprojectSA-Amiga', 'default_bezel': 'retroarch/overlay/Commodore-Amiga.png'},
              'amigacd32': {'bezel_repo': 'bezelproject-CD32', 'default_bezel': 'retroarch/overlay/Commodore-Amiga-CD32.png'},
              'amstradcpc': {'bezel_repo': 'bezelprojectSA-AmstradCPC', 'default_bezel': 'retroarch/overlay/Amstrad-CPC.png'},
-             'arcade': {'bezel_repo': 'bezelproject-MAME', 'default_bezel': 'retroarch/overlay/MAME-Horizontal.png'},
+             'arcade': {'bezel_repo': 'bezelproject-MAME', 'default_bezel': 'retroarch/overlay/MAME-Horizontal.png', 'use_filename': True},
              'atari800': {'bezel_repo': 'bezelprojectSA-Atari800', 'default_bezel': 'retroarch/overlay/Atari-800.png'},
              'atari2600': {'bezel_repo': 'bezelproject-Atari2600', 'default_bezel': 'retroarch/overlay/Atari-2600.png'},
              'atari5200': {'bezel_repo': 'bezelproject-Atari5200', 'default_bezel': 'retroarch/overlay/Atari-5200.png'},
@@ -51,7 +54,7 @@ PLATFORMS = {'3do': {'bezel_repo': 'bezelproject-3DO', 'default_bezel': 'retroar
              'coleco': {'bezel_repo': 'bezelproject-ColecoVision', 'default_bezel': 'retroarch/overlay/Colecovision.png'},
              'daphne': {'bezel_repo': 'bezelproject-Daphne', 'default_bezel': 'retroarch/overlay/Daphne.png'},
              'dreamcast': {'bezel_repo': 'bezelproject-Dreamcast', 'default_bezel': 'retroarch/overlay/Dreamcast.png'},
-             'fba': {'bezel_repo': 'bezelproject-MAME', 'default_bezel': 'retroarch/overlay/MAME-Horizontal.png'},
+             'fba': {'bezel_repo': 'bezelproject-MAME', 'default_bezel': 'retroarch/overlay/MAME-Horizontal.png', 'use_filename': True},
              'fds': {'bezel_repo': 'bezelproject-FDS', 'default_bezel': 'retroarch/overlay/Nintendo-Famicom-Disk-System.png'},
              'gamegear': {'bezel_repo': 'bezelproject-GameGear', 'default_bezel': 'retroarch/overlay/Sega-Game-Gear.png'},
              'gb': {'bezel_repo': 'bezelproject-GB', 'default_bezel': 'retroarch/overlay/Nintendo-Game-Boy.png'},
@@ -59,14 +62,14 @@ PLATFORMS = {'3do': {'bezel_repo': 'bezelproject-3DO', 'default_bezel': 'retroar
              'gbc': {'bezel_repo': 'bezelproject-GBC', 'default_bezel': 'retroarch/overlay/Nintendo-Game-Boy-Color.png'},
              'genesis': {'bezel_repo': 'bezelproject-MegaDrive', 'default_bezel': 'retroarch/overlay/Sega-Mega-Drive.png'},
              'intellivision': {'bezel_repo': 'bezelproject-Intellivision', 'default_bezel': 'retroarch/overlay/Intellivision.png'},
-             'mame-libretro': {'bezel_repo': 'bezelproject-MAME', 'default_bezel': 'retroarch/overlay/MAME-Horizontal.png'},
+             'mame-libretro': {'bezel_repo': 'bezelproject-MAME', 'default_bezel': 'retroarch/overlay/MAME-Horizontal.png',  'use_filename': True},
              'mastersystem': {'bezel_repo': 'bezelproject-MasterSystem', 'default_bezel': 'retroarch/overlay/Sega-Master-System.png'},
              'megacd': {'bezel_repo': 'bezelproject-SegaCD', 'default_bezel': 'retroarch/overlay/Sega-CD.png'},
              'megadrive': {'bezel_repo': 'bezelproject-MegaDrive', 'default_bezel': 'retroarch/overlay/Sega-Mega-Drive.png'},
              'msx': {'bezel_repo': 'bezelprojectSA-MSX', 'default_bezel': 'retroarch/overlay/Microsoft-MSX.png'},
              'n64': {'bezel_repo': 'bezelproject-N64', 'default_bezel': 'retroarch/overlay/Nintendo-64.png'},
              'nds': {'bezel_repo': 'bezelproject-NDS', 'default_bezel': 'retroarch/overlay/Nintendo-DS.png'},
-             'neogeo': {'bezel_repo': 'bezelproject-MAME', 'default_bezel': 'retroarch/overlay/MAME-Horizontal.png'},
+             'neogeo': {'bezel_repo': 'bezelproject-MAME', 'default_bezel': 'retroarch/overlay/MAME-Horizontal.png',  'use_filename': True},
              'neogeocd': {'bezel_repo': 'bezelproject-NG-CD', 'default_bezel': 'retroarch/overlay/SNK-Neo-Geo-CD.png'},
              'nes': {'bezel_repo': 'bezelproject-NES', 'default_bezel': 'retroarch/overlay/Nintendo-Entertainment-System.png'},
              'ngp': {'bezel_repo': 'bezelproject-NGP', 'default_bezel': 'retroarch/overlay/SNK-Neo-Geo-Pocket.png'},
@@ -93,3 +96,14 @@ PLATFORMS = {'3do': {'bezel_repo': 'bezelproject-3DO', 'default_bezel': 'retroar
 
 SCRAPING_MODULES = ['screenscraper', 'arcadedb', 'igdb', 'mobygames', 'openretro', 'thegamesdb',
                     'worldofspectrum']
+
+UNSUPPORTED_REGION_STRINGS = (
+    'Japan',
+    '(J)'
+)
+
+BASE_TREE_URL = 'https://api.github.com/repos/thebezelproject/{0}/git/trees/master?recursive=1'
+
+BASE_BEZEL_RAW_URL = 'https://raw.githubusercontent.com/thebezelproject/{0}/master/{1}'
+
+BEZEL_ROOT_DIR = os.path.join(str(Path.home()), '.bezels')
