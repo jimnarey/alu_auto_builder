@@ -13,6 +13,7 @@ from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import ParseError
 from subprocess import Popen, PIPE
 
+from PIL import Image, UnidentifiedImageError
 import requests
 
 from shared import error_messages, info_messages
@@ -48,7 +49,7 @@ def escape_ansi(line):
     return ANSI_ESCAPE.sub('', line)
 
 
-def clean_file_name(file_name):
+def hyphen_special_chars(file_name):
     for char in '"<>:/\|?*':
         file_name = file_name.replace(char, '-')
     return file_name
@@ -152,8 +153,11 @@ def copytree(source, dest, symlinks=False):
 def create_symlink(target, symlink):
     try:
         os.symlink(target, symlink)
+    except PermissionError as e:
+        logger.warning(error_messages.symlink_failure_permissions(symlink, target))
+        return False
     except OSError as e:
-        logger.error(error_messages.symlink_failure(symlink, target, e))
+        logger.error(error_messages.symlink_failure_other(symlink, target, e))
         return False
     logger.info(info_messages.symlink_success(symlink, target))
     return True
@@ -321,3 +325,18 @@ def score_to_int(value):
     except ValueError as e:
         logger.error(error_messages.score_not_number(value, e))
     return 0
+
+
+def resize_and_save_image(source_path, dest_path, x, y, image_format='PNG'):
+    try:
+        img = Image.open(source_path)
+        img = img.resize((x, y))
+        img.save(dest_path, image_format)
+        logger.info(info_messages.image_resize_success(source_path, dest_path))
+        return True
+    except (OSError, FileNotFoundError, UnidentifiedImageError, ValueError) as e:
+        logger.error(error_messages.image_resize_failure(source_path, dest_path, x, y, e))
+
+
+def get_basename_no_ext(path):
+    return os.path.splitext(os.path.basename(path))[0]

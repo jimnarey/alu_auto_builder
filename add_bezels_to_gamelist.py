@@ -46,8 +46,8 @@ def clean_compare_name(name):
     return ' '.join(re.sub("[\(\[].*?[\)\]]", "", name).lower().split())
 
 
-def get_basename_no_ext(path):
-    return os.path.splitext(os.path.basename(path))[0]
+# def get_basename_no_ext(path):
+#     return os.path.splitext(os.path.basename(path))[0]
 
 
 def get_game_compare_name(game_data, compare_filename):
@@ -63,7 +63,7 @@ def get_game_compare_name(game_data, compare_filename):
 
 def get_bezel_data(repo, github_tree_item):
     path = github_tree_item['path']
-    game_name = get_basename_no_ext(path)
+    game_name = common_utils.get_basename_no_ext(path)
     local_path = os.path.join(configs.BEZEL_ROOT_DIR, repo, '{0}.png'.format(game_name))
     compare_name = clean_compare_name(game_name)
     return compare_name, {
@@ -122,7 +122,7 @@ def is_unsupported_region(game_data):
 
 def get_game_data(game_entry, compare_filename):
     game_data = common_utils.parse_game_entry(game_entry)
-    game_data['basename_no_ext'] = get_basename_no_ext(game_data['rom_path'])
+    game_data['basename_no_ext'] = common_utils.get_basename_no_ext(game_data['rom_path'])
     game_data['compare_name'] = get_game_compare_name(game_data, compare_filename)
     game_data['is_unsupported_region'] = is_unsupported_region(game_data)
     return game_data

@@ -30,8 +30,14 @@ CARTRIDGE_XML = [
 
 EXEC_SH = [
     '#!/bin/sh\n',
+    'if [ -f ./boxart/addon.z.png ]; then\n',
+    'cp ./boxart/addon.z.png /tmp\n',
+    'echo -e "[Property]" > /tmp/gameinfo.ini\n'
+    'echo -e "BezelPath=/tmp/addon.z.png" >> /tmp/gameinfo.ini\n',
+    'fi\n',
     'set -x\n',
-    '/emulator/retroplayer ./emu/CORE_FILE_NAME "./roms/GAME_FILE_NAME"\n'
+    '/emulator/retroplayer ./emu/CORE_FILE_NAME "./roms/GAME_FILE_NAME"\n',
+    '[ -f ./boxart/addon.z.png ] && rm -f /tmp/gameinfo.ini\n'
 ]
 
 SCRAPE_FLAGS = ['nosubdirs', 'noscreenshots']

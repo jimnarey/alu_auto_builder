@@ -22,10 +22,10 @@ def scrape_and_build_uces(args):
     logger.info(info_messages.start_operation("'scrape to uces'"))
     temp_dir = common_utils.create_temp_dir(__name__)
     recipes_temp_dir = os.path.join(temp_dir, 'recipes')
-    create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
+    gamelist_path = create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
                          user_name=args['user_name'], password=args['password'], output_dir=temp_dir,
                          refresh_rom_data=args['refresh_rom_data'], scrape_videos=args['scrape_videos'])
-    gamelist_path = os.path.join(temp_dir, 'gamelist.xml')
+    # gamelist_path = os.path.join(temp_dir, 'gamelist.xml')
     print('Hello 1')
     add_bezels_to_gamelist.main(gamelist_path, args['platform'], min_match_score=args['min_match_score'], compare_filename=args['compare_filename'], filter_unsupported_regions=args['filter_unsupported_regions'])
 
@@ -45,11 +45,11 @@ def scrape_and_build_uces(args):
 def scrape_and_make_recipes(args):
     logger.info(info_messages.start_operation("'scrape to recipes'"))
     temp_dir = common_utils.create_temp_dir(__name__)
-    create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
+    gamelist_path = create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
                          user_name=args['user_name'], password=args['password'], output_dir=temp_dir,
                          refresh_rom_data=args['refresh_rom_data'], scrape_videos=args['scrape_videos'])
     output_dir = args['output_dir'] if args['output_dir'] else os.path.join(args['input_dir'], 'recipes')
-    gamelist_path = os.path.join(temp_dir, 'gamelist.xml')
+    # gamelist_path = os.path.join(temp_dir, 'gamelist.xml')
 
     add_bezels_to_gamelist.main(gamelist_path, args['platform'], min_match_score=args['min_match_score'], compare_filename=args['compare_filename'], filter_unsupported_regions=args['filter_unsupported_regions'])
 
@@ -64,11 +64,11 @@ def scrape_and_make_recipes(args):
 
 def scrape_and_make_gamelist(args):
     logger.info(info_messages.start_operation("'scrape to gamelist'"))
-    create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
+    gamelist_path = create_gamelist.main(args['platform'], args['input_dir'], scrape_module=args['scrape_module'],
                          user_name=args['user_name'], password=args['password'], output_dir=args['output_dir'],
                          refresh_rom_data=args['refresh_rom_data'], scrape_videos=args['scrape_videos'])
-    # TODO - what if no output_dir provided?
-    gamelist_path = os.path.join(args['output_dir'], 'gamelist.xml') if args['output_dir'] else os.path.join(args['input_dir'], 'gamelist', 'gamelist.xml')
+    # TODO - get path from create_gamelist.py
+    # gamelist_path = os.path.join(args['output_dir'], 'gamelist.xml') if args['output_dir'] else os.path.join(args['input_dir'], 'gamelist', 'gamelist.xml')
     add_bezels_to_gamelist.main(gamelist_path, args['platform'], min_match_score=args['min_match_score'], compare_filename=args['compare_filename'], filter_unsupported_regions=args['filter_unsupported_regions'])
     if args['do_summarise_gamelist']:
         summarise_gamelist.main(gamelist_path, output_dir=args['output_dir'])

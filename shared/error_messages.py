@@ -81,12 +81,22 @@ def copy_failure(item_type, source, dest, exception_message):
     return 'Error copying {0} {1} to {2}: {3}'.format(item_type, source, dest, exception_message)
 
 
-def symlink_failure(symlink, target, exception_message):
+def symlink_failure_other(symlink, target, exception_message):
     return 'Failed to create symlink {0} to target {1}: {2}'.format(symlink, target, exception_message)
 
 
 def score_not_number(value, exception_message):
     return 'Match score {0} cannot be converted to int: {1}'.format(value, exception_message)
+
+
+def image_resize_failure(source_path, dest_path, x, y, exception_message):
+    return 'Failed to resize image {0} to {1}, {2} and save as {3}: {4}'.format(source_path, x, y, dest_path, exception_message)
+
+
+# Common Utils, warnings
+
+def symlink_failure_permissions(symlink, target):
+    return 'Permissions error creating symlink {0} to target {1}, copying instead'.format(symlink, target)
 
 
 # Shared

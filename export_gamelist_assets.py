@@ -65,10 +65,8 @@ def make_asset_dirs(asset_paths, export_cox_assets, export_bitpixel_marquees):
 def exp_bitpixel_marquee(game_data, asset_paths):
     marquee_path = game_data['marquee_path']
     if marquee_path:
-        img = Image.open(marquee_path)
-        img = img.resize((128, 32))
         save_path = os.path.join(asset_paths['bitpixel'], os.path.basename(marquee_path))
-        img.save(save_path)
+        common_utils.resize_and_save_image(marquee_path, save_path, 128, 32)
 
 
 def add_to_playlists(game_data, playlists):
@@ -118,13 +116,13 @@ def save_playlist_art(playlist_name, playlist_file_name, playlist_art_spec, asse
 def save_playlists(playlists, asset_paths):
     common_utils.make_dir(asset_paths['playlists'])
     common_utils.make_dir(asset_paths['playlist_art'])
-    playist_art_spec = get_playlist_art_spec()
+    playlist_art_spec = get_playlist_art_spec()
     for index, playlist_cat in enumerate(playlists):
         for playlist in playlists[playlist_cat]:
-            playlist_file_name = common_utils.clean_file_name(playlist)
+            playlist_file_name = common_utils.hyphen_special_chars(playlist)
             common_utils.write_file(os.path.join(asset_paths['playlists'], '{0} {1}'.format(index, playlist_file_name)),
                                     '\n'.join(playlists[playlist_cat][playlist]), 'w')
-            save_playlist_art(playlist, playlist_file_name, playist_art_spec, asset_paths)
+            save_playlist_art(playlist, playlist_file_name, playlist_art_spec, asset_paths)
 
 
 def export(gamelist, asset_paths, export_cox_assets, export_bitpixel_marquees):

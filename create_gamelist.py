@@ -98,6 +98,7 @@ def main(platform, input_dir, scrape_module=None, user_name=None, password=None,
     scrape(platform, input_dir, configs.SCRAPE_FLAGS, config_path, scrape_module, user_creds, refresh_rom_data, scrape_videos)
     create_gamelist(platform, input_dir, configs.GAME_LIST_FLAGS, config_path, art_xml_path, output_dir)
     common_utils.cleanup_temp_dir(__name__)
+    return os.path.join(output_dir, 'gamelist.xml')
 
 
 if __name__ == "__main__":

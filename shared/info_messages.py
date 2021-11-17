@@ -97,6 +97,10 @@ def symlink_success(symlink, target):
     return 'Successfully created symlink {0} to target {1}'.format(symlink, target)
 
 
+def image_resize_success(source_path, dest_path):
+    return 'Successfully resized imaged {0} and saved to {1}'.format(source_path, dest_path)
+
+
 # UCE Utils
 
 def split_uce(uce_path):
