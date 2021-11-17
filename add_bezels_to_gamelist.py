@@ -148,12 +148,9 @@ def format_gamelist(gamelist_tree):
 
 
 def main(input_path, platform, min_match_score=None, compare_filename=False, filter_unsupported_regions=True):
-    print('Hello 2')
     platform_data = configs.PLATFORMS.get(platform, False)
-    print('min_match_score: ', min_match_score)
     if not platform_data or not validate_args(input_path, platform, min_match_score):
         return False
-    print('Hello 3')
     # TODO - Avoid converting to int here and in validate_args
     min_match_score = int(min_match_score) if min_match_score else 85
     init_local_dirs()
@@ -168,21 +165,5 @@ def main(input_path, platform, min_match_score=None, compare_filename=False, fil
         add_bezel_to_game_entry(game_entry, bezel_compare_names, bezels, default_bezel, min_match_score, compare_filename, filter_unsupported_regions)
     common_utils.write_file(os.path.join(input_path), format_gamelist(gamelist_tree), 'w')
 
-
-# logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
-
-
-
-# SNES_GAMELIST = '/media/jimnarey/HDD_Data_B/Retro/AtGames ALU/match_testing/SNES_NO_INTRO/gamelist/gamelist.xml'
-#
-# MAME_GAMELIST = '/media/jimnarey/HDD_Data_B/Retro/AtGames ALU/match_testing/MAME 078/gamelist/gamelist.xml'
-
-
-# add_bezels_to_gamelist(SNES_GAMELIST, 'snes')
-
-# add_bezels_to_gamelist(MAME_GAMELIST, 'mame-libretro')
-
-
-# '/media/jimnarey/HDD_Data_B/Retro/AtGames ALU/match_testing/SNES/gamelist/gamelist.xml'
 
 # No 'if name == __main__' as this can't be run as a distinct operation

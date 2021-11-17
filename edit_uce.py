@@ -135,7 +135,7 @@ def edit_save_part_with_cmds(ec_config, continue_check):
     edit_contents(ec_config.save_part_contents_path, ec_config.file_manager)
     continue_check()
     common_utils.delete_file(ec_config.img_path)
-    uce_utils.make_save_part_from_dir(ec_config.temp_dir, ec_config.save_part_contents_path, ec_config.img_path)
+    uce_utils.make_save_part_from_dir(ec_config.save_part_contents_path, ec_config.img_path)
     common_utils.make_dir(ec_config.debugfs_temp_dir)
     uce_utils.modify_inodes(ec_config.debugfs_temp_dir, ec_config.img_path)
     return True

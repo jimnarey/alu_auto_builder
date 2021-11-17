@@ -68,7 +68,7 @@ def scrape_and_make_gamelist(args):
                          user_name=args['user_name'], password=args['password'], output_dir=args['output_dir'],
                          refresh_rom_data=args['refresh_rom_data'], scrape_videos=args['scrape_videos'])
     # TODO - what if no output_dir provided?
-    gamelist_path = os.path.join(args['output_dir'], 'gamelist.xml')
+    gamelist_path = os.path.join(args['output_dir'], 'gamelist.xml') if args['output_dir'] else os.path.join(args['input_dir'], 'gamelist', 'gamelist.xml')
     add_bezels_to_gamelist.main(gamelist_path, args['platform'], min_match_score=args['min_match_score'], compare_filename=args['compare_filename'], filter_unsupported_regions=args['filter_unsupported_regions'])
     if args['do_summarise_gamelist']:
         summarise_gamelist.main(gamelist_path, output_dir=args['output_dir'])

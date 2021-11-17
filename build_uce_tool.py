@@ -190,11 +190,11 @@ def create_save_img(ub_paths):
     elif os.path.isdir(ub_paths.save_dir) and os.listdir(ub_paths.save_dir):
         logger.info(info_messages.creating_save_from_files(ub_paths.save_dir))
         prepare_files_based_save_contents(ub_paths)
-        uce_utils.make_save_part_from_dir(ub_paths.temp_dir, ub_paths.save_workdir, ub_paths.cart_save_file)
+        uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
     if not os.path.isfile(ub_paths.cart_save_file):
         logger.info(info_messages.CREATING_BLANK_SAVE_PART)
         prepare_blank_save(ub_paths)
-        uce_utils.make_save_part_from_dir(ub_paths.temp_dir, ub_paths.blank_save_workdir, ub_paths.cart_save_file)
+        uce_utils.make_save_part_from_dir(ub_paths.blank_save_workdir, ub_paths.cart_save_file)
     if os.path.isdir(ub_paths.save_dir):
         common_utils.remove_dir(ub_paths.save_dir)
     common_utils.make_dir(ub_paths.save_dir)
