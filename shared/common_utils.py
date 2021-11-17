@@ -314,3 +314,10 @@ def parse_game_entry(game_entry):
         'bezel_path': get_game_entry_val(game_entry, 'bezel_path')
     }
 
+
+def score_to_int(value):
+    try:
+        return int(value.strip())
+    except ValueError as e:
+        logger.error(error_messages.score_not_number(value, e))
+    return 0

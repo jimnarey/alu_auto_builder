@@ -25,16 +25,8 @@ USER_NAME = 'User account name for scraping module. This enables faster scraping
 PASSWORD = 'Password for scraping module.'
 
 REFRESH_ROM_DATA = 'Choose whether to refresh the metadata cache'
-#
-# EXPORT_COVERS = 'Choose whether to export cover images to a filesystem folder'
-#
-# EXPORT_LOGOS = "Choose whether to export logos ('wheels') to a filesystem folder"
-#
-# EXPORT_MARQUEES = 'Choose whether to export marquees to a filesystem folder'
 
 EXPORT_BITPIXEL_MARQUEES = 'Choose whether to export marquees, resized to fit the Bitpixel, to a filesystem folder'
-
-# EXPORT_VIDEOS = 'Choose whether to export videos to a filesystem folder'
 
 EXPORT_COX_ASSETS = 'Choose whether to export assets for use with CoinOpsX'
 
@@ -47,6 +39,16 @@ MOUNT_METHOD = 'Set this option to use the mount method for opening an existing 
 FILE_MANAGER = 'Optionally specify a file manager to open the save parition. Linux only.'
 
 BACKUP_UCE = 'Set this option to create a backup of the UCE file before editing.'
+
+DO_BEZEL_SCRAPE = 'Choose whether to scrape bezels in addition to other game data provided by Skyscraper'
+
+DO_SUMMARISE_GAMELIST = 'Choose whether to sumamrise the gamelist (scraping results) on completion'
+
+MIN_MATCH_SCORE = "The minimum % name match to use before reverting to the platform's default bezel"
+
+COMPARE_FILENAME = 'Use a filename instead of game title to scrape bezels'
+
+FILTER_UNSUPPORTED_REGIONS = 'Use the default system bezel for Japanese games which are not supported by the bezel project'
 
 # Operations
 
@@ -69,3 +71,11 @@ EDIT_SAVE_PARTITION = 'Edit the save partition of an existing UCE file.'
 EXTRACT_SAVE_PARTITION = 'Extract the save partition from an existing UCE file.'
 
 REPLACE_SAVE_PARTITION = 'Replace the save parttion of an existing UCE file with a specified save.img file.'
+
+EXPORT_GAMELIST_ASSETS = 'Export CoinOpsX assets from a specified gamelist.xml'
+
+ADD_BEZELS_TO_GAMELIST = 'Add bezels to a previously created gamelist.xml'
+
+SUMMARISE_GAMELIST = "Create summary files to assess the completeness of a gamelist's data"
+
+

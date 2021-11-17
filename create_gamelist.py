@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def validate_args(platform, scrape_module, input_dir, output_dir):
     logger.info('Validating arguments for create_gamelist')
     valid = True
-    if not platform or platform not in configs.PLATFORMS:
+    if not platform or platform not in configs.PLATFORMS.keys():
         logger.error(error_messages.SCRAPE_INVALID_PLATFORM)
         valid = False
     if scrape_module not in configs.SCRAPING_MODULES:

@@ -10,6 +10,16 @@ from shared import common_utils
 logger = logging.getLogger(__name__)
 
 
+def validate_args(input_path, output_dir):
+    logger.info('Validating arguments for export_assets')
+    valid = True
+    if not common_utils.validate_required_path(input_path, 'Specified gamelist'):
+        valid = False
+    if not common_utils.validate_existing_dir(output_dir, 'Output dir'):
+        valid = False
+    return valid
+
+
 def get_playlist_art_spec():
     return {
         'font': os.path.join(common_utils.get_app_root(), 'data', 'RobotoMono-Bold.ttf'),
@@ -33,16 +43,6 @@ def get_asset_paths(output_dir):
         'playlist_art': os.path.join(cox_dir, 'playlist_art')
 
     }
-
-
-def validate_args(input_path, output_dir):
-    logger.info('Validating arguments for export_assets')
-    valid = True
-    if not common_utils.validate_required_path(input_path, 'Specified gamelist'):
-        valid = False
-    if not common_utils.validate_existing_dir(output_dir, 'Output dir'):
-        valid = False
-    return valid
 
 
 def check_export_required(*args):
@@ -130,21 +130,19 @@ def save_playlists(playlists, asset_paths):
 def export(gamelist, asset_paths, export_cox_assets, export_bitpixel_marquees):
     playlists = {'genres': {}, 'publishers': {}, 'players': {}, 'all': {'All': []}}
     for game_entry in gamelist:
-        # print(game_entry)
         game_data = common_utils.parse_game_entry(game_entry)
-        # print(game_data)
         if export_bitpixel_marquees:
             exp_bitpixel_marquee(game_data, asset_paths)
         if export_cox_assets:
             exp_cox_assets(game_data, asset_paths)
             add_to_playlists(game_data, playlists)
     save_playlists(playlists, asset_paths)
-    # breakpoint()
 
 
-def main(input_path, output_dir, export_cox_assets=False, export_bitpixel_marquees=False):
+def main(input_path, output_dir=None, export_cox_assets=False, export_bitpixel_marquees=False):
     if not check_export_required(export_cox_assets, export_bitpixel_marquees):
         return False
+    output_dir = output_dir if output_dir else os.path.abspath(os.path.dirname(input_path))
     if not validate_args(input_path, output_dir):
         return False
     gamelist = common_utils.read_gamelist_tree(input_path).getroot()

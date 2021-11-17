@@ -8,12 +8,22 @@ from shared import error_messages
 logger = logging.getLogger(__name__)
 
 
-def score_to_int(value):
-    try:
-        return int(value.strip())
-    except ValueError as e:
-        logger.error(error_messages.score_not_number(value, e))
-    return 0
+def validate_args(input_path, output_dir):
+    logger.info('Validating arguments for summarise_gamelist')
+    valid = True
+    if not common_utils.validate_required_path(input_path, 'Specified gamelist'):
+        valid = False
+    if not common_utils.validate_existing_dir(output_dir, 'Output dir'):
+        valid = False
+    return valid
+
+
+# def score_to_int(value):
+#     try:
+#         return int(value.strip())
+#     except ValueError as e:
+#         logger.error(error_messages.score_not_number(value, e))
+#     return 0
 
 
 def append_to_summary_table(summary_table, game_data, rom_basename, bezel_basename):
@@ -46,7 +56,7 @@ def append_to_summary_lists(summary_lists, game_data, rom_basename, bezel_basena
     if bezel_match == 'default':
         summary_lists['default_bezel'].append(rom_basename),
     elif bezel_match != '100':
-        summary_lists['non_100_bezel_match'].append([score_to_int(bezel_match), rom_basename, bezel_basename])
+        summary_lists['non_100_bezel_match'].append([common_utils.score_to_int(bezel_match), rom_basename, bezel_basename])
 
 
 def get_sublist_header(summary_lists, key):
@@ -73,7 +83,10 @@ def format_summary_lists(summary_lists):
     return summary_text
 
 
-def summarise_gamelist(input_path, output_dir):
+def main(input_path, output_dir=None):
+    output_dir = output_dir if output_dir else os.path.abspath(os.path.dirname(input_path))
+    if not validate_args(input_path, output_dir):
+        return False
     gamelist = common_utils.read_gamelist_tree(input_path).getroot()
     summary_table = [['Filename', 'Gamelist name', 'Bezel name', 'Bezel match', 'Has cover', 'Has marquee', 'Has logo',
                       'Has video', ], ]

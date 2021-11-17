@@ -2,19 +2,30 @@
 
 import os
 import re
-
-# import requests
-# import xml.etree.ElementTree
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 import logging
 
 from fuzzywuzzy import process
 
-from shared import configs, common_utils, info_messages
-import summarise_gamelist
+from shared import configs, common_utils, info_messages, error_messages
 
 logger = logging.getLogger(__name__)
+
+
+def validate_args(input_path, platform, min_match_score):
+    logger.info('Validating arguments for create_gamelist')
+    valid = True
+    if not platform or platform not in configs.PLATFORMS.keys():
+        logger.error(error_messages.SCRAPE_INVALID_PLATFORM)
+        valid = False
+    if not common_utils.validate_required_path(input_path, 'Specified gamelist'):
+        valid = False
+    if min_match_score:
+        min_match_score = common_utils.score_to_int(min_match_score)
+        if not min_match_score:
+            valid = False
+    return valid
 
 
 def init_local_dirs():
@@ -69,7 +80,7 @@ def get_default_data(platform_data):
 
 
 def get_available_bezels(repo):
-    data = common_utils.download_data(configs.BASE_TREE_URL.format(repo))
+    data = common_utils.download_data(configs.BASE_BEZEL_TREE_URL.format(repo))
     tree = data.json()['tree']
     bezels = {}
     for item in tree:
@@ -101,7 +112,7 @@ def apply_matched_bezel_to_game_entry(bezel_match_element, bezel_path_element, s
 
 
 def is_unsupported_region(game_data):
-    for substring in configs.UNSUPPORTED_REGION_STRINGS:
+    for substring in configs.BEZEL_SCRAPE_UNSUPPORTED_REGIONS:
         if substring in os.path.basename(game_data['rom_path']):
             return True
         if substring in game_data['name']:
@@ -136,11 +147,15 @@ def format_gamelist(gamelist_tree):
     return '\n'.join([line for line in lines if line.strip()])
 
 
-def add_bezels_to_gamelist(input_path, platform, output_dir=None, min_match_score=85, compare_filename=False, filter_unsupported_regions=True):
+def main(input_path, platform, min_match_score=None, compare_filename=False, filter_unsupported_regions=True):
+    print('Hello 2')
     platform_data = configs.PLATFORMS.get(platform, False)
-    if not platform_data:
+    print('min_match_score: ', min_match_score)
+    if not platform_data or not validate_args(input_path, platform, min_match_score):
         return False
-    output_dir = output_dir if output_dir else os.path.abspath(os.path.dirname(input_path))
+    print('Hello 3')
+    # TODO - Avoid converting to int here and in validate_args
+    min_match_score = int(min_match_score) if min_match_score else 85
     init_local_dirs()
     bezels = get_available_bezels(platform_data['bezel_repo'])
     gamelist_tree = common_utils.read_gamelist_tree(input_path)
@@ -151,8 +166,7 @@ def add_bezels_to_gamelist(input_path, platform, output_dir=None, min_match_scor
         compare_filename = True
     for game_entry in gamelist_tree.getroot():
         add_bezel_to_game_entry(game_entry, bezel_compare_names, bezels, default_bezel, min_match_score, compare_filename, filter_unsupported_regions)
-    common_utils.write_file(input_path, format_gamelist(gamelist_tree), 'w')
-    summarise_gamelist.summarise_gamelist(input_path, output_dir)
+    common_utils.write_file(os.path.join(input_path), format_gamelist(gamelist_tree), 'w')
 
 
 # logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")

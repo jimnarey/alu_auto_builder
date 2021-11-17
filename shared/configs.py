@@ -97,12 +97,12 @@ PLATFORMS = {'3do': {'bezel_repo': 'bezelproject-3DO', 'default_bezel': 'retroar
 SCRAPING_MODULES = ['screenscraper', 'arcadedb', 'igdb', 'mobygames', 'openretro', 'thegamesdb',
                     'worldofspectrum']
 
-UNSUPPORTED_REGION_STRINGS = (
+BEZEL_SCRAPE_UNSUPPORTED_REGIONS = (
     'Japan',
     '(J)'
 )
 
-BASE_TREE_URL = 'https://api.github.com/repos/thebezelproject/{0}/git/trees/master?recursive=1'
+BASE_BEZEL_TREE_URL = 'https://api.github.com/repos/thebezelproject/{0}/git/trees/master?recursive=1'
 
 BASE_BEZEL_RAW_URL = 'https://raw.githubusercontent.com/thebezelproject/{0}/master/{1}'
 
