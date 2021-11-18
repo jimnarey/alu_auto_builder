@@ -44,7 +44,7 @@ DO_BEZEL_SCRAPE = 'Choose whether to scrape bezels in addition to other game dat
 
 DO_SUMMARISE_GAMELIST = 'Choose whether to sumamrise the gamelist (scraping results) on completion'
 
-MIN_MATCH_SCORE = "The minimum % name match to use before reverting to the platform's default bezel"
+MIN_MATCH_SCORE = "The minimum percentage bezel name match to use before reverting to the platform's default bezel"
 
 COMPARE_FILENAME = 'Use a filename instead of game title to scrape bezels'
 

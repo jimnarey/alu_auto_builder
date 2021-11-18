@@ -134,7 +134,7 @@ do_summarise_gamelist_opt = {
 add_bezels_to_gamelist_opts = (
     {
         'name': 'min_match_score',
-        'cli_short': 's',
+        'cli_short': 'm',
         'gui_required': False,
         'type': 'text',
         'help': help_messages.MIN_MATCH_SCORE
@@ -192,19 +192,19 @@ scrape_and_build_opts = (input_dir_opt, output_dir_opt, *extra_build_opts, platf
 build_from_game_list_opts = (input_path_opt, output_dir_opt, *extra_build_opts)
 
 operations = {
-    'scrape_to_uces': {
+    'scrape_to_uces': { #
         'options': (*scrape_and_build_opts, do_summarise_gamelist_opt, do_bezel_scape_opt, *add_bezels_to_gamelist_opts, *export_assets_opts),
         'runner': runners.scrape_and_build_uces,
         'help': help_messages.SCRAPE_TO_UCES,
         'gui_user_continue_check': False
     },
-    'scrape_to_recipes': {
+    'scrape_to_recipes': { #
         'options': (*scrape_and_build_opts, do_summarise_gamelist_opt, do_bezel_scape_opt, *add_bezels_to_gamelist_opts, *export_assets_opts),
         'runner': runners.scrape_and_make_recipes,
         'help': help_messages.SCRAPE_TO_RECIPES,
         'gui_user_continue_check': False
     },
-    'scrape_to_gamelist': {
+    'scrape_to_gamelist': { #
         'options': (input_dir_opt, output_dir_opt, platform_opt, *other_scrape_opts, do_summarise_gamelist_opt, do_bezel_scape_opt, *add_bezels_to_gamelist_opts,),
         'runner': runners.scrape_and_make_gamelist,
         'help': help_messages.SCRAPE_TO_GAMELIST,
@@ -228,7 +228,7 @@ operations = {
         'help': help_messages.EXPORT_GAMELIST_ASSETS,
         'gui_user_continue_check': False
     },
-    'add_bezels_to_gamelist': {
+    'add_bezels_to_gamelist': { #
         'options': (input_path_opt, output_dir_opt, platform_opt, *add_bezels_to_gamelist_opts, do_summarise_gamelist_opt),
         'runner': runners.add_bezels_to_existing_gamelist,
         'help': help_messages.ADD_BEZELS_TO_GAMELIST,
