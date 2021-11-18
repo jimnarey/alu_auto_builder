@@ -44,7 +44,7 @@ def get_raw_url(repo, path):
 
 # TODO - Consider option to retain (and add) no-intro region codes
 def clean_compare_name(name):
-    return ' '.join(re.sub("[\(\[].*?[\)\]]", "", name).lower().split())
+    return common_utils.remove_bracketed_text(name).lower()
 
 
 def get_game_compare_name(game_data, compare_filename):

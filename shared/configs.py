@@ -24,7 +24,7 @@ CARTRIDGE_XML = [
     '<byog_cartridge version="1.0">\n',
     '\t<title>GAME_TITLE</title>\n',
     '\t<desc>GAME_DESCRIPTION</desc>\n',
-    '\t<boxart file="boxart\\boxart.png" ext="png">\n',
+    '\t<boxart file="boxart/boxart.png" ext="png">\n',
     '</byog_cartridge>\n',
 ]
 

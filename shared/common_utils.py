@@ -26,6 +26,8 @@ ANSI_ESCAPE = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
 
 SPECIAL_CHARS = '\'"<>:/\|?*,'
 
+BRACKETED_TEXT_REGEX = '[\(\[].*?[\)\]]'
+
 active_temp_dirs = {}
 
 
@@ -55,6 +57,10 @@ def remove_special_chars(text, replace_val=''):
     for char in SPECIAL_CHARS:
         text = text.replace(char, replace_val)
     return text
+
+
+def remove_bracketed_text(text):
+    return ' '.join(re.sub(BRACKETED_TEXT_REGEX, '', text).split())
 
 
 def execute_with_output(cmd, shell=False):

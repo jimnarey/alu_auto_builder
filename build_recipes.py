@@ -8,6 +8,8 @@ import operations
 
 logger = logging.getLogger(__name__)
 
+MAX_FILE_NAME_LENGTH = 62
+
 
 def validate_args(input_path, core_path, bios_dir, output_dir):
     logger.info('Validating arguments for build_recipes')
@@ -21,6 +23,18 @@ def validate_args(input_path, core_path, bios_dir, output_dir):
     if not common_utils.validate_optional_dir(bios_dir, 'Bios dir'):
         valid = False
     return valid
+
+
+def get_target_filename(filename):
+    filename = common_utils.remove_special_chars(filename)
+    if len(filename) > MAX_FILE_NAME_LENGTH:
+        name, ext = os.path.splitext(filename)
+        name_max_length = MAX_FILE_NAME_LENGTH - len(ext)
+        while len(name) > name_max_length:
+            name = common_utils.remove_bracketed_text(name)
+            name = name[:name_max_length]
+        filename = '{0}{1}'.format(name, ext)
+    return filename
 
 
 def make_uce_sub_dirs(game_dir):
@@ -78,11 +92,12 @@ def copy_source_files(core_path, bios_dir, game_data, game_dir, target_rom_filen
 
 def setup_uce_source(core_path, bios_dir, game_data, output_dir):
     # Modify the target_rom_filename to deal with limitations on exec.sh rom name length, special chars
-    target_rom_filename = common_utils.remove_special_chars(os.path.basename(game_data['rom_path']))
+    # target_rom_filename = common_utils.remove_special_chars(os.path.basename(game_data['rom_path']))
+    target_rom_filename = get_target_filename(os.path.basename(game_data['rom_path']))
     game_dir = os.path.join(output_dir, os.path.splitext(target_rom_filename)[0])
     common_utils.make_dir(game_dir)
     make_uce_sub_dirs(game_dir)
-    cart_xml_game_name = common_utils.remove_special_chars(game_data['name']) if game_data['name'] else os.path.splitext(target_rom_filename)[0]
+    cart_xml_game_name = game_data['name'] if game_data['name'] else os.path.splitext(target_rom_filename)[0]
     write_cart_xml(game_dir, cart_xml_game_name, game_data['description'])
     write_exec_sh(game_dir, os.path.basename(core_path), target_rom_filename)
     copy_source_files(core_path, bios_dir, game_data, game_dir, target_rom_filename)
