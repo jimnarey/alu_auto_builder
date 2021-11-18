@@ -49,34 +49,43 @@ def copy_dir_contents(source_dir, dest_dir):
             common_utils.copyfile(source_file_path, os.path.join(dest_dir, file_name))
 
 
-# TODO - Break this up
-def copy_source_files(core_path, bios_dir, game_data, game_dir):
-    app_root = common_utils.get_app_root()
-    common_utils.copyfile(core_path, os.path.join(game_dir, 'emu', os.path.basename(core_path)))
-    common_utils.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', os.path.basename(game_data['rom_path'])))
+def copy_and_resize_bezel(game_data, game_dir):
     bezel_path = game_data['bezel_path']
     if bezel_path:
         common_utils.resize_and_save_image(bezel_path, os.path.join(game_dir, 'boxart', 'addon.z.png'), 1280, 720)
+
+
+def copy_boxart(game_data, game_dir):
     boxart_source_path = game_data['boxart_path']
     box_art_target_path = os.path.join(game_dir, 'boxart', 'boxart.png')
     if boxart_source_path:
         common_utils.copyfile(boxart_source_path, box_art_target_path)
     else:
         logger.info(info_messages.NO_BOXART_FOUND)
-        common_utils.copyfile(os.path.join(app_root, 'common', 'title.png'), box_art_target_path)
-    if bios_dir:
-        copy_dir_contents(bios_dir, os.path.join(game_dir, 'roms'))
+        common_utils.copyfile(os.path.join(common_utils.get_app_root(), 'data', 'title.png'), box_art_target_path)
     if not common_utils.create_symlink(box_art_target_path, os.path.join(game_dir, 'title.png')):
         common_utils.copyfile(game_data['boxart_path'], os.path.join(game_dir, 'title.png'))
 
 
-def setup_uce_source(core_path, bios_dir, game_data, game_dir):
+def copy_source_files(core_path, bios_dir, game_data, game_dir, target_rom_filename):
+    common_utils.copyfile(core_path, os.path.join(game_dir, 'emu', os.path.basename(core_path)))
+    common_utils.copyfile(game_data['rom_path'], os.path.join(game_dir, 'roms', target_rom_filename))
+    copy_boxart(game_data, game_dir)
+    copy_and_resize_bezel(game_data, game_dir)
+    if bios_dir:
+        copy_dir_contents(bios_dir, os.path.join(game_dir, 'roms'))
+
+
+def setup_uce_source(core_path, bios_dir, game_data, output_dir):
+    # Modify the target_rom_filename to deal with limitations on exec.sh rom name length, special chars
+    target_rom_filename = common_utils.remove_special_chars(os.path.basename(game_data['rom_path']))
+    game_dir = os.path.join(output_dir, os.path.splitext(target_rom_filename)[0])
     common_utils.make_dir(game_dir)
     make_uce_sub_dirs(game_dir)
-    cart_xml_game_name = game_data['name'] if game_data['name'] else common_utils.get_basename_no_ext(game_data['rom_path'])
+    cart_xml_game_name = common_utils.remove_special_chars(game_data['name']) if game_data['name'] else os.path.splitext(target_rom_filename)[0]
     write_cart_xml(game_dir, cart_xml_game_name, game_data['description'])
-    write_exec_sh(game_dir, os.path.basename(core_path), os.path.basename(game_data['rom_path']))
-    copy_source_files(core_path, bios_dir, game_data, game_dir)
+    write_exec_sh(game_dir, os.path.basename(core_path), target_rom_filename)
+    copy_source_files(core_path, bios_dir, game_data, game_dir, target_rom_filename)
 
 
 def main(input_path, core_path, bios_dir=None, output_dir=None):
@@ -88,8 +97,7 @@ def main(input_path, core_path, bios_dir=None, output_dir=None):
     if gamelist:
         for game_entry in gamelist:
             game_data = common_utils.parse_game_entry(game_entry)
-            game_dir = os.path.join(output_dir, os.path.splitext(os.path.basename(game_data['rom_path']))[0])
-            setup_uce_source(core_path, bios_dir, game_data, game_dir)
+            setup_uce_source(core_path, bios_dir, game_data, output_dir)
 
 
 if __name__ == "__main__":

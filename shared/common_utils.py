@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 ANSI_ESCAPE = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
 
-SPECIAL_CHARS = '\'"<>:/\|?*'
+SPECIAL_CHARS = '\'"<>:/\|?*,'
 
 active_temp_dirs = {}
 
