@@ -2,8 +2,9 @@
 
 import os
 import logging
+
+import operations
 from shared import common_utils
-from shared import error_messages
 
 logger = logging.getLogger(__name__)
 
@@ -16,14 +17,6 @@ def validate_args(input_path, output_dir):
     if not common_utils.validate_existing_dir(output_dir, 'Output dir'):
         valid = False
     return valid
-
-
-# def score_to_int(value):
-#     try:
-#         return int(value.strip())
-#     except ValueError as e:
-#         logger.error(error_messages.score_not_number(value, e))
-#     return 0
 
 
 def append_to_summary_table(summary_table, game_data, rom_basename, bezel_basename):
@@ -107,3 +100,10 @@ def main(input_path, output_dir=None):
         append_to_summary_lists(summary_lists, game_data, rom_basename, bezel_basename)
     common_utils.write_file(os.path.join(output_dir, 'summary_lists.txt'), format_summary_lists(summary_lists), 'w')
     common_utils.write_csv(os.path.join(output_dir, 'summary_table.csv'), summary_table)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
+    parser = common_utils.get_cmd_line_args(operations.operations['summarise_gamelist']['options'])
+    args = vars(parser.parse_args())
+    main(args['input_dir'], output_dir=args['output_dir'])

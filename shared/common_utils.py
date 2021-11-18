@@ -24,6 +24,8 @@ logger = logging.getLogger(__name__)
 
 ANSI_ESCAPE = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
 
+SPECIAL_CHARS = '\'"<>:/\|?*'
+
 active_temp_dirs = {}
 
 
@@ -49,10 +51,10 @@ def escape_ansi(line):
     return ANSI_ESCAPE.sub('', line)
 
 
-def hyphen_special_chars(file_name):
-    for char in '"<>:/\|?*':
-        file_name = file_name.replace(char, '-')
-    return file_name
+def remove_special_chars(text, replace_val=''):
+    for char in SPECIAL_CHARS:
+        text = text.replace(char, replace_val)
+    return text
 
 
 def execute_with_output(cmd, shell=False):
@@ -153,7 +155,7 @@ def copytree(source, dest, symlinks=False):
 def create_symlink(target, symlink):
     try:
         os.symlink(target, symlink)
-    except PermissionError as e:
+    except PermissionError:
         logger.warning(error_messages.symlink_failure_permissions(symlink, target))
         return False
     except OSError as e:

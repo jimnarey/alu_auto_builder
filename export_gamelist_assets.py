@@ -5,6 +5,7 @@ import logging
 
 from PIL import Image, ImageDraw, ImageFont
 
+import operations
 from shared import common_utils
 
 logger = logging.getLogger(__name__)
@@ -119,7 +120,7 @@ def save_playlists(playlists, asset_paths):
     playlist_art_spec = get_playlist_art_spec()
     for index, playlist_cat in enumerate(playlists):
         for playlist in playlists[playlist_cat]:
-            playlist_file_name = common_utils.hyphen_special_chars(playlist)
+            playlist_file_name = common_utils.remove_special_chars(playlist, replace_val='-')
             common_utils.write_file(os.path.join(asset_paths['playlists'], '{0} {1}'.format(index, playlist_file_name)),
                                     '\n'.join(playlists[playlist_cat][playlist]), 'w')
             save_playlist_art(playlist, playlist_file_name, playlist_art_spec, asset_paths)
@@ -148,4 +149,9 @@ def main(input_path, output_dir=None, export_cox_assets=False, export_bitpixel_m
     make_asset_dirs(asset_paths, export_cox_assets, export_bitpixel_marquees)
     export(gamelist, asset_paths, export_cox_assets, export_bitpixel_marquees)
 
-# No 'if name == __main__' as this can't be run as a distinct operation
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
+    parser = common_utils.get_cmd_line_args(operations.operations['export_gamelist_assets']['options'])
+    args = vars(parser.parse_args())
+    main(args['input_dir'], output_dir=args['output_dir'], export_cox_assets=args['export_cox_assets'], export_bitpixel_marquees=args['export_bitpixel_marquees'])

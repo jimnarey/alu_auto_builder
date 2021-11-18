@@ -42,7 +42,7 @@ EXEC_SH = [
 
 SCRAPE_FLAGS = ['nosubdirs', 'noscreenshots']
 
-GAME_LIST_FLAGS = ['nobrackets', 'skipped', 'symlink', 'videos']
+GAME_LIST_FLAGS = ['nobrackets', 'skipped', 'videos']
 
 PLATFORMS = {'3do': {'bezel_repo': 'bezelproject-3DO', 'default_bezel': 'retroarch/overlay/Panasonic-3DO.png'},
              'amiga': {'bezel_repo': 'bezelprojectSA-Amiga', 'default_bezel': 'retroarch/overlay/Commodore-Amiga.png'},

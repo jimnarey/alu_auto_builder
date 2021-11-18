@@ -207,6 +207,7 @@ def main(input_dir, output_path=None):
     if not check_os() or not validate_args(input_dir):
         return
     if not output_path:
+        # TODO - Use os.path.basename
         output_path = os.path.join(input_dir, '{0}.uce'.format(os.path.split(os.path.abspath(input_dir))[-1]))
     logger.info('Building new UCE')
     app_root = common_utils.get_app_root()

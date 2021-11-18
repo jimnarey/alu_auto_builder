@@ -8,6 +8,7 @@ import logging
 
 from fuzzywuzzy import process
 
+import operations
 from shared import configs, common_utils, info_messages, error_messages
 
 logger = logging.getLogger(__name__)
@@ -41,13 +42,9 @@ def get_raw_url(repo, path):
     return configs.BASE_BEZEL_RAW_URL.format(repo, path).replace(' ', '%20')
 
 
-# TODO - Consider option to retain (and add) no-intro region codes, using
+# TODO - Consider option to retain (and add) no-intro region codes
 def clean_compare_name(name):
     return ' '.join(re.sub("[\(\[].*?[\)\]]", "", name).lower().split())
-
-
-# def get_basename_no_ext(path):
-#     return os.path.splitext(os.path.basename(path))[0]
 
 
 def get_game_compare_name(game_data, compare_filename):
@@ -166,4 +163,9 @@ def main(input_path, platform, min_match_score=None, compare_filename=False, fil
     common_utils.write_file(os.path.join(input_path), format_gamelist(gamelist_tree), 'w')
 
 
-# No 'if name == __main__' as this can't be run as a distinct operation
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s : %(asctime)s : %(message)s", datefmt="%H:%M:%S")
+    parser = common_utils.get_cmd_line_args(operations.operations['add_bezels_to_gamelist']['options'])
+    args = vars(parser.parse_args())
+    main(args['input_dir'], args['platform'], min_match_score=args['min_match_score'], compare_filename=args['compare_filename'], filter_unsupported_regions=args['filter_unsupported_regions'])
+
