@@ -3,11 +3,12 @@
 'emu' and 'roms' as well as properly formatted 'exec.sh' and 'cartridge.xml' files. It can optionally have 'boxart'
 and 'save' sub-dirs, as well as a 'title.png' file. 'Recipe' dirs can be generated from roms using the appropriate
 operations selected from the main menu.</p>
-<p>The tool can create custom save partitions. To do this include one of the following in the 'save' subdir of a recipe
-directory:</p>
+<p>The tool can create custom save partitions. To do this include one of the following:</p>
 <ul>
-    <li>A file called save.img - a raw ext4 filesystem.</li>
-    <li>A file called save.zip - as above but zipped up.</li>
-    <li>Arbitrary files in the correct folder structure. Usually all files go in a subdir called 'upper' with an empty
-    dir called 'work' next to it.</li>
+    <li>A file called save.zip containing a zipped save partition in the recipe root or 'save' subdir</li>
+    <li>A file called save.* - a raw ext4 filesystem, uncompressed, in the recipe root or 'save' subdir</li>
+    <li>Arbitrary files in a 'save/upper' subdir</li>
+    <li>Arbitrary files in the 'save' subdir. They will automatically be moved to 'save/upper' as required by the
+    UCE format.</li>
+
 </ul>

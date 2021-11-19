@@ -15,6 +15,41 @@
         requires no account but as the name suggests is relevant mostly for arcade roms.</li>
     <li><b>User Name</b> <i>Optional</i> A user name if you are using a module for which you have an account.</li>
     <li><b>Password</b> <i>Optional</i> A password for any user account.</li>
-    <li><b>Refresh Rom Data</b> <i>Optional</i> Select to re-download metadata and images for input roms. Do this if
-        the tool is not producing a folder of marquees as expected.</li>
+    <li><b>Scrape Videos</b> <i>Optional</i> Choose whether to try to download videos when scraping game data. Only
+        useful if you want to export CoinOpsX assets.
+    </li>
+    <li><b>Refresh Rom Data</b> <i>Optional</i> Select this to re-scrape data/assets for roms/games which already have
+        data stored from the chosen scraping module. Use this option if you have previously scraped without choosing to
+        download videos and would now like to do so. Select this option if marquees are expected by missing.
+    </li>
+    <li><b>Do Summarise Gamelist</b> <i>Optional</i> Choose whether to create files containing lists and a table showing what data/assets
+        have been successfully scraped for each game.
+        This is particularly useful when building recipes as it lets you determine which need further work before they
+        are built into UCEs.
+    </li>
+    <li><b>Do Bezel Scrape</b> <i>Optional</i> Scraping bezels is a separate process from the main scrape as bezels are
+        not stored by the scraping modules. Select this to additionally scrape bezels from the BezelProject on GitHub
+    </li>
+    <li><b>Min Match Score</b> <i>Optional</i> Matching rom/game names to bezels is imperfect. Set this option to choose
+        how close a match is needed when scraping bezels. Defaults to 85%. If no match is found for a particular rom,
+        the
+        default bezel for that system will be used.
+    </li>
+    <li><b>Compare Filename</b> <i>Optional</i> When scraping for bezels, use the rom filename rather than the title
+        in the gamelist/returned by the scraping module. This is forced for arcade platforms due to the naming
+        convention used by the BezelProject. This option may produce better matches for other platforms if your roms are
+        named according to the No-Intro convention.
+    </li>
+    <li><b>Filter unsupported regions</b> <i>Optional, Recommended</i> The BezelProject does not support games with
+        Japanese names and the matcher can return strange results if it tries to search for them. This option will try
+        to identify Japanese games and apply the default bezel.
+    </li>
+    <li><b>Export Cox Assets</b> <i>Optional</i> Export a folder of assets which can be directly copied to a USB
+        stick for use wit CoinOpsX. Videos are not guaranteed to work as ATGames products are quite picky about
+        video formats.
+    </li>
+    <li><b>Export BitPixel Marquees</b> <i>Optional</i> Export a folder of marquee files resized for use with the
+        BitPixel.
+        These are in addition to any full size marquees exported for CoinOpsX (if selected).
+    </li>
 </ul>

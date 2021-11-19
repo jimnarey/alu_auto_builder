@@ -2,11 +2,10 @@
 
 An automatic UCE builder for the Arcade Legends Ultimate arcade cabinet
 
-
 ## Important!
 
-- Some of the operations performed by this tool require administrator privileges on Windows. Look in the help
-  sections of the GUI for more info.
+- Some of the operations performed by this tool require administrator privileges on Windows. Look in the help sections
+  of the GUI for more info.
 - When running the GUI tool in Linux, use the included sh file if running from the Desktop (i.e not in a console window)
   to get the logging output.
 
@@ -16,20 +15,20 @@ An automatic UCE builder for the Arcade Legends Ultimate arcade cabinet
 - [What it is](#what-it-is)
 - [Status and Safety](#status-and-safety)
 - [Input files](#input-files)
-  * [What on Earth is a 'recipe'](#what-on-earth-is-a--recipe-)
+    * [What on Earth is a 'recipe'](#what-on-earth-is-a--recipe-)
 - [How it works](#how-it-works)
 - [Requirements and Dependencies](#requirements-and-dependencies)
-  * [Windows](#windows)
-    + [GUI](#gui)
-    + [Command Line](#command-line)
-  * [Linux](#linux)
+    * [Windows](#windows)
+        + [GUI](#gui)
+        + [Command Line](#command-line)
+    * [Linux](#linux)
 - [Skyscraper](#skyscraper)
 - [Installation](#installation)
 - [Usage](#usage)
-  * [General](#general)
-  * [GUI](#gui-1)
-  * [Command Line](#command-line-1)
-  * [When things go wrong](#when-things-go-wrong)
+    * [General](#general)
+    * [GUI](#gui-1)
+    * [Command Line](#command-line-1)
+    * [When things go wrong](#when-things-go-wrong)
 - [Building](#building)
 - [To do](#to-do)
 - [Credits](#credits)
@@ -37,22 +36,33 @@ An automatic UCE builder for the Arcade Legends Ultimate arcade cabinet
 
 ## What's New!
 
-Since beta-1 the following changes have been made:
+New in Beta 3:
+
+- The tool scrapes bezels and adds them to UCEs/Recipes.
+- Exporting of CoinOpsX assets. Videos can be scraped for the first time in order to support this
+- Exporting of marquees resized for the BitPixel.
+- Gamelists can be summarised so it's clear what data/assets were found for each recipe/UCE.
+- The logging output is now included in the GUI rather than a separate console window.
+- Help is included in each GUI dialog rather than a separate one.
+- The tool is more tolerant of different ways of including a custom save partition in recipes.
+- Various bug fixes.
+
+Beta 2 introduced the following:
 
 - UCE Building: in addition to building UCEs from roms or a gamelist, the tool can now: build a gamelist from roms,
   build recipes from a gamelist, build recipes from roms, build a single recipe into a UCE and build multiple UCEs from
   a directtory of recipes.
-- UCE Editing: you can extract the save partition from a UCE, replace the save partition in a UCE with a new
-  one or edit a UCE save partition in your OS's file manager.
-- Custom save paritions: when building UCEs from recipes (multiple or single) you can include a custom save
-  partition by populating the 'save' subdir of the recipe. Include a save.zip, a save.img or simply the files
-  you want to make up the partition (with the right internal folder structure). 
+- UCE Editing: you can extract the save partition from a UCE, replace the save partition in a UCE with a new one or edit
+  a UCE save partition in your OS's file manager.
+- Custom save paritions: when building UCEs from recipes (multiple or single) you can include a custom save partition by
+  populating the 'save' subdir of the recipe. Include a save.zip, a save.img or simply the files you want to make up the
+  partition (with the right internal folder structure).
 - GUI: it has had a complete overhaul to accommodate managing a broader set of operations/functions.
-- Command line: simplified with a single entry-point (`ucetool`) which has several subcommands, exactly
-  mirroring the functionality of the GUI tool.
+- Command line: simplified with a single entry-point (`ucetool`) which has several subcommands, exactly mirroring the
+  functionality of the GUI tool.
 - Help: the command line help is a little clearer. The GUI includes comprehensive help for each operation.
-- Structure: much of the work since the last beta involved turning what was a prototype into a more extensible
-  app. Adding new functionality is now easier and quicker.
+- Structure: much of the work since the last beta involved turning what was a prototype into a more extensible app.
+  Adding new functionality is now easier and quicker.
 
 ## What it is
 
@@ -71,13 +81,12 @@ is no need to be logged in to use them.
 ## Status and Safety
 
 The tool has been tested using a number of cores on Windows 10, Windows 11 and several Linux distros. Nonetheless, it is
-offered without warranty of any kind and used entirely at the user's own risk.
+offered without warranty of any kind and is used entirely at the user's own risk.
 
-It is designed to write into only two places, temporary directories created by Python's built-in tempfile library (so
-in '/tmp' on Linux) and to an output directory provided by the user. However, it will write to whatever output directory
-you give it so some care should be taken when providing this. This is especially the case on Windows where the functions
-that involve building 'recipe' dirs require administrator privileges in order to create symlinks, an essential part of
-the process.
+It is designed to write into only three places, temporary directories created by Python's built-in tempfile library (so
+in '/tmp' on Linux),an output directory provided by the user and a '.bezels' folder in the user's homedir when scraping
+bezels. However, it will write to whatever output directory you give , so some care should be taken when providing
+this. 
 
 ## Input files
 
@@ -104,6 +113,8 @@ UCE files are then added to a USB drive (formatted as FAT32 or exFat) as normal.
 To create 10 MAME2003Plus UCEs - with covers, titles and descriptions - you really do just need the 10 roms (zip files)
 in a single directory and a core.
 
+The tool has several other functions described in the help sections within the tool itself.
+
 ## Requirements and Dependencies
 
 The tool uses [Skyscraper](https://github.com/muldjord/skyscraper) for scraping and gamelist generation. However, this
@@ -113,8 +124,8 @@ it is not needed if the user provides their own gamelist.xml and cover images (s
 
 #### GUI
 
-The Windows release includes Skyscraper as the author only provides an (unsupported) Windows build in binary format
-so this doesn't conflict with his preferred way of distribution. The current bundled version is 3.6.12.
+The Windows release includes Skyscraper as the author only provides an (unsupported) Windows build in binary format so
+this doesn't conflict with his preferred way of distribution. The current bundled version is 3.6.12.
 
 If you already have Skyscraper installed **and** it is in your PATH then this tool will use that copy instead of the
 bundled one. It's not impossible that running two versions of Skyscraper - each using the same cache - could cause
@@ -132,9 +143,13 @@ so on Windows has no external dependencies.
 
 ### Linux
 
-You will need QT installed. On Ubuntu:
+You will need QT installed. On Ubuntu < 20:
 
 `sudo apt install qt5-default`
+
+On Ubuntu 20:
+
+`apt install build-essential qtbase5-dev qt5-qmake qtbase5-dev-tools`
 
 Please follow the instructions on the Skyscraper page for installing it on Linux. It's quick and straightforward but
 since the author doesn't provide a binary release for Linux, neither have I.
@@ -187,27 +202,14 @@ extension is right.
 Care needs to be taken here, especially if you don't specify an output directory (in which case a directory is created
 automatically in the input directory).
 
-### GUI
-
-On Windows, right-click the .exe file and choose 'Run as administrator'.
-
-On Linux, run the aluautobuild_gui.sh script rather than the binary and select 'Execute in Terminal' (or just run it
-from within a terminal window) to make sure you get the logging output.
-
-Click on 'Help' under each dialog for more information on the inputs.
-
-*Notes on the GUI*
-
-The tool is at an early stage and it currently uses a console window (opened by the tool, if needed) for log output.
-Something nicer will come soon
 
 ### Command Line
 
 The command line includes useful information on the options but it's less comprehensive than that provided in the GUI.
-You may want a look at the GUI (click the Help button in any of the dialogs) to get more info. The command line is there
+You may want a look at the GUI to get more info. The command line is there
 for users already reasonably au fait with the UCE format etc
 
-There is one entry-point (changed from the last beta): `ucetool`.
+There is one entry-point (changed from the first beta): `ucetool`.
 
 Run `ucetool --help` to get a list of subcommands.
 
@@ -249,13 +251,13 @@ created 'build' directory for your build.
 
 A huge amount has been done since the last beta but the following are outstanding:
 
-- Adding support for bezels.
-- Adding support for marquees
-- The logging needs a little rationalisation
+- The logging needs a little rationalisation, including removing some errant special characters
 - Better handling of errors
 - Catching when Skyscraper can't find metadata and informing the user before continuing
-- It can be made to run a little faster
+- It can be made to run a little faster, especially when building UCEs
 - A MacOS build, which I now expect to have exactly the same functionality as the Windows/Linux versions.
+- General GUI refinements
+- Improve the help and documentation
 
 ## Credits
 
