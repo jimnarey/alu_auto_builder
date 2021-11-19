@@ -2,9 +2,24 @@
 <ul>
     <li><b>Input Path:</b> <i>Required</i> The gamelist.xml file from which to generate the recipes.</li>
     <li><b>Output Dir:</b> <i>Optional</i> A directory in which to place the output recipes. If this is not provided,
-    a directory will be created in the same directory as the gamelist.xml.</li>
+        a directory will be created in the same directory as the gamelist.xml.
+    </li>
     <li><b>Core Path:</b> <i>Required</i> The path to a libretro core (emulator) file compatible with the roms referred
-        to in the gamelist.xml</li>
+        to in the gamelist.xml
+    </li>
     <li><b>Bios Dir</b> <i>Optional</i> Any files in this directory will be placed in the 'roms' directory within
-    the UCE. This is mostly useful for adding the same bios file(s) to all recipes built from the gamelist.xml.</li>
+        the UCE. This is mostly useful for adding the same bios file(s) to all recipes built from the gamelist.xml.
+    </li>
+    <li><b>Export Cox Assets</b> <i>Optional</i> Export a folder of assets which can be directly copied to a USB
+        stick for use wit CoinOpsX. Videos are not guaranteed to work as ATGames products are quite picky about
+        video formats.
+    </li>
+    <li><b>Export BitPixel Marquees</b> <i>Optional</i> Export a folder of marquee files resized for use with the
+        BitPixel.
+        These are in addition to any full size marquees exported for CoinOpsX (if selected).
+    </li>
+    <li><b>Do Summarise Gamelist</b> <i>Optional</i> Choose whether to create files containing lists and a table showing
+        what data/assets have been successfully scraped for each game. This is particularly useful when building recipes
+        as it lets you determine which need further work before they are built into UCEs.
+    </li>
 </ul>

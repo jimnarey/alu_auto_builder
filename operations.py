@@ -229,7 +229,7 @@ operations = {
         'gui_user_continue_check': False
     },
     'add_bezels_to_gamelist': { #
-        'options': (input_path_opt, output_dir_opt, platform_opt, *add_bezels_to_gamelist_opts, do_summarise_gamelist_opt),
+        'options': (input_path_opt, platform_opt, *add_bezels_to_gamelist_opts, do_summarise_gamelist_opt),
         'runner': runners.add_bezels_to_existing_gamelist,
         'help': help_messages.ADD_BEZELS_TO_GAMELIST,
         'gui_user_continue_check': False
