@@ -41,6 +41,7 @@ New in Beta 3:
 - The tool scrapes bezels and adds them to UCEs/Recipes.
 - Exporting of CoinOpsX assets. Videos can be scraped for the first time in order to support this
 - Exporting of marquees resized for the BitPixel.
+- Admin is no longer needed under Windows, though you will end up with slightly bigger UCEs (a few KB).
 - Gamelists can be summarised so it's clear what data/assets were found for each recipe/UCE.
 - The logging output is now included in the GUI rather than a separate console window.
 - Help is included in each GUI dialog rather than a separate one.
@@ -256,7 +257,7 @@ created 'build' directory for your build.
 A huge amount has been done since the last beta but the following are outstanding:
 
 - The logging needs a little rationalisation, including removing some errant special characters
-- Better handling of errors
+- Better handling of errors. It's currently designed to support debugging.
 - Catching when Skyscraper can't find metadata and informing the user before continuing
 - It can be made to run a little faster, especially when building UCEs
 - A MacOS build, which I now expect to have exactly the same functionality as the Windows/Linux versions.

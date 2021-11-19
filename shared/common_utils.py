@@ -164,9 +164,6 @@ def copytree(source, dest, symlinks=False):
 def create_symlink(target, symlink):
     try:
         os.symlink(target, symlink)
-    except PermissionError:
-        logger.warning(error_messages.symlink_failure_permissions(symlink, target))
-        return False
     except OSError as e:
         logger.error(error_messages.symlink_failure_other(symlink, target, e))
         return False
