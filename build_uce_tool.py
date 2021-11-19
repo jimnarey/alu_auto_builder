@@ -50,7 +50,7 @@ def relink_boxart(data_dir):
     common_utils.delete_file(title_png)
     if not common_utils.create_symlink('boxart/boxart.png', title_png):
         logger.info(info_messages.COPY_SYMLINK_FAILED)
-        common_utils.copyfile('boxart/boxart.png', title_png)
+        common_utils.copyfile(os.path.join(data_dir, 'boxart', 'boxart.png'), title_png)
 
 
 def call_mksquashfs(input_dir, target_file, app_root):
