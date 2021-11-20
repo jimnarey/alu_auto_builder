@@ -49,6 +49,7 @@ New in Beta 3:
 - Various bug fixes.
 - Building UCEs is slower due to improvements to how the save partitions are created. I'll attempt to speed this up
   in future versions.
+- Now running on Ubuntu 18 as well as 20.
 
 Beta 2 introduced the following:
 
