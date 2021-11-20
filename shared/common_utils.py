@@ -65,8 +65,11 @@ def remove_bracketed_text(text):
 
 
 def execute_with_output(cmd, shell=False):
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    if get_platform() == 'win32':
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    else:
+        startupinfo = None
     try:
         with subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1,
                               universal_newlines=True, shell=shell, startupinfo=startupinfo) as p:
