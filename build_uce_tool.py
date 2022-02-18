@@ -58,7 +58,9 @@ def call_mksquashfs(input_dir, target_file, app_root):
         input_dir,
         target_file,
         '-b', '262144',
-        '-root-owned',
+        '-force-uid', '12',
+        '-force-gid', '12',
+        '-noappend',
         '-nopad'
     ]
     if common_utils.get_platform() == 'win32':
