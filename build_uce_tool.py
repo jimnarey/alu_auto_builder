@@ -31,7 +31,7 @@ class UCEBuildPaths:
 
 
 def check_os():
-    if common_utils.get_platform() not in ('linux', 'win32'):
+    if common_utils.get_platform() not in ('linux', 'win32', 'darwin'):
         logger.error(error_messages.INVALID_OS)
         return False
     return True
