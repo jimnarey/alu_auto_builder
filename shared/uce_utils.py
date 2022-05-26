@@ -3,6 +3,7 @@
 import os
 import time
 import logging
+import subprocess
 
 from shared import common_utils, info_messages
 
@@ -48,19 +49,18 @@ def make_save_part_from_dir(root_dir_path, img_path):
     common_utils.execute_with_output(cmd)
 
 
-def ls_img_dir(debugfs_temp_dir, img_path, img_dir):
-    output_path = os.path.join(debugfs_temp_dir, 'debug_ls_out-{0}'.format(time.time_ns()))
+def ls_img_dir(img_path, img_dir):
     bin_ = common_utils.get_platform_bin('debugfs.exe', 'debugfs')
-    cmd = "{0} -R 'ls -p {1}' {2} > {3}".format(bin_, img_dir, img_path, output_path)
-    proc = os.popen(cmd)
-    out = proc.read()
-    return [line for line in common_utils.get_file_content(output_path, 'r').split('\n') if line]
+    cmd2 = [bin_, '-R', 'ls -p {0}'.format(img_dir), img_path]
+    with subprocess.Popen(cmd2, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+        return list(filter(None, [line for line in proc.stdout.read().decode().split('\n')]))
 
 
-def ls_recursive(debugfs_temp_dir, img_path, img_dir):
+
+def ls_recursive(img_path, img_dir):
     dirs = []
     files = []
-    for item in ls_img_dir(debugfs_temp_dir, img_path, img_dir):
+    for item in ls_img_dir(img_path, img_dir):
         item_name = item.split('/')[5]
         if item[-2:] == '//':
             if item_name not in ('.', '..'):
@@ -69,7 +69,7 @@ def ls_recursive(debugfs_temp_dir, img_path, img_dir):
             if item_name:
                 files.append('{0}{1}'.format(img_dir, item_name))
     for dir_ in dirs:
-        dirs_, files_ = ls_recursive(debugfs_temp_dir, img_path, dir_)
+        dirs_, files_ = ls_recursive(img_path, dir_)
         dirs += dirs_
         files += files_
     return dirs, files
@@ -87,9 +87,9 @@ def modify_inode(item, img_path, perm_octal):
         out = proc.read()
 
 
-def modify_inodes(debugfs_temp_dir, img_path):
+def modify_inodes(img_path):
     logger.info(info_messages.modifying_save_part_perms(img_path))
-    dirs, files = ls_recursive(debugfs_temp_dir, img_path, '/')
+    dirs, files = ls_recursive(img_path, '/')
     for item in files:
         modify_inode(item, img_path, '0100777')
     for item in dirs:

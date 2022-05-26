@@ -14,7 +14,6 @@ class EditUCEConfig:
 
     def __init__(self, input_path, file_manager):
         self.temp_dir = common_utils.create_temp_dir(__name__)
-        self.debugfs_temp_dir = (os.path.join(self.temp_dir, 'debugfs'))
         self.input_path = os.path.abspath(input_path)
         self.img_path = os.path.join(self.temp_dir, 'save.img')
         self.save_part_contents_path = os.path.join(self.temp_dir, 'save_part_contents')
@@ -136,8 +135,7 @@ def edit_save_part_with_cmds(ec_config, continue_check):
     continue_check()
     common_utils.delete_file(ec_config.img_path)
     uce_utils.make_save_part_from_dir(ec_config.save_part_contents_path, ec_config.img_path)
-    common_utils.make_dir(ec_config.debugfs_temp_dir)
-    uce_utils.modify_inodes(ec_config.debugfs_temp_dir, ec_config.img_path)
+    uce_utils.modify_inodes(ec_config.img_path)
     return True
 
 
