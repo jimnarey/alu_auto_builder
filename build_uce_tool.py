@@ -16,7 +16,6 @@ class UCEBuildPaths:
 
     def __init__(self):
         self.temp_dir = common_utils.create_temp_dir(__name__)
-        self.debugfs_temp_dir = (os.path.join(self.temp_dir, 'debugfs'))
         self.cart_tmp_file = os.path.join(self.temp_dir, 'cart_tmp_file.img')
         self.cart_save_file = os.path.join(self.temp_dir, 'cart_save_file.img')
         self.md5_file = os.path.join(self.temp_dir, 'md5_file')
@@ -48,7 +47,9 @@ def validate_args(input_dir):
 def relink_boxart(data_dir):
     title_png = os.path.join(data_dir, 'title.png')
     common_utils.delete_file(title_png)
-    common_utils.create_symlink('boxart/boxart.png', title_png)
+    if not common_utils.create_symlink('boxart/boxart.png', title_png):
+        logger.info(info_messages.COPY_SYMLINK_FAILED)
+        common_utils.copyfile(os.path.join(data_dir, 'boxart', 'boxart.png'), title_png)
 
 
 def call_mksquashfs(input_dir, target_file, app_root):
@@ -56,7 +57,9 @@ def call_mksquashfs(input_dir, target_file, app_root):
         input_dir,
         target_file,
         '-b', '262144',
-        '-root-owned',
+        '-force-uid', '12',
+        '-force-gid', '12',
+        '-noappend',
         '-nopad'
     ]
     if common_utils.get_platform() == 'win32':
@@ -183,7 +186,6 @@ def prepare_blank_save(ub_paths):
 
 def create_save_img(ub_paths):
     save_file = look_for_save_file(ub_paths)
-    common_utils.make_dir(ub_paths.debugfs_temp_dir)
     if save_file:
         logger.info(info_messages.processing_save_file(save_file))
         save_img_from_save_file(save_file, ub_paths)
@@ -198,8 +200,7 @@ def create_save_img(ub_paths):
     if os.path.isdir(ub_paths.save_dir):
         common_utils.remove_dir(ub_paths.save_dir)
     common_utils.make_dir(ub_paths.save_dir)
-    common_utils.make_dir(ub_paths.debugfs_temp_dir)
-    uce_utils.modify_inodes(ub_paths.debugfs_temp_dir, ub_paths.cart_save_file)
+    uce_utils.modify_inodes(ub_paths.cart_save_file)
 
 
 def main(input_dir, output_path=None):    

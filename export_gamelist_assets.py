@@ -111,7 +111,7 @@ def save_playlist_art(playlist_name, playlist_file_name, playlist_art_spec, asse
                     (0, 0, 0, 0))
     canvas = ImageDraw.Draw(img)
     canvas.text((playlist_art_spec['margin'], playlist_art_spec['margin']), playlist_name, font=font, fill='#FFFFFF')
-    img.save(os.path.join(asset_paths['playlist_art'], playlist_file_name), 'PNG')
+    img.save(os.path.join(asset_paths['playlist_art'], '{0}{1}'.format(playlist_file_name, '.png')), 'PNG')
 
 
 def save_playlists(playlists, asset_paths):

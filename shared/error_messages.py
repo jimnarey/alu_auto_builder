@@ -93,10 +93,10 @@ def image_resize_failure(source_path, dest_path, x, y, exception_message):
     return 'Failed to resize image {0} to {1}, {2} and save as {3}: {4}'.format(source_path, x, y, dest_path, exception_message)
 
 
-# Common Utils, warnings
-
-def symlink_failure_permissions(symlink, target):
-    return 'Permissions error creating symlink {0} to target {1}, copying instead'.format(symlink, target)
+# # Common Utils, warnings
+#
+# def symlink_failure_permissions(symlink, target):
+#     return 'Permissions error creating symlink {0} to target {1}, copying instead'.format(symlink, target)
 
 
 # Shared

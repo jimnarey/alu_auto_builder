@@ -11,7 +11,8 @@ import re
 import csv
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import ParseError
-from subprocess import Popen, PIPE
+import subprocess
+# from subprocess import Popen, PIPE
 
 from PIL import Image, UnidentifiedImageError
 import requests
@@ -64,9 +65,14 @@ def remove_bracketed_text(text):
 
 
 def execute_with_output(cmd, shell=False):
+    if get_platform() == 'win32':
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    else:
+        startupinfo = None
     try:
-        with Popen(cmd, stdout=PIPE, bufsize=1,
-                   universal_newlines=True, shell=shell) as p:
+        with subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1,
+                              universal_newlines=True, shell=shell, startupinfo=startupinfo) as p:
             for line in p.stdout:
                 log_text = escape_ansi(line.strip())
                 if log_text:
@@ -161,9 +167,6 @@ def copytree(source, dest, symlinks=False):
 def create_symlink(target, symlink):
     try:
         os.symlink(target, symlink)
-    except PermissionError:
-        logger.warning(error_messages.symlink_failure_permissions(symlink, target))
-        return False
     except OSError as e:
         logger.error(error_messages.symlink_failure_other(symlink, target, e))
         return False

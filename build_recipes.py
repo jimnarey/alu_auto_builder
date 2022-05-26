@@ -78,6 +78,7 @@ def copy_boxart(game_data, game_dir):
         logger.info(info_messages.NO_BOXART_FOUND)
         common_utils.copyfile(os.path.join(common_utils.get_app_root(), 'data', 'title.png'), box_art_target_path)
     if not common_utils.create_symlink(box_art_target_path, os.path.join(game_dir, 'title.png')):
+        logger.info(info_messages.COPY_SYMLINK_FAILED)
         common_utils.copyfile(game_data['boxart_path'], os.path.join(game_dir, 'title.png'))
 
 

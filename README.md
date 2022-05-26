@@ -4,8 +4,8 @@ An automatic UCE builder for the Arcade Legends Ultimate arcade cabinet
 
 ## Important!
 
-- Some of the operations performed by this tool require administrator privileges on Windows. Look in the help sections
-  of the GUI for more info.
+- Although Beta 3 included changes so that Windows users do not have to run the tool as admin, this has started throwing 
+  some (possibly irrelevant) errors. I need to look into it. *For the time being Windows users should run the tool as admin*
 - When running the GUI tool in Linux, use the included sh file if running from the Desktop (i.e not in a console window)
   to get the logging output.
 
@@ -36,7 +36,19 @@ An automatic UCE builder for the Arcade Legends Ultimate arcade cabinet
 
 ## What's New!
 
+<<<<<<< HEAD
 New in Beta 3:
+=======
+New in Beta 4:
+
+- With thanks to GitHub user n-i-x, this version fixes the issue with UCEs not working for firmware versions => 5.62 for
+  the various Arcade Legends devices.
+  
+I plan to release a bigger update in the next month or so with a few bugfixes (e.g. hi-scores not working) but wanted
+to get this out immediately.
+
+Beta 3 introduced the following:
+>>>>>>> speed-up-debugfs
 
 - The tool scrapes bezels and adds them to UCEs/Recipes.
 - Exporting of CoinOpsX assets. Videos can be scraped for the first time in order to support this
@@ -46,6 +58,12 @@ New in Beta 3:
 - Help is included in each GUI dialog rather than a separate one.
 - The tool is more tolerant of different ways of including a custom save partition in recipes.
 - Various bug fixes.
+<<<<<<< HEAD
+=======
+- Building UCEs is slower due to improvements to how the save partitions are created. I'll attempt to speed this up in
+  future versions.
+- Now running on Ubuntu 18 as well as 20.
+>>>>>>> speed-up-debugfs
 
 Beta 2 introduced the following:
 
@@ -85,8 +103,12 @@ offered without warranty of any kind and is used entirely at the user's own risk
 
 It is designed to write into only three places, temporary directories created by Python's built-in tempfile library (so
 in '/tmp' on Linux),an output directory provided by the user and a '.bezels' folder in the user's homedir when scraping
+<<<<<<< HEAD
 bezels. However, it will write to whatever output directory you give , so some care should be taken when providing
 this. 
+=======
+bezels. However, it will write to whatever output directory you give , so some care should be taken when providing this.
+>>>>>>> speed-up-debugfs
 
 ## Input files
 
@@ -119,6 +141,8 @@ The tool has several other functions described in the help sections within the t
 
 The tool uses [Skyscraper](https://github.com/muldjord/skyscraper) for scraping and gamelist generation. However, this
 it is not needed if the user provides their own gamelist.xml and cover images (specified in the gamelist, as normal).
+
+If using Ubuntu version 20.x is needed for now, though I'll attempt to offer greater compatibility in future versions.
 
 ### Windows
 
@@ -202,12 +226,20 @@ extension is right.
 Care needs to be taken here, especially if you don't specify an output directory (in which case a directory is created
 automatically in the input directory).
 
+<<<<<<< HEAD
 
 ### Command Line
 
 The command line includes useful information on the options but it's less comprehensive than that provided in the GUI.
 You may want a look at the GUI to get more info. The command line is there
 for users already reasonably au fait with the UCE format etc
+=======
+### Command Line
+
+The command line includes useful information on the options but it's less comprehensive than that provided in the GUI.
+You may want a look at the GUI to get more info. The command line is there for users already reasonably au fait with the
+UCE format etc
+>>>>>>> speed-up-debugfs
 
 There is one entry-point (changed from the first beta): `ucetool`.
 
@@ -252,7 +284,11 @@ created 'build' directory for your build.
 A huge amount has been done since the last beta but the following are outstanding:
 
 - The logging needs a little rationalisation, including removing some errant special characters
+<<<<<<< HEAD
 - Better handling of errors
+=======
+- Better handling of errors. It's currently designed to support debugging.
+>>>>>>> speed-up-debugfs
 - Catching when Skyscraper can't find metadata and informing the user before continuing
 - It can be made to run a little faster, especially when building UCEs
 - A MacOS build, which I now expect to have exactly the same functionality as the Windows/Linux versions.
@@ -266,6 +302,7 @@ A huge amount has been done since the last beta but the following are outstandin
   and derived tools.
 - dudemo from the Legends Ultimate Reddit for a huge amount of help in understanding the Legends Ultimate internals,
   UCEs and testing.
+- n-i-x for fixing the issue with UCEs not working, introduced by ATGames firmware 5.62  
 - One or two others too modest to be named!
 
 ## Licence

@@ -97,6 +97,9 @@ def symlink_success(symlink, target):
     return 'Successfully created symlink {0} to target {1}'.format(symlink, target)
 
 
+COPY_SYMLINK_FAILED = 'Copying instead of symlinking, you can ignore the previous error'
+
+
 def image_resize_success(source_path, dest_path):
     return 'Successfully resized imaged {0} and saved to {1}'.format(source_path, dest_path)
 
