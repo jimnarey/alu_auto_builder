@@ -17,7 +17,7 @@ class UCEBuildPaths:
     def __init__(self):
         self.temp_dir = common_utils.create_temp_dir(__name__)
         self.cart_tmp_file = os.path.join(self.temp_dir, 'cart_tmp_file.img')
-        self.cart_save_file = os.path.join(self.temp_dir, 'cart_save_file.img')
+        self.cart_save_file = os.path.join(self.temp_dir, 'data/blank_save_part.img')
         self.md5_file = os.path.join(self.temp_dir, 'md5_file')
         self.data_dir = os.path.join(self.temp_dir, 'data')
         self.save_dir = os.path.join(self.temp_dir, 'data', 'save')
@@ -163,44 +163,51 @@ def save_img_from_save_file(save_file, ub_paths):
         common_utils.copyfile(save_file, ub_paths.cart_save_file)
 
 
-def prepare_files_based_save_contents(ub_paths):
-    common_utils.make_dir(ub_paths.save_workdir)
-    save_dir_upper = os.path.join(ub_paths.save_dir, 'upper')
-    save_workdir_upper = os.path.join(ub_paths.save_workdir, 'upper')
-    hiscore_dat_path = os.path.join(ub_paths.save_workdir, 'upper', 'hiscore.dat')
-    if os.path.isdir(save_dir_upper):
-        common_utils.copytree(save_dir_upper, save_workdir_upper)
-    else:
-        common_utils.copytree(ub_paths.save_dir, save_workdir_upper)
-    if not os.path.isfile(hiscore_dat_path):
-        common_utils.write_file(hiscore_dat_path, '', 'w')
-    common_utils.make_dir(os.path.join(ub_paths.save_workdir, 'work'))
+# def prepare_files_based_save_contents(ub_paths):
+#     common_utils.make_dir(ub_paths.save_workdir)
+#     save_dir_upper = os.path.join(ub_paths.save_dir, 'upper')
+#     save_workdir_upper = os.path.join(ub_paths.save_workdir, 'upper')
+#     hiscore_dat_path = os.path.join(ub_paths.save_workdir, 'upper', 'hiscore.dat')
+#     if os.path.isdir(save_dir_upper):
+#         common_utils.copytree(save_dir_upper, save_workdir_upper)
+#     else:
+#         common_utils.copytree(ub_paths.save_dir, save_workdir_upper)
+#     if not os.path.isfile(hiscore_dat_path):
+#         common_utils.write_file(hiscore_dat_path, '', 'w')
+#     common_utils.make_dir(os.path.join(ub_paths.save_workdir, 'work'))
 
 
-def prepare_blank_save(ub_paths):
-    common_utils.make_dir(ub_paths.blank_save_workdir)
-    common_utils.make_dir(os.path.join(ub_paths.blank_save_workdir, 'upper'))
-    common_utils.make_dir(os.path.join(ub_paths.blank_save_workdir, 'work'))
-    common_utils.write_file(os.path.join(ub_paths.blank_save_workdir, 'upper', 'hiscore.dat'), '', 'w')
-
-
-def create_save_img(ub_paths):
+def prepare_save_contents(ub_paths):
     save_file = look_for_save_file(ub_paths)
     if save_file:
         logger.info(info_messages.processing_save_file(save_file))
         save_img_from_save_file(save_file, ub_paths)
-    elif os.path.isdir(ub_paths.save_dir) and os.listdir(ub_paths.save_dir):
-        logger.info(info_messages.creating_save_from_files(ub_paths.save_dir))
-        prepare_files_based_save_contents(ub_paths)
-        uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
-    if not os.path.isfile(ub_paths.cart_save_file):
-        logger.info(info_messages.CREATING_BLANK_SAVE_PART)
-        prepare_blank_save(ub_paths)
-        uce_utils.make_save_part_from_dir(ub_paths.blank_save_workdir, ub_paths.cart_save_file)
-    if os.path.isdir(ub_paths.save_dir):
-        common_utils.remove_dir(ub_paths.save_dir)
+        uce_utils.modify_inodes(ub_paths.cart_save_file)
+        # TODO - delete save_file
+        common_utils.delete_file(save_file)
+        # if os.path.isdir(ub_paths.save_dir):
+        #     common_utils.remove_dir(ub_paths.save_dir)
+        # common_utils.make_dir(ub_paths.save_dir)
+        return
+
+    # Intent - keep the save contents where they are and build into squashfs
+    if os.path.isdir(ub_paths.save_dir) and os.listdir(ub_paths.save_dir):
+        logger.info(info_messages.including_save_files_in_squashfs(ub_paths.save_dir))
+        hiscore_dat_path = os.path.join(ub_paths.save_dir, 'hiscore.dat')
+        if not os.path.isfile(os.path.join(hiscore_dat_path)):
+            common_utils.write_file(os.path.join(hiscore_dat_path), '', 'w')
+
+        # prepare_files_based_save_contents(ub_paths)
+        # uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
+
+    # Intent - use a stock, prepared save file
+
+    logger.info(info_messages.USING_STOCK_BLANK_SAVE_PART)
+    common_utils.copyfile(os.path.join(common_utils.get_app_root(), 'data', 'blank_save_part.img'), ub_paths.cart_save_file)
+    # if os.path.isdir(ub_paths.save_dir):
+    #     common_utils.remove_dir(ub_paths.save_dir)
     common_utils.make_dir(ub_paths.save_dir)
-    uce_utils.modify_inodes(ub_paths.cart_save_file)
+    # uce_utils.modify_inodes(ub_paths.cart_save_file)
 
 
 def main(input_dir, output_path=None):    
@@ -214,7 +221,7 @@ def main(input_dir, output_path=None):
     app_root = common_utils.get_app_root()
     ub_paths = UCEBuildPaths()
     prepare_source_files(input_dir, ub_paths)
-    create_save_img(ub_paths)
+    prepare_save_contents(ub_paths)
     make_squashfs_img(app_root, ub_paths)
     append_md5_to_img(ub_paths.cart_tmp_file, ub_paths.md5_file, ub_paths.cart_tmp_file)
     append_to_file(ub_paths.cart_tmp_file, bytearray(32))

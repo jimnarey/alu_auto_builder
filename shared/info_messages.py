@@ -34,7 +34,7 @@ def recipe_dir_check(dir_, result_text):
 
 SAVE_DIR_DATA_FOUND = 'Custom save data found in save dir'
 
-CREATING_BLANK_SAVE_PART = 'Creating blank save partition'
+USING_STOCK_BLANK_SAVE_PART = 'Using stock blank save partition'
 
 
 def processing_save_file(source_type):
@@ -45,8 +45,8 @@ def copying_extracted_save_file(save_file, save_zip):
     return 'Copying save file {0} extracted from {1}'.format(save_file, save_zip)
 
 
-def creating_save_from_files(dir_path):
-    return 'Creating save partition from contents of {0}'.format(dir_path)
+def including_save_files_in_squashfs(dir_path):
+    return 'Including save files from {0} in squashfs'.format(dir_path)
 
 
 # Edit UCE

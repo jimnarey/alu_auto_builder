@@ -35,6 +35,14 @@ def create_blank_file(file_path, size=4194304):
     common_utils.execute_with_output(cmd)
 
 
+# Not currently used
+def prepare_blank_save(source_dir):
+    common_utils.make_dir(source_dir)
+    common_utils.make_dir(os.path.join(source_dir, 'upper'))
+    common_utils.make_dir(os.path.join(source_dir, 'work'))
+    common_utils.write_file(os.path.join(source_dir, 'upper', 'hiscore.dat'), '', 'w')
+
+
 def make_save_part_from_dir(root_dir_path, img_path):
     create_blank_file(img_path)
     bin_ = common_utils.get_platform_bin('mke2fs.exe', 'mke2fs')
