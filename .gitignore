@@ -10,6 +10,5 @@ build/
 windows/skyscraper/
 log.txt
 *.json
-*.img
 matches
 test.*
