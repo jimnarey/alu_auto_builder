@@ -183,11 +183,7 @@ def prepare_save_contents(ub_paths):
         logger.info(info_messages.processing_save_file(save_file))
         save_img_from_save_file(save_file, ub_paths)
         uce_utils.modify_inodes(ub_paths.cart_save_file)
-        # TODO - delete save_file
         common_utils.delete_file(save_file)
-        # if os.path.isdir(ub_paths.save_dir):
-        #     common_utils.remove_dir(ub_paths.save_dir)
-        # common_utils.make_dir(ub_paths.save_dir)
         return
 
     # Intent - keep the save contents where they are and build into squashfs
@@ -197,17 +193,9 @@ def prepare_save_contents(ub_paths):
         if not os.path.isfile(os.path.join(hiscore_dat_path)):
             common_utils.write_file(os.path.join(hiscore_dat_path), '', 'w')
 
-        # prepare_files_based_save_contents(ub_paths)
-        # uce_utils.make_save_part_from_dir(ub_paths.save_workdir, ub_paths.cart_save_file)
-
-    # Intent - use a stock, prepared save file
-
     logger.info(info_messages.USING_STOCK_BLANK_SAVE_PART)
     common_utils.copyfile(os.path.join(common_utils.get_app_root(), 'data', 'blank_save_part.img'), ub_paths.cart_save_file)
-    # if os.path.isdir(ub_paths.save_dir):
-    #     common_utils.remove_dir(ub_paths.save_dir)
     common_utils.make_dir(ub_paths.save_dir)
-    # uce_utils.modify_inodes(ub_paths.cart_save_file)
 
 
 def main(input_dir, output_path=None):    
