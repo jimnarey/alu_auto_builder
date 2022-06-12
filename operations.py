@@ -54,7 +54,7 @@ platform_opt = {
         'name': 'platform',
         'cli_short': 'p',
         'gui_required': True,
-        'type': 'text',
+        'type': 'text_selection',
         'help': help_messages.PLATFORM,
         'selections': configs.PLATFORMS.keys()
      }
@@ -64,7 +64,7 @@ other_scrape_opts = (
         'name': 'scrape_module',
         'cli_short': 's',
         'gui_required': False,
-        'type': 'text',
+        'type': 'text_selection',
         'help': help_messages.SCRAPE_MODULE,
         'selections': configs.SCRAPING_MODULES
      },
@@ -86,6 +86,7 @@ other_scrape_opts = (
         'name': 'scrape_videos',
         'cli_short': 'V',
         'gui_required': False,
+        'gui_default': False,
         'type': 'bool',
         'help': help_messages.SCRAPE_VIDEOS
     },
@@ -93,6 +94,7 @@ other_scrape_opts = (
         'name': 'refresh_rom_data',
         'cli_short': 'R',
         'gui_required': False,
+        'gui_default': False,
         'type': 'bool',
         'help': help_messages.REFRESH_ROM_DATA
     }
@@ -103,6 +105,7 @@ export_assets_opts = (
         'name': 'export_cox_assets',
         'cli_short': 'C',
         'gui_required': False,
+        'gui_default': False,
         'type': 'bool',
         'help': help_messages.EXPORT_COX_ASSETS
      },
@@ -110,6 +113,7 @@ export_assets_opts = (
         'name': 'export_bitpixel_marquees',
         'cli_short': 'Q',
         'gui_required': False,
+        'gui_default': False,
         'type': 'bool',
         'help': help_messages.EXPORT_BITPIXEL_MARQUEES
     }
@@ -119,6 +123,7 @@ do_bezel_scape_opt = {
     'name': 'do_bezel_scrape',
     'cli_short': 'B',
     'gui_required': False,
+    'gui_default': True,
     'type': 'bool',
     'help': help_messages.DO_BEZEL_SCRAPE
 }
@@ -127,6 +132,7 @@ do_summarise_gamelist_opt = {
     'name': 'do_summarise_gamelist',
     'cli_short': 'S',
     'gui_required': False,
+    'gui_default': False,
     'type': 'bool',
     'help': help_messages.DO_SUMMARISE_GAMELIST
 }
@@ -136,6 +142,7 @@ add_bezels_to_gamelist_opts = (
         'name': 'min_match_score',
         'cli_short': 'm',
         'gui_required': False,
+        'gui_default': True,
         'type': 'text',
         'help': help_messages.MIN_MATCH_SCORE
     },
@@ -143,6 +150,7 @@ add_bezels_to_gamelist_opts = (
         'name': 'compare_filename',
         'cli_short': 'F',
         'gui_required': False,
+        'gui_default': False,
         'type': 'bool',
         'help': help_messages.COMPARE_FILENAME
     },
@@ -150,6 +158,7 @@ add_bezels_to_gamelist_opts = (
         'name': 'filter_unsupported_regions',
         'cli_short': 'U',
         'gui_required': False,
+        'gui_default': True,
         'type': 'bool',
         'help': help_messages.FILTER_UNSUPPORTED_REGIONS
     }
@@ -168,6 +177,7 @@ edit_save_part_opts = (
         'name': 'mount_method',
         'cli_short': 'M',
         'gui_required': False,
+        'gui_default': False,
         'type': 'bool',
         'help': help_messages.MOUNT_METHOD
     },
@@ -183,6 +193,7 @@ backup_save_part_opt = {
     'name': 'backup_uce',
     'cli_short': 'B',
     'gui_required': False,
+    'gui_default': False,
     'type': 'bool',
     'help': help_messages.BACKUP_UCE
 }
